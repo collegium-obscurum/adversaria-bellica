@@ -1,4 +1,6 @@
 import { browser } from '$app/environment';
+import { SvelteSet } from 'svelte/reactivity';
+import { migrateCard } from './migrations';
 import type { MonsterCard } from './types';
 
 const STORAGE_KEY = 'adversaria-bellica.cards';
@@ -6,7 +8,9 @@ const STORAGE_KEY = 'adversaria-bellica.cards';
 function load(): MonsterCard[] {
 	if (!browser) return [];
 	try {
-		return JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]');
+		const parsed: unknown = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]');
+		if (!Array.isArray(parsed)) return [];
+		return parsed.map((item) => migrateCard(item as Record<string, unknown>));
 	} catch {
 		return [];
 	}
@@ -18,7 +22,9 @@ function persist() {
 	try {
 		localStorage.setItem(STORAGE_KEY, JSON.stringify(store.cards));
 	} catch {
-		alert('Speichern fehlgeschlagen: der Browser-Speicher ist voll. Exportiere Karten als JSON und lösche alte Karten.');
+		alert(
+			'Speichern fehlgeschlagen: der Browser-Speicher ist voll. Exportiere Karten als JSON und lösche alte Karten.'
+		);
 	}
 }
 
@@ -58,20 +64,24 @@ export function exportJson(cards: MonsterCard[] = store.cards): string {
 
 /** Returns the number of imported cards. Throws on invalid JSON or shape. */
 export function importJson(json: string): number {
-	const parsed = JSON.parse(json);
+	const parsed: unknown = JSON.parse(json);
 	if (!Array.isArray(parsed)) {
 		throw new Error('Erwartet ein JSON-Array von Karten.');
 	}
-	const existingIds = new Set(store.cards.map((card) => card.id));
-	for (const item of parsed) {
-		if (typeof item !== 'object' || item === null || typeof item.name !== 'string') {
+	const existingIds = new SvelteSet(store.cards.map((card) => card.id));
+	for (const item of parsed as unknown[]) {
+		if (typeof item !== 'object' || item === null) {
 			throw new Error('Mindestens ein Eintrag ist keine gültige Karte.');
 		}
-		if (typeof item.id !== 'string' || existingIds.has(item.id)) {
-			item.id = crypto.randomUUID();
+		const record = item as Record<string, unknown>;
+		if (typeof record.name !== 'string') {
+			throw new Error('Mindestens ein Eintrag ist keine gültige Karte.');
 		}
-		existingIds.add(item.id);
-		store.cards.push(item);
+		if (typeof record.id !== 'string' || existingIds.has(record.id)) {
+			record.id = crypto.randomUUID();
+		}
+		existingIds.add(record.id as string);
+		store.cards.push(migrateCard(record));
 	}
 	persist();
 	return parsed.length;

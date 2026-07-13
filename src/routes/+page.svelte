@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { base } from '$app/paths';
+	import { resolve } from '$app/paths';
 	import { deleteCard, duplicateCard, exportJson, importJson, store } from '$lib/storage.svelte';
 	import type { MonsterCard } from '$lib/types';
 
@@ -41,7 +41,7 @@
 			const count = importJson(await file.text());
 			alert(`${count} Karte(n) importiert.`);
 		} catch (error) {
-			alert(`Import fehlgeschlagen: ${error instanceof Error ? error.message : error}`);
+			alert(`Import fehlgeschlagen: ${error instanceof Error ? error.message : String(error)}`);
 		}
 		input.value = '';
 	}
@@ -61,7 +61,8 @@
 			<option value={category}>{category}</option>
 		{/each}
 	</select>
-	<button type="button" onclick={onExport} disabled={store.cards.length === 0}>Export (JSON)</button>
+	<button type="button" onclick={onExport} disabled={store.cards.length === 0}>Export (JSON)</button
+	>
 	<label class="import">
 		Import (JSON)
 		<input type="file" accept="application/json,.json" onchange={onImport} />
@@ -69,7 +70,7 @@
 </div>
 
 {#if store.cards.length === 0}
-	<p>Noch keine Karten. <a href="{base}/editor">Lege die erste an.</a></p>
+	<p>Noch keine Karten. <a href={resolve('/editor')}>Lege die erste an.</a></p>
 {:else if filtered.length === 0}
 	<p>Keine Karte passt zu Suche/Filter.</p>
 {:else}
@@ -88,9 +89,15 @@
 					</small>
 				</div>
 				<div class="buttons">
-					<a href="{base}/editor?id={card.id}">Bearbeiten</a>
+					<a href="{resolve('/editor')}?id={card.id}">Bearbeiten</a>
 					<button type="button" onclick={() => duplicateCard(card.id)}>Duplizieren</button>
-					<button type="button" class="danger" onclick={() => onDelete(card)}>Löschen</button>
+					<button
+						type="button"
+						class="danger"
+						onclick={() => {
+							onDelete(card);
+						}}>Löschen</button
+					>
 				</div>
 			</li>
 		{/each}

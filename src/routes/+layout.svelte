@@ -1,8 +1,9 @@
 <script lang="ts">
 	import favicon from '$lib/assets/favicon.svg';
-	import { base } from '$app/paths';
+	import { resolve } from '$app/paths';
+	import type { Snippet } from 'svelte';
 
-	let { children } = $props();
+	let { children }: { children: Snippet } = $props();
 </script>
 
 <svelte:head>
@@ -12,9 +13,9 @@
 
 <nav class="no-print">
 	<strong>Adversaria Bellica</strong>
-	<a href="{base}/">Bibliothek</a>
-	<a href="{base}/editor">Neue Karte</a>
-	<a href="{base}/print">Drucken</a>
+	<a href={resolve('/')}>Bibliothek</a>
+	<a href={resolve('/editor')}>Neue Karte</a>
+	<a href={resolve('/print')}>Drucken</a>
 </nav>
 
 <main>

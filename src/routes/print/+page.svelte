@@ -32,7 +32,14 @@
 		<div class="buttons">
 			<button type="button" onclick={selectAll}>Alle auswählen</button>
 			<button type="button" onclick={() => (selectedIds = [])}>Auswahl leeren</button>
-			<button type="button" class="print-button" disabled={selectedCards.length === 0} onclick={() => window.print()}>
+			<button
+				type="button"
+				class="print-button"
+				disabled={selectedCards.length === 0}
+				onclick={() => {
+					window.print();
+				}}
+			>
 				Drucken ({selectedCards.length})
 			</button>
 		</div>

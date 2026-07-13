@@ -7,14 +7,19 @@ export const TALENT_KEYS = ['body', 'social', 'nature', 'knowledge', 'craft'] as
 export type TalentKey = (typeof TALENT_KEYS)[number];
 
 export interface ActionEntry {
-	from: number;
-	to: number;
+	/** number of d20 faces this row covers; rows partition 1–20 in list order */
+	span: number;
 	name: string;
 	effect: string;
 }
 
 export const WOUND_TRIGGERS = ['combatStart', 'hp75', 'hp50', 'hp25', 'death'] as const;
 export type WoundTrigger = (typeof WOUND_TRIGGERS)[number];
+
+export interface SpecialMove {
+	name: string;
+	effect: string;
+}
 
 export interface MonsterCard {
 	id: string;
@@ -34,7 +39,7 @@ export interface MonsterCard {
 	actionCount: number;
 	talents: Record<TalentKey, TalentValue>;
 	actions: ActionEntry[];
-	specialMoves: Record<WoundTrigger, string>;
+	specialMoves: Record<WoundTrigger, SpecialMove>;
 }
 
 export function createEmptyCard(): MonsterCard {
@@ -61,10 +66,16 @@ export function createEmptyCard(): MonsterCard {
 			craft: { value: 5, maxQs: 2 }
 		},
 		actions: [
-			{ from: 1, to: 5, name: 'Fehlschlag', effect: 'Der Angriff geht daneben.' },
-			{ from: 6, to: 19, name: 'Angriff', effect: '1W6+2 TP' },
-			{ from: 20, to: 20, name: 'Kritischer Treffer', effect: '2W6+4 TP' }
+			{ span: 5, name: 'Fehlschlag', effect: 'Der Angriff geht daneben.' },
+			{ span: 14, name: 'Angriff', effect: '1W6+2 TP' },
+			{ span: 1, name: 'Kritischer Treffer', effect: '2W6+4 TP' }
 		],
-		specialMoves: { combatStart: '', hp75: '', hp50: '', hp25: '', death: '' }
+		specialMoves: {
+			combatStart: { name: '', effect: '' },
+			hp75: { name: '', effect: '' },
+			hp50: { name: '', effect: '' },
+			hp25: { name: '', effect: '' },
+			death: { name: '', effect: '' }
+		}
 	};
 }
