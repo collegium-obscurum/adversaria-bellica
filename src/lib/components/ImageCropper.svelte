@@ -151,4 +151,19 @@
 		max-width: none;
 		user-select: none;
 	}
+
+	button {
+		font: inherit;
+		font-weight: bold;
+		padding: 0.4rem 1rem;
+		border: none;
+		border-radius: var(--radius);
+		background: var(--color-brand);
+		color: var(--color-cream);
+		cursor: pointer;
+	}
+
+	button:hover {
+		background: var(--color-brand-hover);
+	}
 </style>

@@ -101,6 +101,7 @@
 	{#if card.image}
 		<button
 			type="button"
+			class="remove-image"
 			onclick={() => {
 				card.image = null;
 				cropperDialog.close();
@@ -245,9 +246,9 @@
 	}
 
 	dialog {
-		border: 1px solid #c9c1b2;
-		border-radius: 6px;
-		padding: 1rem;
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-lg);
+		padding: 1.25rem;
 	}
 
 	dialog::backdrop {
@@ -255,16 +256,36 @@
 	}
 
 	dialog h2 {
-		margin-top: 0;
+		margin: 0 0 0.75rem;
+		font-family: var(--font-serif);
+		font-size: 1rem;
+		font-variant: small-caps;
+		letter-spacing: 0.05em;
+		color: var(--color-brand);
 	}
 
 	dialog button {
 		font: inherit;
 		padding: 0.4rem 0.8rem;
-		border: 1px solid #c9c1b2;
-		border-radius: 4px;
-		background: #fff;
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius);
+		background: var(--color-surface);
 		cursor: pointer;
 		margin-top: 0.5rem;
+	}
+
+	dialog button:hover {
+		border-color: var(--color-gold);
+	}
+
+	dialog .remove-image {
+		border: none;
+		background: none;
+		padding: 0;
+		color: var(--color-danger);
+	}
+
+	dialog .remove-image:hover {
+		text-decoration: underline;
 	}
 </style>
