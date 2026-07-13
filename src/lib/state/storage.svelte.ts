@@ -25,6 +25,8 @@ function persist() {
 		alert(
 			'Speichern fehlgeschlagen: der Browser-Speicher ist voll. Exportiere Karten als JSON und lösche alte Karten.'
 		);
+		// keep UI in sync with what actually got saved
+		store.cards = load();
 	}
 }
 

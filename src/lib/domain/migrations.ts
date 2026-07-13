@@ -1,5 +1,13 @@
-import type { ActionEntry, CustomMove, MonsterCard, SpecialMove, WoundTrigger } from './types';
-import { WOUND_TRIGGERS } from './types';
+import type {
+	ActionEntry,
+	CustomMove,
+	MonsterCard,
+	SpecialMove,
+	TalentKey,
+	TalentValue,
+	WoundTrigger
+} from './types';
+import { TALENT_KEYS, WOUND_TRIGGERS } from './types';
 
 interface LegacyActionEntry {
 	from: number;
@@ -12,20 +20,36 @@ function isLegacyAction(entry: unknown): entry is LegacyActionEntry {
 	return typeof entry === 'object' && entry !== null && 'from' in entry && 'to' in entry;
 }
 
-/** Convert pre-span rows ({from, to}); already-migrated rows pass through. */
-export function migrateActions(actions: unknown[]): ActionEntry[] {
-	if (actions.length === 0 || !isLegacyAction(actions[0])) {
-		return actions as ActionEntry[];
-	}
-	const legacy = [...(actions as LegacyActionEntry[])].sort((a, b) => a.from - b.from);
-	return legacy.map((entry) => ({
-		span: Math.max(1, entry.to - entry.from + 1),
-		name: entry.name,
-		effect: entry.effect
-	}));
+function textOrEmpty(value: unknown): string {
+	return typeof value === 'string' ? value : '';
 }
 
-/** Convert pre-object moves (plain strings become the effect); objects pass through. */
+/** Convert pre-span rows ({from, to}) and default malformed rows; drops non-object entries. */
+export function migrateActions(actions: unknown[]): ActionEntry[] {
+	let rows = actions;
+	if (actions.length > 0 && isLegacyAction(actions[0])) {
+		const legacy = [...(actions as LegacyActionEntry[])].sort((a, b) => a.from - b.from);
+		rows = legacy.map((entry) => ({
+			span: entry.to - entry.from + 1,
+			name: entry.name,
+			effect: entry.effect
+		}));
+	}
+	const result: ActionEntry[] = [];
+	for (const row of rows) {
+		if (typeof row !== 'object' || row === null) continue;
+		const record = row as Record<string, unknown>;
+		const span = Number(record.span);
+		result.push({
+			span: Number.isFinite(span) ? Math.max(1, Math.round(span)) : 1,
+			name: textOrEmpty(record.name),
+			effect: textOrEmpty(record.effect)
+		});
+	}
+	return result;
+}
+
+/** Convert pre-object moves (plain strings become the effect); malformed fields default to ''. */
 export function migrateSpecialMoves(moves: unknown): Record<WoundTrigger, SpecialMove> {
 	const record =
 		typeof moves === 'object' && moves !== null ? (moves as Record<string, unknown>) : {};
@@ -35,10 +59,42 @@ export function migrateSpecialMoves(moves: unknown): Record<WoundTrigger, Specia
 		if (typeof value === 'string') {
 			result[trigger] = { name: '', effect: value };
 		} else if (typeof value === 'object' && value !== null) {
-			result[trigger] = value as SpecialMove;
+			const move = value as Record<string, unknown>;
+			result[trigger] = { name: textOrEmpty(move.name), effect: textOrEmpty(move.effect) };
 		} else {
 			result[trigger] = { name: '', effect: '' };
 		}
+	}
+	return result;
+}
+
+export function migrateCustomMoves(raw: unknown): CustomMove[] {
+	if (!Array.isArray(raw)) return [];
+	const result: CustomMove[] = [];
+	for (const item of raw) {
+		if (typeof item !== 'object' || item === null) continue;
+		const record = item as Record<string, unknown>;
+		result.push({
+			trigger: textOrEmpty(record.trigger),
+			name: textOrEmpty(record.name),
+			effect: textOrEmpty(record.effect)
+		});
+	}
+	return result;
+}
+
+export function migrateTalents(raw: unknown): Record<TalentKey, TalentValue> {
+	const record = typeof raw === 'object' && raw !== null ? (raw as Record<string, unknown>) : {};
+	const result = {} as Record<TalentKey, TalentValue>;
+	for (const key of TALENT_KEYS) {
+		const value =
+			typeof record[key] === 'object' && record[key] !== null
+				? (record[key] as Record<string, unknown>)
+				: {};
+		result[key] = {
+			value: typeof value.value === 'number' ? value.value : 0,
+			maxQs: typeof value.maxQs === 'number' ? value.maxQs : 0
+		};
 	}
 	return result;
 }
@@ -64,11 +120,18 @@ export function migrateStats(raw: Record<string, unknown>): void {
 	raw.lifePoints = Number.isFinite(lifePoints) ? Math.max(1, lifePoints) : 1;
 }
 
-/** Bring a card parsed from storage or import JSON up to the current schema. */
+/** Bring a card parsed from storage or import JSON up to the current schema; every field gets a sane default. */
 export function migrateCard(raw: Record<string, unknown>): MonsterCard {
+	raw.id = typeof raw.id === 'string' ? raw.id : crypto.randomUUID();
+	raw.name = textOrEmpty(raw.name);
+	raw.category = textOrEmpty(raw.category);
+	raw.flavorText = textOrEmpty(raw.flavorText);
+	raw.notes = textOrEmpty(raw.notes);
+	raw.image = typeof raw.image === 'string' ? raw.image : null;
+	raw.talents = migrateTalents(raw.talents);
 	raw.actions = migrateActions(Array.isArray(raw.actions) ? raw.actions : []);
 	raw.specialMoves = migrateSpecialMoves(raw.specialMoves);
-	raw.customMoves = Array.isArray(raw.customMoves) ? (raw.customMoves as CustomMove[]) : [];
+	raw.customMoves = migrateCustomMoves(raw.customMoves);
 	migrateStats(raw);
 	return raw as unknown as MonsterCard;
 }

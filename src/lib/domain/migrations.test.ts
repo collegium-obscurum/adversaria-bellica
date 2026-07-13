@@ -18,11 +18,18 @@ describe('migrateActions', () => {
 
 	it('passes span rows through unchanged', () => {
 		const entries: ActionEntry[] = [{ span: 20, name: 'x', effect: '' }];
-		expect(migrateActions(entries)).toBe(entries);
+		expect(migrateActions(entries)).toEqual(entries);
 	});
 
 	it('handles empty lists', () => {
 		expect(migrateActions([])).toEqual([]);
+	});
+
+	it('defaults malformed rows and drops non-objects', () => {
+		expect(migrateActions([{ span: 'abc' }, null, 'garbage', { span: 3.4, name: 'x' }])).toEqual([
+			{ span: 1, name: '', effect: '' },
+			{ span: 3, name: 'x', effect: '' }
+		]);
 	});
 });
 
@@ -104,5 +111,39 @@ describe('migrateCard', () => {
 		const moves = [{ trigger: 'Bei Feuerschaden', name: 'Panik', effect: 'Flieht 1 Runde.' }];
 		const card = migrateCard({ id: 'a', name: 'Wolf', customMoves: moves });
 		expect(card.customMoves).toEqual(moves);
+	});
+
+	it('defaults every missing field so a bare object renders', () => {
+		const card = migrateCard({});
+		expect(typeof card.id).toBe('string');
+		expect(card.name).toBe('');
+		expect(card.category).toBe('');
+		expect(card.flavorText).toBe('');
+		expect(card.notes).toBe('');
+		expect(card.image).toBeNull();
+		expect(card.talents.body).toEqual({ value: 0, maxQs: 0 });
+		expect(card.talents.craft).toEqual({ value: 0, maxQs: 0 });
+		expect(card.actions).toEqual([]);
+		expect(card.specialMoves.death).toEqual({ name: '', effect: '' });
+		expect(card.customMoves).toEqual([]);
+		expect(card.lifePoints).toBe(1);
+		expect(card.armor).toBe('');
+	});
+
+	it('sanitizes wrong-typed fields', () => {
+		const card = migrateCard({
+			id: 42,
+			name: 7,
+			flavorText: null,
+			image: false,
+			talents: { body: { value: 'x', maxQs: 2 } },
+			customMoves: ['garbage', { trigger: 'Feuer' }]
+		});
+		expect(typeof card.id).toBe('string');
+		expect(card.name).toBe('');
+		expect(card.flavorText).toBe('');
+		expect(card.image).toBeNull();
+		expect(card.talents.body).toEqual({ value: 0, maxQs: 2 });
+		expect(card.customMoves).toEqual([{ trigger: 'Feuer', name: '', effect: '' }]);
 	});
 });
