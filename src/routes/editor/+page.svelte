@@ -4,6 +4,8 @@
 	import { page } from '$app/state';
 	import CardPreview from '$lib/CardPreview.svelte';
 	import ImageCropper from '$lib/ImageCropper.svelte';
+	import StatIcon from '$lib/StatIcon.svelte';
+	import { STAT_BADGES } from '$lib/statBadges';
 	import StyleToggle from '$lib/StyleToggle.svelte';
 	import { getCard, upsertCard } from '$lib/storage.svelte';
 	import { createEmptyCard } from '$lib/types';
@@ -41,14 +43,29 @@
 		<button type="button" class="save" onclick={save}>Speichern</button>
 	</div>
 
-	<div class="card-zoom">
-		<CardPreview
-			bind:card
-			editable
-			onPortraitClick={() => {
-				cropperDialog.showModal();
-			}}
-		/>
+	<div class="workspace">
+		<div class="card-zoom">
+			<CardPreview
+				bind:card
+				editable
+				onPortraitClick={() => {
+					cropperDialog.showModal();
+				}}
+			/>
+		</div>
+
+		<aside class="legend">
+			<h2>Legende</h2>
+			<ul>
+				{#each STAT_BADGES as badge (badge.key)}
+					<li>
+						<span class="legend-icon"><StatIcon name={badge.key} /></span>
+						<b>{badge.abbr}</b>
+						<span>{badge.label}</span>
+					</li>
+				{/each}
+			</ul>
+		</aside>
 	</div>
 </div>
 
@@ -95,6 +112,13 @@
 		color: #5c4a30;
 	}
 
+	.workspace {
+		display: flex;
+		gap: 2rem;
+		align-items: flex-start;
+		flex-wrap: wrap;
+	}
+
 	.card-zoom {
 		zoom: 1.7;
 	}
@@ -103,6 +127,56 @@
 		.card-zoom {
 			zoom: 1;
 		}
+	}
+
+	.legend {
+		position: sticky;
+		top: 1rem;
+		background: #fff;
+		border: 1px solid #ddd4c2;
+		border-radius: 8px;
+		padding: 0.9rem 1.1rem;
+	}
+
+	.legend h2 {
+		margin: 0 0 0.5rem;
+		font-family: 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
+		font-size: 1rem;
+		font-variant: small-caps;
+		letter-spacing: 0.05em;
+		color: #7a1e12;
+	}
+
+	.legend ul {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 0.4rem;
+	}
+
+	.legend li {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		font-size: 0.9rem;
+	}
+
+	.legend b {
+		width: 2.2rem;
+	}
+
+	.legend-icon {
+		width: 1.1rem;
+		height: 1.1rem;
+		color: #7a1e12;
+		line-height: 0;
+	}
+
+	.legend-icon :global(svg) {
+		width: 100%;
+		height: 100%;
 	}
 
 	.save {

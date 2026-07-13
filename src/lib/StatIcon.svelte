@@ -1,13 +1,7 @@
 <script lang="ts">
-	export type StatIconName =
-		| 'lifePoints'
-		| 'armor'
-		| 'initiative'
-		| 'speed'
-		| 'defense'
-		| 'soulPower'
-		| 'toughness'
-		| 'actionCount';
+	import type { StatKey } from './statBadges';
+
+	export type StatIconName = StatKey;
 
 	let { name }: { name: StatIconName } = $props();
 
@@ -25,19 +19,19 @@
 		initiative:
 			'<path fill="currentColor" d="M13.4 1.8 L4.6 13.4 H10.2 L8.4 22.2 L19.4 9.2 H12.8 Z"/>',
 		speed:
-			'<path fill="currentColor" d="M8.5 2.8 H14 V10.2 C17.6 10.8 20.4 12.6 20.4 15.6 V17.4 H10.8 L10.4 21.2 H4.6 L6.2 13.2 L8.5 10 Z"/>' +
-			'<path class="line" d="M2.2 6.2 H5.6 M1.8 9.6 H4.8"/>',
+			'<path fill="currentColor" d="M5 3.5 L13.5 12 L5 20.5 V14.4 L7.4 12 L5 9.6 Z"/>' +
+			'<path fill="currentColor" d="M11.5 3.5 L20 12 L11.5 20.5 V14.4 L13.9 12 L11.5 9.6 Z"/>',
 		defense:
-			'<path class="line" d="M5 4 L15.9 15.1 M19 4 L8.1 15.1"/>' +
-			'<path class="guard" d="M13.8 17.2 L18 13 M10.2 17.2 L6 13 M16.6 15.8 L18.7 17.9 M7.4 15.8 L5.3 17.9"/>' +
-			'<circle fill="currentColor" cx="19.8" cy="19" r="1.4"/>' +
-			'<circle fill="currentColor" cx="4.2" cy="19" r="1.4"/>',
+			'<path class="blade" d="M5 4.4 L15.6 15 M19 4.4 L8.4 15"/>' +
+			'<path class="guard" d="M13.4 17.4 L18.4 12.4 M10.6 17.4 L5.6 12.4"/>' +
+			'<path class="grip" d="M16.5 15.9 L18.9 18.3 M7.5 15.9 L5.1 18.3"/>' +
+			'<circle fill="currentColor" cx="20" cy="19.4" r="1.5"/>' +
+			'<circle fill="currentColor" cx="4" cy="19.4" r="1.5"/>',
 		soulPower:
 			'<path fill="currentColor" d="M12 1.8 L14.7 8 L21.2 8.7 L16.3 13.1 L17.8 19.8 L12 16.2 L6.2 19.8 L7.7 13.1 L2.8 8.7 L9.3 8 Z"/>',
 		toughness:
-			'<path fill="currentColor" d="M6.8 21.5 V12.2 C6.8 8.2 9 6 12 6 C15 6 17.2 8.2 17.2 12.2 V21.5 Z"/>' +
-			'<path class="cut" d="M6.8 13.2 H17.2 M10.3 13.2 V17.4 M13.7 13.2 V17.4"/>' +
-			'<path class="line" d="M9.3 4.4 V2.6 M12 3.9 V1.9 M14.7 4.4 V2.6"/>',
+			'<path fill="currentColor" d="M2.5 6.5 H13 C16.5 6.5 19.5 5.5 21.5 3.8 C21.5 7.6 18.8 10.2 15 10.6 L14.4 13.6 H16.2 V16.4 H7.8 V13.6 H9.6 L9 10.6 H7 C4.2 10.6 2.5 8.8 2.5 6.5 Z"/>' +
+			'<path fill="currentColor" d="M6.5 18 H17.5 V20.5 H6.5 Z"/>',
 		actionCount:
 			'<path fill="currentColor" d="M12 1.6 L21 6.8 V17.2 L12 22.4 L3 17.2 V6.8 Z"/>' +
 			'<path class="cut" d="M12 7.6 L17.7 16.4 L6.3 16.4 Z M12 1.6 V7.6 M21 6.8 L17.7 16.4 M3 6.8 L6.3 16.4 M12 22.4 L6.3 16.4 M12 22.4 L17.7 16.4 M21 17.2 L17.7 16.4 M3 17.2 L6.3 16.4"/>'
@@ -66,10 +60,24 @@
 		stroke-linejoin: round;
 	}
 
+	svg :global(.blade) {
+		fill: none;
+		stroke: currentColor;
+		stroke-width: 3;
+		stroke-linecap: round;
+	}
+
 	svg :global(.guard) {
 		fill: none;
 		stroke: currentColor;
-		stroke-width: 1.7;
+		stroke-width: 1.9;
+		stroke-linecap: round;
+	}
+
+	svg :global(.grip) {
+		fill: none;
+		stroke: currentColor;
+		stroke-width: 2.4;
 		stroke-linecap: round;
 	}
 </style>

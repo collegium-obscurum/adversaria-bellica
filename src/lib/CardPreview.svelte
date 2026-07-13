@@ -9,8 +9,8 @@
 		setRangeStart
 	} from './actions';
 	import { prefs } from './preferences.svelte';
+	import { STAT_BADGES } from './statBadges';
 	import StatIcon from './StatIcon.svelte';
-	import type { StatIconName } from './StatIcon.svelte';
 	import type { MonsterCard, WoundTrigger } from './types';
 	import { WOUND_TRIGGERS } from './types';
 	import { woundThresholds } from './wounds';
@@ -44,29 +44,6 @@
 		knowledge: 'Wissen',
 		craft: 'Handwerk'
 	} as const;
-
-	const STAT_BADGES: {
-		key:
-			| 'lifePoints'
-			| 'armor'
-			| 'initiative'
-			| 'speed'
-			| 'defense'
-			| 'soulPower'
-			| 'toughness'
-			| 'actionCount';
-		icon: StatIconName;
-		label: string;
-	}[] = [
-		{ key: 'lifePoints', icon: 'lifePoints', label: 'Lebenspunkte (LeP)' },
-		{ key: 'armor', icon: 'armor', label: 'Rüstungsschutz (RS)' },
-		{ key: 'initiative', icon: 'initiative', label: 'Initiative (INI)' },
-		{ key: 'speed', icon: 'speed', label: 'Geschwindigkeit (GS)' },
-		{ key: 'defense', icon: 'defense', label: 'Verteidigung (VW)' },
-		{ key: 'soulPower', icon: 'soulPower', label: 'Seelenkraft (SK)' },
-		{ key: 'toughness', icon: 'toughness', label: 'Zähigkeit (ZK)' },
-		{ key: 'actionCount', icon: 'actionCount', label: 'Aktionen pro Runde' }
-	];
 
 	let showFlavor = $state(false);
 	let showNotes = $state(false);
@@ -361,8 +338,8 @@
 
 		<aside class="badges">
 			{#each STAT_BADGES as badge (badge.key)}
-				<div class="badge" title={badge.label}>
-					<span class="badge-icon"><StatIcon name={badge.icon} /></span>
+				<div class="badge" title="{badge.label} ({badge.abbr})">
+					<span class="badge-icon"><StatIcon name={badge.key} /></span>
 					{#if editable}
 						<input type="number" bind:value={card[badge.key]} />
 					{:else}
@@ -763,6 +740,17 @@
 		min-height: 1.4em;
 		width: 100%;
 		box-sizing: border-box;
+	}
+
+	.ornate.editable input:focus,
+	.ornate.editable textarea:focus {
+		background: #fffbf0;
+	}
+
+	/* wax seals hold light text; the default bright focus box would swallow it */
+	.ornate.editable .badge input:focus {
+		background: rgb(0 0 0 / 25%);
+		border-color: #f2e8d0;
 	}
 
 	.name-input {
