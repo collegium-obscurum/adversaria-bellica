@@ -11,6 +11,9 @@
 	const lifePointsBadge = STAT_BADGES[0];
 	const textBadges = STAT_BADGES.slice(1) as (StatBadgeInfo & { key: TextStatKey })[];
 
+	// icon cut lines are drawn in the badge background colour
+	const iconCutColor = $derived(prefs.cardStyle === 'ornate' ? '#7a1e12' : '#fff');
+
 	function valueFontSize(value: string | number): string {
 		const length = String(value).length;
 		if (length <= 2) return '9pt';
@@ -30,7 +33,8 @@
 <aside class="badges">
 	<div class="badge" title="{lifePointsBadge.label} ({lifePointsBadge.abbr})">
 		{#if prefs.statLabelMode === 'icons'}
-			<span class="badge-icon"><StatIcon name={lifePointsBadge.key} /></span>
+			<span class="badge-icon"><StatIcon name={lifePointsBadge.key} cutColor={iconCutColor} /></span
+			>
 		{:else}
 			<span class="badge-label" style:font-size={labelFontSize(badgeLabel(lifePointsBadge))}
 				>{badgeLabel(lifePointsBadge)}</span
@@ -54,7 +58,7 @@
 		{#if editable || card[badge.key].trim() !== ''}
 			<div class="badge" title="{badge.label} ({badge.abbr})">
 				{#if prefs.statLabelMode === 'icons'}
-					<span class="badge-icon"><StatIcon name={badge.key} /></span>
+					<span class="badge-icon"><StatIcon name={badge.key} cutColor={iconCutColor} /></span>
 				{:else}
 					<span class="badge-label" style:font-size={labelFontSize(badgeLabel(badge))}
 						>{badgeLabel(badge)}</span
@@ -97,7 +101,6 @@
 	}
 
 	:global(.card.ornate) .badge {
-		--icon-cut: #7a1e12;
 		background: radial-gradient(circle at 35% 30%, #a33a2a 0%, #7a1e12 60%, #57120a 100%);
 		border-color: #4a0e07;
 		color: #f2e8d0;

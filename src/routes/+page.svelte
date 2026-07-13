@@ -62,7 +62,7 @@
 
 {#if store.cards.length === 0}
 	<div class="empty">
-		<span class="empty-sigil"><StatIcon name="actionCount" /></span>
+		<span class="empty-sigil"><StatIcon name="actionCount" cutColor="#f4efe4" /></span>
 		<p>Noch keine Gegner in der Bibliothek.</p>
 		<a class="primary" href={resolve('/editor')}>Erste Karte anlegen</a>
 	</div>
@@ -183,7 +183,6 @@
 		width: 3.5rem;
 		height: 3.5rem;
 		color: #a5813c;
-		--icon-cut: #f4efe4;
 		line-height: 0;
 	}
 

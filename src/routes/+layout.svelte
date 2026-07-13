@@ -21,7 +21,7 @@
 
 <nav class="no-print">
 	<a class="brand" href={resolve('/')}>
-		<span class="sigil"><StatIcon name="actionCount" /></span>
+		<span class="sigil"><StatIcon name="actionCount" cutColor="#262019" /></span>
 		<span class="wordmark">Adversaria Bellica</span>
 	</a>
 	<div class="links">
@@ -77,7 +77,6 @@
 		width: 1.5rem;
 		height: 1.5rem;
 		color: #a5813c;
-		--icon-cut: #262019;
 		line-height: 0;
 	}
 
