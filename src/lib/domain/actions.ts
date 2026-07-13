@@ -26,8 +26,10 @@ export function actionRanges(entries: ActionEntry[]): ActionRange[] {
 	return ranges;
 }
 
-export function rangeLabel(range: ActionRange): string {
-	return range.from === range.to ? String(range.from) : `${range.from}–${range.to}`;
+/** The last row absorbs penalty overflow past 20, so its end reads "20+". */
+export function rangeLabel(range: ActionRange, isLast = false): string {
+	const toLabel = isLast ? `${range.to}+` : String(range.to);
+	return range.from === range.to ? toLabel : `${range.from}–${toLabel}`;
 }
 
 /** Append a span-1 row; if the total exceeds 20, the largest row shrinks by 1. */

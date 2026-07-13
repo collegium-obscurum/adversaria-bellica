@@ -36,6 +36,9 @@
 
 <div class="actions">
 	<h3>Aktionen (1w20)</h3>
+	<p class="note">
+		Erschwernisse (Schmerz, Zustände) erhöhen das Wurfergebnis. Eine 1 bleibt eine 1.
+	</p>
 	{#each card.actions as action, index (action)}
 		{#if editable}
 			<div
@@ -71,7 +74,7 @@
 								setRangeStart(card.actions, index, Number(event.currentTarget.value));
 							}}
 							title="Bereichsanfang"
-						/>{/if}–{#if index === card.actions.length - 1}<span class="bound">{D20_FACES}</span
+						/>{/if}–{#if index === card.actions.length - 1}<span class="bound">{D20_FACES}+</span
 						>{:else}<input
 							class="bound"
 							type="number"
@@ -101,7 +104,8 @@
 			</div>
 		{:else}
 			<p class="entry">
-				<b>{rangeLabel(ranges[index])} = {action.name}</b>{#if action.effect}:
+				<b>{rangeLabel(ranges[index], index === card.actions.length - 1)} = {action.name}</b
+				>{#if action.effect}:
 					{action.effect}{/if}
 			</p>
 		{/if}
@@ -136,11 +140,21 @@
 	}
 
 	.range .bound {
-		width: 5mm;
 		box-sizing: border-box;
 		padding: 0;
 		text-align: center;
 		font-weight: bold;
 		display: inline-block;
+	}
+
+	.range input.bound {
+		width: 5mm;
+	}
+
+	.note {
+		margin: 0;
+		font-size: 7pt;
+		font-style: italic;
+		color: #6b6353;
 	}
 </style>

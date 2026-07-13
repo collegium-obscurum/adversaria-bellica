@@ -64,6 +64,11 @@ describe('rangeLabel', () => {
 		expect(rangeLabel({ from: 20, to: 20 })).toBe('20');
 		expect(rangeLabel({ from: 6, to: 14 })).toBe('6–14');
 	});
+
+	it('marks the last range end with a plus', () => {
+		expect(rangeLabel({ from: 16, to: 20 }, true)).toBe('16–20+');
+		expect(rangeLabel({ from: 20, to: 20 }, true)).toBe('20+');
+	});
 });
 
 describe('addAction', () => {
