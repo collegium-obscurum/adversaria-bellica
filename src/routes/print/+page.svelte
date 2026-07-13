@@ -2,13 +2,22 @@
 	import CardPreview from '$lib/components/card/CardPreview.svelte';
 	import StatLabelToggle from '$lib/components/StatLabelToggle.svelte';
 	import StyleToggle from '$lib/components/StyleToggle.svelte';
+	import defaultCardBack from '$lib/assets/card-back.svg';
+	import { BACK_IMAGE_HEIGHT_PX, BACK_IMAGE_WIDTH_PX, coverCropRect } from '$lib/domain/cardBack';
 	import {
 		CARD_HEIGHT_MM,
 		CARD_WIDTH_MM,
 		CARDS_PER_PAGE,
+		backSlotPosition,
 		cardSlotPosition,
 		cardsInSelectionOrder
 	} from '$lib/domain/printLayout';
+	import {
+		cardBack,
+		setCardBackEnabled,
+		setCardBackImage,
+		setCardBackMode
+	} from '$lib/state/cardBack.svelte';
 	import { prefs } from '$lib/state/preferences.svelte';
 	import { store } from '$lib/state/storage.svelte';
 
@@ -33,20 +42,99 @@
 		selectedIds = store.cards.map((card) => card.id);
 	}
 
+	async function loadImage(src: string): Promise<HTMLImageElement> {
+		const image = new Image();
+		await new Promise<void>((resolve, reject) => {
+			image.onload = () => {
+				resolve();
+			};
+			image.onerror = () => {
+				reject(new Error(`Bild nicht ladbar: ${src.slice(0, 50)}`));
+			};
+			image.src = src;
+		});
+		return image;
+	}
+
+	/** Cover-crops and scales any image to the card's print resolution. */
+	async function toCardSizedJpeg(src: string): Promise<string> {
+		const image = await loadImage(src);
+		const canvas = document.createElement('canvas');
+		canvas.width = BACK_IMAGE_WIDTH_PX;
+		canvas.height = BACK_IMAGE_HEIGHT_PX;
+		const context = canvas.getContext('2d');
+		if (!context) throw new Error('Canvas nicht verfügbar');
+		const crop = coverCropRect(image.naturalWidth, image.naturalHeight);
+		context.drawImage(
+			image,
+			crop.x,
+			crop.y,
+			crop.width,
+			crop.height,
+			0,
+			0,
+			canvas.width,
+			canvas.height
+		);
+		return canvas.toDataURL('image/jpeg', 0.85);
+	}
+
+	async function onBackImageUpload(event: Event) {
+		const input = event.currentTarget as HTMLInputElement;
+		const file = input.files?.[0];
+		if (!file) return;
+		const objectUrl = URL.createObjectURL(file);
+		try {
+			setCardBackImage(await toCardSizedJpeg(objectUrl));
+			setCardBackMode('custom');
+		} catch (error) {
+			console.error(error);
+			alert('Bild konnte nicht geladen werden.');
+		} finally {
+			URL.revokeObjectURL(objectUrl);
+			input.value = '';
+		}
+	}
+
+	async function resolveBackImage(): Promise<string> {
+		if (cardBack.mode === 'custom' && cardBack.customImage) {
+			return cardBack.customImage;
+		}
+		return toCardSizedJpeg(defaultCardBack);
+	}
+
 	async function downloadPdf() {
 		pdfBusy = true;
 		try {
 			const nodes = Array.from(document.querySelectorAll<HTMLElement>('.sheet .card'));
+			const backDataUrl = cardBack.enabled ? await resolveBackImage() : null;
 			const { toPng } = await import('html-to-image');
 			const { jsPDF } = await import('jspdf');
 			const pdf = new jsPDF({ unit: 'mm', format: 'a4' });
-			for (let index = 0; index < nodes.length; index++) {
-				if (index > 0 && index % CARDS_PER_PAGE === 0) {
-					pdf.addPage();
+			for (let pageStart = 0; pageStart < nodes.length; pageStart += CARDS_PER_PAGE) {
+				if (pageStart > 0) pdf.addPage();
+				const cardsOnPage = Math.min(CARDS_PER_PAGE, nodes.length - pageStart);
+				for (let slot = 0; slot < cardsOnPage; slot++) {
+					const dataUrl = await toPng(nodes[pageStart + slot], { pixelRatio: 300 / 96 });
+					const { x, y } = cardSlotPosition(slot);
+					pdf.addImage(dataUrl, 'PNG', x, y, CARD_WIDTH_MM, CARD_HEIGHT_MM, undefined, 'FAST');
 				}
-				const dataUrl = await toPng(nodes[index], { pixelRatio: 300 / 96 });
-				const { x, y } = cardSlotPosition(index);
-				pdf.addImage(dataUrl, 'PNG', x, y, CARD_WIDTH_MM, CARD_HEIGHT_MM, undefined, 'FAST');
+				if (backDataUrl) {
+					pdf.addPage();
+					for (let slot = 0; slot < cardsOnPage; slot++) {
+						const { x, y } = backSlotPosition(slot);
+						pdf.addImage(
+							backDataUrl,
+							'JPEG',
+							x,
+							y,
+							CARD_WIDTH_MM,
+							CARD_HEIGHT_MM,
+							undefined,
+							'FAST'
+						);
+					}
+				}
 			}
 			pdf.save('adversaria-bellica-karten.pdf');
 		} catch (error) {
@@ -95,6 +183,63 @@
 					{card.name}
 				</label>
 			{/each}
+		</div>
+		<div class="backs">
+			<label class="back-toggle">
+				<input
+					type="checkbox"
+					checked={cardBack.enabled}
+					onchange={(event) => {
+						setCardBackEnabled(event.currentTarget.checked);
+					}}
+				/>
+				Rückseiten für beidseitigen Druck (nur PDF)
+			</label>
+			{#if cardBack.enabled}
+				<div class="back-options">
+					<label>
+						<input
+							type="radio"
+							name="back-mode"
+							checked={cardBack.mode === 'default'}
+							onchange={() => {
+								setCardBackMode('default');
+							}}
+						/>
+						Standardmotiv
+					</label>
+					<label>
+						<input
+							type="radio"
+							name="back-mode"
+							checked={cardBack.mode === 'custom'}
+							disabled={!cardBack.customImage}
+							onchange={() => {
+								setCardBackMode('custom');
+							}}
+						/>
+						Eigenes Bild
+					</label>
+					<label class="upload">
+						Bild wählen …
+						<input
+							type="file"
+							accept="image/*"
+							onchange={(event) => {
+								void onBackImageUpload(event);
+							}}
+						/>
+					</label>
+					<img
+						class="back-preview"
+						src={cardBack.mode === 'custom' && cardBack.customImage
+							? cardBack.customImage
+							: defaultCardBack}
+						alt="Rückseiten-Vorschau"
+					/>
+					<span class="hint">Beim Drucken „Beidseitig, an langer Kante spiegeln“ wählen.</span>
+				</div>
+			{/if}
 		</div>
 		<div class="buttons">
 			<button type="button" onclick={selectAll}>Alle auswählen</button>
@@ -191,6 +336,51 @@
 		background: #ece4d2;
 		color: var(--color-gold);
 		font-family: var(--font-serif);
+	}
+
+	.backs {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+		margin-bottom: 1rem;
+	}
+
+	.back-toggle,
+	.back-options label {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.4rem;
+		cursor: pointer;
+	}
+
+	.back-options {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		flex-wrap: wrap;
+	}
+
+	.upload {
+		padding: 0.4rem 0.8rem;
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius);
+		background: var(--color-surface);
+	}
+
+	.upload:hover {
+		border-color: var(--color-gold);
+	}
+
+	.upload input {
+		display: none;
+	}
+
+	.back-preview {
+		width: 60px;
+		height: 84px;
+		object-fit: cover;
+		border: 1px solid var(--color-border);
+		border-radius: 4px;
 	}
 
 	.buttons {

@@ -13,6 +13,12 @@ export function cardSlotPosition(index: number): { x: number; y: number } {
 	};
 }
 
+/** Back-page slot for the card at `index`: columns mirrored for a long-edge duplex flip. */
+export function backSlotPosition(index: number): { x: number; y: number } {
+	const front = cardSlotPosition(index);
+	return { x: front.x === 0 ? CARD_WIDTH_MM : 0, y: front.y };
+}
+
 /** Cards in the order they were selected; ids without a matching card are skipped. */
 export function cardsInSelectionOrder(cards: MonsterCard[], selectedIds: string[]): MonsterCard[] {
 	const byId = new Map(cards.map((card) => [card.id, card]));
