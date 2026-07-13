@@ -17,6 +17,10 @@
 	let customCategory = $state(false);
 	const typeOptions = $derived(categoryOptions(store.cards, card.category));
 
+	function hideBrokenImage(event: Event) {
+		(event.currentTarget as HTMLImageElement).style.display = 'none';
+	}
+
 	function onCategoryChange(event: Event & { currentTarget: HTMLSelectElement }) {
 		const value = event.currentTarget.value;
 		if (value === CUSTOM_TYPE) {
@@ -31,13 +35,13 @@
 	{#if editable}
 		<button type="button" class="portrait" onclick={onPortraitClick} title="Bild wählen">
 			{#if card.image}
-				<img src={card.image} alt="" />
+				<img src={card.image} alt="" onerror={hideBrokenImage} />
 			{:else}
 				<span class="portrait-hint">Bild</span>
 			{/if}
 		</button>
 	{:else if card.image}
-		<img class="portrait" src={card.image} alt="" />
+		<img class="portrait" src={card.image} alt="" onerror={hideBrokenImage} />
 	{/if}
 	<div class="title">
 		{#if editable}

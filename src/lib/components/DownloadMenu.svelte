@@ -24,6 +24,12 @@
 		return toPng(node, { pixelRatio: PIXEL_RATIO });
 	}
 
+	function closeOnOutsideClick(event: MouseEvent) {
+		if (details.open && !details.contains(event.target as Node)) {
+			details.open = false;
+		}
+	}
+
 	async function download(format: 'png' | 'pdf') {
 		details.open = false;
 		busy = true;
@@ -49,6 +55,8 @@
 		}
 	}
 </script>
+
+<svelte:window onclick={closeOnOutsideClick} />
 
 <details class="download" bind:this={details}>
 	<summary>{busy ? 'Erstelle …' : 'Herunterladen'}</summary>
