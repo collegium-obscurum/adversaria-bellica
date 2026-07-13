@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
+	import CardPreview from '$lib/components/card/CardPreview.svelte';
+	import DownloadMenu from '$lib/components/DownloadMenu.svelte';
 	import StatIcon from '$lib/components/StatIcon.svelte';
 	import {
 		deleteCard,
@@ -8,11 +10,24 @@
 		importJson,
 		store
 	} from '$lib/state/storage.svelte';
+	import { cardFitZoom } from '$lib/domain/cardZoom';
 	import type { MonsterCard } from '$lib/domain/types';
 
 	let search = $state('');
 	let categoryFilter = $state('');
 	let sortAlpha = $state(false);
+	let viewCard = $state<MonsterCard | undefined>();
+	let viewDialog: HTMLDialogElement;
+	let viewportWidth = $state(0);
+	let viewportHeight = $state(0);
+
+	// Reserve room for dialog padding, toolbar row, and backdrop margin.
+	const viewZoom = $derived(cardFitZoom(viewportWidth - 120, viewportHeight - 160));
+
+	function openView(card: MonsterCard) {
+		viewCard = card;
+		viewDialog.showModal();
+	}
 
 	const categories = $derived(
 		[...new Set(store.cards.map((card) => card.category).filter(Boolean))].sort()
@@ -62,6 +77,8 @@
 		input.value = '';
 	}
 </script>
+
+<svelte:window bind:innerWidth={viewportWidth} bind:innerHeight={viewportHeight} />
 
 <svelte:head>
 	<title>Bibliothek – Adversaria Bellica</title>
@@ -123,6 +140,25 @@
 						<span title="Geschwindigkeit"><small>GS</small>{card.speed}</span>
 					</div>
 					<div class="buttons">
+						<button
+							type="button"
+							class="view"
+							title="Ansehen"
+							aria-label="{card.name} ansehen"
+							onclick={() => {
+								openView(card);
+							}}
+						>
+							<svg viewBox="0 0 24 24" aria-hidden="true">
+								<path
+									d="M12 5.5C7 5.5 3.3 9.3 1.8 12c1.5 2.7 5.2 6.5 10.2 6.5S20.7 14.7 22.2 12C20.7 9.3 17 5.5 12 5.5Z"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="1.8"
+								/>
+								<circle cx="12" cy="12" r="3" fill="currentColor" />
+							</svg>
+						</button>
 						<a href="{resolve('/editor')}?id={card.id}">Bearbeiten</a>
 						<button type="button" onclick={() => duplicateCard(card.id)}>Duplizieren</button>
 						<button
@@ -138,6 +174,32 @@
 		</ul>
 	{/if}
 {/if}
+
+<dialog
+	bind:this={viewDialog}
+	class="view-dialog"
+	onclose={() => (viewCard = undefined)}
+	onclick={(event) => {
+		if (event.target === viewDialog) viewDialog.close();
+	}}
+>
+	{#if viewCard}
+		<div class="view-toolbar">
+			<DownloadMenu card={viewCard} />
+			<button
+				type="button"
+				class="view-close"
+				aria-label="Schließen"
+				onclick={() => {
+					viewDialog.close();
+				}}>✕</button
+			>
+		</div>
+		<div style:zoom={viewZoom}>
+			<CardPreview card={viewCard} />
+		</div>
+	{/if}
+</dialog>
 
 <style>
 	.toolbar {
@@ -341,6 +403,55 @@
 
 	.buttons button:hover {
 		text-decoration: underline;
+	}
+
+	.buttons .view {
+		display: inline-flex;
+		width: 1.2rem;
+		height: 1.2rem;
+		line-height: 0;
+	}
+
+	.buttons .view:hover {
+		color: var(--color-brand);
+		text-decoration: none;
+	}
+
+	.buttons .view svg {
+		width: 100%;
+		height: 100%;
+	}
+
+	.view-dialog {
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-lg);
+		padding: 1rem 1.25rem 1.25rem;
+	}
+
+	.view-dialog::backdrop {
+		background: rgb(0 0 0 / 40%);
+	}
+
+	.view-toolbar {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1rem;
+		margin-bottom: 0.75rem;
+	}
+
+	.view-close {
+		border: none;
+		background: none;
+		padding: 0;
+		font: inherit;
+		font-size: 1.1rem;
+		color: var(--color-ink-soft);
+		cursor: pointer;
+	}
+
+	.view-close:hover {
+		color: var(--color-brand);
 	}
 
 	.danger {
