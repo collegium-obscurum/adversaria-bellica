@@ -35,6 +35,7 @@
 </script>
 
 <div class="actions">
+	<h3>Aktionen (1W20)</h3>
 	{#each card.actions as action, index (action)}
 		{#if editable}
 			<div

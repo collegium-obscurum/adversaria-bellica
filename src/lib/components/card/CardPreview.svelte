@@ -79,26 +79,32 @@
 
 			{#if editable}
 				{#if showNotes || card.notes.trim() !== ''}
-					<div class="removable">
-						<textarea
-							class="notes-input"
-							bind:value={card.notes}
-							placeholder="Notizen (Immunitäten, Schwächen, Taktik)"></textarea>
-						<button
-							type="button"
-							class="remove"
-							onclick={() => {
-								card.notes = '';
-								showNotes = false;
-							}}
-							title="Notizen entfernen">✕</button
-						>
+					<div class="notes-section">
+						<h3>Notizen</h3>
+						<div class="removable">
+							<textarea
+								class="notes-input"
+								bind:value={card.notes}
+								placeholder="Notizen (Immunitäten, Schwächen, Taktik)"></textarea>
+							<button
+								type="button"
+								class="remove"
+								onclick={() => {
+									card.notes = '';
+									showNotes = false;
+								}}
+								title="Notizen entfernen">✕</button
+							>
+						</div>
 					</div>
 				{:else}
 					<button type="button" class="add" onclick={() => (showNotes = true)}>+ Notizen</button>
 				{/if}
 			{:else if card.notes}
-				<p class="notes">{card.notes}</p>
+				<div class="notes-section">
+					<h3>Notizen</h3>
+					<p class="notes">{card.notes}</p>
+				</div>
 			{/if}
 		</div>
 
@@ -220,6 +226,12 @@
 		border-color: #b99b5f;
 	}
 
+	.notes-section {
+		display: flex;
+		flex-direction: column;
+		gap: 1mm;
+	}
+
 	.notes {
 		margin: 0;
 		color: var(--muted);
@@ -243,6 +255,16 @@
 	}
 
 	/* shared card styles: used by the section subcomponents too, hence :global */
+	.card :global(h3) {
+		margin: 0;
+		font-family: 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
+		font-size: 8.5pt;
+		font-variant: small-caps;
+		letter-spacing: 0.05em;
+		color: var(--accent);
+		border-bottom: 0.3mm solid var(--line);
+	}
+
 	.card :global(.entry) {
 		margin: 0;
 	}

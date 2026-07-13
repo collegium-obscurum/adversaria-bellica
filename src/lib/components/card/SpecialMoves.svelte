@@ -131,16 +131,6 @@
 		gap: 1mm;
 	}
 
-	.special-moves h3 {
-		margin: 0;
-		font-family: 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
-		font-size: 8.5pt;
-		font-variant: small-caps;
-		letter-spacing: 0.05em;
-		color: var(--accent);
-		border-bottom: 0.3mm solid var(--line);
-	}
-
 	.special-moves .range {
 		width: 24mm;
 		justify-content: flex-end;

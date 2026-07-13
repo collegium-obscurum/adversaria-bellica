@@ -7,7 +7,7 @@ import {
 	setRangeEnd,
 	setRangeStart
 } from './actions';
-import type { ActionEntry } from './types';
+import { createEmptyCard, type ActionEntry } from './types';
 
 function entry(span: number, name = ''): ActionEntry {
 	return { span, name, effect: '' };
@@ -45,6 +45,16 @@ describe('actionRanges', () => {
 		expect(actionRanges([entry(0), entry(5)])).toEqual([
 			{ from: 1, to: 1 },
 			{ from: 2, to: 20 }
+		]);
+	});
+
+	it('partitions the default card actions into 1 / 2–8 / 9–15 / 16–19 / 20', () => {
+		expect(actionRanges(createEmptyCard().actions)).toEqual([
+			{ from: 1, to: 1 },
+			{ from: 2, to: 8 },
+			{ from: 9, to: 15 },
+			{ from: 16, to: 19 },
+			{ from: 20, to: 20 }
 		]);
 	});
 });

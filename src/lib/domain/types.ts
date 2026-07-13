@@ -72,9 +72,15 @@ export function createEmptyCard(): MonsterCard {
 			craft: { value: 5, maxQs: 2 }
 		},
 		actions: [
-			{ span: 5, name: 'Fehlschlag', effect: 'Der Angriff geht daneben.' },
-			{ span: 14, name: 'Angriff', effect: '1W6+2 TP' },
-			{ span: 1, name: 'Kritischer Treffer', effect: '2W6+4 TP' }
+			{ span: 1, name: 'Kritischer Treffer', effect: '2W6+4 TP' },
+			{ span: 7, name: 'Angriff', effect: '1W6+2 TP' },
+			{ span: 7, name: 'Schwerer Angriff', effect: '1W6+4 TP' },
+			{ span: 4, name: 'Fehlschlag', effect: 'Der Angriff geht daneben.' },
+			{
+				span: 1,
+				name: 'Flucht',
+				effect: 'Erstes Mal: sucht einen Fluchtweg. Zweites Mal: entkommt.'
+			}
 		],
 		specialMoves: {
 			combatStart: { name: '', effect: '' },
