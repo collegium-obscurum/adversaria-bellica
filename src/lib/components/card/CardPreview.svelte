@@ -35,10 +35,10 @@
 			</svg>
 		{/each}
 	{/if}
-	<CardHeader bind:card {editable} {onPortraitClick} />
-
 	<div class="columns">
 		<div class="body">
+			<CardHeader bind:card {editable} {onPortraitClick} />
+
 			{#if editable}
 				{#if showFlavor || card.flavorText.trim() !== ''}
 					<div class="removable">
@@ -64,8 +64,6 @@
 			{/if}
 
 			<ActionTable bind:card {editable} />
-
-			<TalentRow bind:card {editable} />
 
 			<div class="wounds">
 				<b>Schmerz bei Schaden:</b>
@@ -106,6 +104,8 @@
 
 		<StatBadges bind:card {editable} />
 	</div>
+
+	<TalentRow bind:card {editable} />
 </article>
 
 <style>

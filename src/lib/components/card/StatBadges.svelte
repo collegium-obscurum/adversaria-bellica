@@ -1,22 +1,61 @@
 <script lang="ts">
 	import { STAT_BADGES } from '$lib/domain/statBadges';
+	import type { StatBadgeInfo, TextStatKey } from '$lib/domain/statBadges';
 	import StatIcon from '$lib/components/StatIcon.svelte';
 	import type { MonsterCard } from '$lib/domain/types';
 
 	let { card = $bindable(), editable = false }: { card: MonsterCard; editable?: boolean } =
 		$props();
+
+	const lifePointsBadge = STAT_BADGES[0];
+	const textBadges = STAT_BADGES.slice(1) as (StatBadgeInfo & { key: TextStatKey })[];
+
+	function valueFontSize(value: string | number): string {
+		const length = String(value).length;
+		if (length <= 2) return '9pt';
+		if (length <= 4) return '7pt';
+		return '5.5pt';
+	}
+
+	function clampLifePoints() {
+		if (!Number.isFinite(card.lifePoints) || card.lifePoints < 1) card.lifePoints = 1;
+	}
 </script>
 
 <aside class="badges">
-	{#each STAT_BADGES as badge (badge.key)}
-		<div class="badge" title="{badge.label} ({badge.abbr})">
-			<span class="badge-icon"><StatIcon name={badge.key} /></span>
-			{#if editable}
-				<input type="number" bind:value={card[badge.key]} />
-			{:else}
-				<span class="badge-value">{card[badge.key]}</span>
-			{/if}
-		</div>
+	<div class="badge" title="{lifePointsBadge.label} ({lifePointsBadge.abbr})">
+		<span class="badge-icon"><StatIcon name={lifePointsBadge.key} /></span>
+		{#if editable}
+			<input
+				type="number"
+				min="1"
+				bind:value={card.lifePoints}
+				onblur={clampLifePoints}
+				style:font-size={valueFontSize(card.lifePoints)}
+			/>
+		{:else}
+			<span class="badge-value" style:font-size={valueFontSize(card.lifePoints)}
+				>{card.lifePoints}</span
+			>
+		{/if}
+	</div>
+	{#each textBadges as badge (badge.key)}
+		{#if editable || card[badge.key].trim() !== ''}
+			<div class="badge" title="{badge.label} ({badge.abbr})">
+				<span class="badge-icon"><StatIcon name={badge.key} /></span>
+				{#if editable}
+					<input
+						type="text"
+						bind:value={card[badge.key]}
+						style:font-size={valueFontSize(card[badge.key])}
+					/>
+				{:else}
+					<span class="badge-value" style:font-size={valueFontSize(card[badge.key])}
+						>{card[badge.key]}</span
+					>
+				{/if}
+			</div>
+		{/if}
 	{/each}
 </aside>
 
@@ -62,7 +101,6 @@
 
 	.badge-value {
 		font-weight: bold;
-		font-size: 9pt;
 		line-height: 1.1;
 	}
 
@@ -74,7 +112,6 @@
 		color: inherit;
 		font: inherit;
 		font-weight: bold;
-		font-size: 9pt;
 		padding: 0;
 		-moz-appearance: textfield;
 		appearance: textfield;

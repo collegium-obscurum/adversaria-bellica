@@ -43,10 +43,32 @@ export function migrateSpecialMoves(moves: unknown): Record<WoundTrigger, Specia
 	return result;
 }
 
+const TEXT_STAT_KEYS = [
+	'armor',
+	'initiative',
+	'speed',
+	'defense',
+	'soulPower',
+	'toughness',
+	'actionCount'
+] as const;
+
+/** Convert pre-string numeric stats; lifePoints stays a number clamped to at least 1. */
+export function migrateStats(raw: Record<string, unknown>): void {
+	for (const key of TEXT_STAT_KEYS) {
+		const value = raw[key];
+		if (typeof value === 'string') continue;
+		raw[key] = typeof value === 'number' ? String(value) : '';
+	}
+	const lifePoints = Number(raw.lifePoints);
+	raw.lifePoints = Number.isFinite(lifePoints) ? Math.max(1, lifePoints) : 1;
+}
+
 /** Bring a card parsed from storage or import JSON up to the current schema. */
 export function migrateCard(raw: Record<string, unknown>): MonsterCard {
 	raw.actions = migrateActions(Array.isArray(raw.actions) ? raw.actions : []);
 	raw.specialMoves = migrateSpecialMoves(raw.specialMoves);
 	raw.customMoves = Array.isArray(raw.customMoves) ? (raw.customMoves as CustomMove[]) : [];
+	migrateStats(raw);
 	return raw as unknown as MonsterCard;
 }

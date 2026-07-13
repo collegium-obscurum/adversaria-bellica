@@ -19,6 +19,11 @@ describe('woundThresholds', () => {
 			{ label: 'Tod', damage: 30 }
 		]);
 	});
+
+	it('treats invalid max HP as 1 while the editor input is empty', () => {
+		expect(woundThresholds(Number.NaN)).toEqual(woundThresholds(1));
+		expect(woundThresholds(0)).toEqual(woundThresholds(1));
+	});
 });
 
 describe('triggerLabels', () => {

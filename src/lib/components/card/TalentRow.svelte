@@ -1,29 +1,38 @@
 <script lang="ts">
-	import type { MonsterCard } from '$lib/domain/types';
+	import type { MonsterCard, TalentKey } from '$lib/domain/types';
 
 	let { card = $bindable(), editable = false }: { card: MonsterCard; editable?: boolean } =
 		$props();
 
-	const TALENT_LABELS = {
+	const TALENT_LABELS: Record<TalentKey, string> = {
 		body: 'Körper',
 		social: 'Gesellschaft',
 		nature: 'Natur',
 		knowledge: 'Wissen',
 		craft: 'Handwerk'
-	} as const;
+	};
+
+	const TALENT_ROWS: TalentKey[][] = [
+		['body', 'social'],
+		['nature', 'knowledge', 'craft']
+	];
 </script>
 
 <div class="talents">
-	{#each Object.entries(TALENT_LABELS) as [key, label] (key)}
-		{@const talent = card.talents[key as keyof typeof TALENT_LABELS]}
-		<div class="talent">
-			<b>{label}</b>
-			{#if editable}
-				<input type="number" min="1" max="20" bind:value={talent.value} title="Wert" />
-				(QS <input type="number" min="1" max="6" bind:value={talent.maxQs} title="max. QS" />)
-			{:else}
-				{talent.value} (QS {talent.maxQs})
-			{/if}
+	{#each TALENT_ROWS as row (row[0])}
+		<div class="talent-row">
+			{#each row as key (key)}
+				{@const talent = card.talents[key]}
+				<div class="talent">
+					<b>{TALENT_LABELS[key]}</b>
+					{#if editable}
+						<input type="number" min="1" max="20" bind:value={talent.value} title="Wert" />
+						(QS <input type="number" min="1" max="6" bind:value={talent.maxQs} title="max. QS" />)
+					{:else}
+						{talent.value} (QS {talent.maxQs})
+					{/if}
+				</div>
+			{/each}
 		</div>
 	{/each}
 </div>
@@ -31,8 +40,8 @@
 <style>
 	.talents {
 		display: flex;
-		flex-wrap: wrap;
-		gap: 0.5mm 2mm;
+		flex-direction: column;
+		gap: 0.5mm;
 		padding: 1mm 1.5mm;
 		border: 0.3mm solid var(--line);
 		border-radius: 1mm;
@@ -43,14 +52,21 @@
 		border-color: #b99b5f;
 	}
 
+	.talent-row {
+		display: flex;
+		justify-content: center;
+		gap: 2mm;
+	}
+
 	.talent {
 		display: flex;
 		align-items: center;
 		gap: 0.5mm;
+		white-space: nowrap;
 	}
 
 	.talent input {
-		width: 5mm;
+		width: 4mm;
 		padding: 0;
 		text-align: center;
 	}

@@ -35,13 +35,13 @@ export interface MonsterCard {
 	/** data URL of the circle cutout, or null */
 	image: string | null;
 	lifePoints: number;
-	armor: number;
-	initiative: number;
-	speed: number;
-	defense: number;
-	soulPower: number;
-	toughness: number;
-	actionCount: number;
+	armor: string;
+	initiative: string;
+	speed: string;
+	defense: string;
+	soulPower: string;
+	toughness: string;
+	actionCount: string;
 	talents: Record<TalentKey, TalentValue>;
 	actions: ActionEntry[];
 	specialMoves: Record<WoundTrigger, SpecialMove>;
@@ -57,13 +57,13 @@ export function createEmptyCard(): MonsterCard {
 		notes: '',
 		image: null,
 		lifePoints: 20,
-		armor: 0,
-		initiative: 10,
-		speed: 8,
-		defense: 6,
-		soulPower: 0,
-		toughness: 0,
-		actionCount: 1,
+		armor: '0',
+		initiative: '10',
+		speed: '8',
+		defense: '6',
+		soulPower: '0',
+		toughness: '0',
+		actionCount: '1',
 		talents: {
 			body: { value: 10, maxQs: 3 },
 			social: { value: 5, maxQs: 2 },

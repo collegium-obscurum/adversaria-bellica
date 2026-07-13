@@ -7,6 +7,8 @@ export interface WoundThreshold {
 }
 
 export function woundThresholds(maxHp: number): WoundThreshold[] {
+	// the editor's number input is transiently null while the user retypes the value
+	if (!Number.isFinite(maxHp) || maxHp < 1) maxHp = 1;
 	return [
 		{ label: '75%', damage: Math.ceil(maxHp * 0.25) },
 		{ label: '50%', damage: Math.ceil(maxHp * 0.5) },

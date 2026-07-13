@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { migrateActions, migrateCard, migrateSpecialMoves } from './migrations';
+import { migrateActions, migrateCard, migrateSpecialMoves, migrateStats } from './migrations';
 import type { ActionEntry, SpecialMove, WoundTrigger } from './types';
 
 describe('migrateActions', () => {
@@ -57,7 +57,44 @@ describe('migrateSpecialMoves', () => {
 	});
 });
 
+describe('migrateStats', () => {
+	it('converts numeric stats to strings', () => {
+		const raw: Record<string, unknown> = { armor: 3, speed: 8, actionCount: 1 };
+		migrateStats(raw);
+		expect(raw.armor).toBe('3');
+		expect(raw.speed).toBe('8');
+		expect(raw.actionCount).toBe('1');
+	});
+
+	it('passes string stats through and fills missing ones with empty strings', () => {
+		const raw: Record<string, unknown> = { speed: '8/16' };
+		migrateStats(raw);
+		expect(raw.speed).toBe('8/16');
+		expect(raw.armor).toBe('');
+	});
+
+	it('clamps lifePoints to at least 1', () => {
+		for (const bad of [0, -5, undefined, 'abc']) {
+			const raw: Record<string, unknown> = { lifePoints: bad };
+			migrateStats(raw);
+			expect(raw.lifePoints).toBe(1);
+		}
+	});
+
+	it('keeps valid lifePoints and coerces numeric strings', () => {
+		const raw: Record<string, unknown> = { lifePoints: '25' };
+		migrateStats(raw);
+		expect(raw.lifePoints).toBe(25);
+	});
+});
+
 describe('migrateCard', () => {
+	it('migrates stats too', () => {
+		const card = migrateCard({ id: 'a', name: 'Wolf', armor: 2, lifePoints: 0 });
+		expect(card.armor).toBe('2');
+		expect(card.lifePoints).toBe(1);
+	});
+
 	it('adds an empty customMoves list to cards without one', () => {
 		const card = migrateCard({ id: 'a', name: 'Wolf' });
 		expect(card.customMoves).toEqual([]);

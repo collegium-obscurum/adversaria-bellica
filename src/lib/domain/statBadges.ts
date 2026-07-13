@@ -8,6 +8,8 @@ export type StatKey =
 	| 'toughness'
 	| 'actionCount';
 
+export type TextStatKey = Exclude<StatKey, 'lifePoints'>;
+
 export interface StatBadgeInfo {
 	key: StatKey;
 	abbr: string;
