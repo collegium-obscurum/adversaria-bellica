@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
+	import { beforeNavigate, goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import CardPreview from '$lib/components/card/CardPreview.svelte';
@@ -19,11 +19,25 @@
 	const existing = editId ? getCard(editId) : undefined;
 	const resolved = resolveEditorCard(editId, existing ? $state.snapshot(existing) : undefined);
 
+	const baseline = JSON.stringify(resolved.card);
+
 	let card = $state(resolved.card);
 	let cardMissing = $state(resolved.missing);
 	let cropperDialog: HTMLDialogElement;
 	let editorWidth = $state(0);
+	let skipGuard = false;
 	const zoom = $derived(cardZoom(editorWidth));
+
+	beforeNavigate((navigation) => {
+		if (skipGuard || JSON.stringify($state.snapshot(card)) === baseline) return;
+		if (navigation.type === 'leave') {
+			navigation.cancel();
+			return;
+		}
+		if (!confirm('Ungespeicherte Änderungen verwerfen?')) {
+			navigation.cancel();
+		}
+	});
 
 	function save() {
 		if (!card.name.trim()) {
@@ -31,6 +45,7 @@
 			return;
 		}
 		upsertCard($state.snapshot(card));
+		skipGuard = true;
 		void goto(resolve('/'));
 	}
 
@@ -59,7 +74,7 @@
 		<StyleToggle />
 		<StatLabelToggle />
 		<DownloadMenu {card} />
-		<a class="cancel" href={resolve('/')}>Abbrechen</a>
+		<a class="cancel" href={resolve('/')} onclick={() => (skipGuard = true)}>Abbrechen</a>
 		<button type="button" class="save" onclick={save}>Speichern</button>
 	</div>
 
