@@ -6,6 +6,7 @@
 	import ImageCropper from '$lib/components/ImageCropper.svelte';
 	import StatIcon from '$lib/components/StatIcon.svelte';
 	import StatLabelToggle from '$lib/components/StatLabelToggle.svelte';
+	import DownloadMenu from '$lib/components/DownloadMenu.svelte';
 	import { STAT_BADGES } from '$lib/domain/statBadges';
 	import { prefs } from '$lib/state/preferences.svelte';
 	import StyleToggle from '$lib/components/StyleToggle.svelte';
@@ -43,6 +44,7 @@
 		<h1>{existing ? 'Karte bearbeiten' : 'Neue Karte'}</h1>
 		<StyleToggle />
 		<StatLabelToggle />
+		<DownloadMenu {card} />
 		<a class="cancel" href={resolve('/')}>Abbrechen</a>
 		<button type="button" class="save" onclick={save}>Speichern</button>
 	</div>
