@@ -7,6 +7,7 @@
 	import StatIcon from '$lib/components/StatIcon.svelte';
 	import { STAT_BADGES } from '$lib/domain/statBadges';
 	import StyleToggle from '$lib/components/StyleToggle.svelte';
+	import TalentCalculator from '$lib/components/TalentCalculator.svelte';
 	import { getCard, upsertCard } from '$lib/state/storage.svelte';
 	import { createEmptyCard } from '$lib/domain/types';
 
@@ -54,18 +55,23 @@
 			/>
 		</div>
 
-		<aside class="legend">
-			<h2>Legende</h2>
-			<ul>
-				{#each STAT_BADGES as badge (badge.key)}
-					<li>
-						<span class="legend-icon"><StatIcon name={badge.key} /></span>
-						<b>{badge.abbr}</b>
-						<span>{badge.label}</span>
-					</li>
-				{/each}
-			</ul>
-		</aside>
+		<div class="side">
+			<aside class="legend">
+				<h2>Legende</h2>
+				<ul>
+					{#each STAT_BADGES as badge (badge.key)}
+						<li>
+							<span class="legend-icon"><StatIcon name={badge.key} /></span>
+							<b>{badge.abbr}</b>
+							<span>{badge.label}</span>
+						</li>
+					{/each}
+				</ul>
+			</aside>
+			<aside class="calc-box">
+				<TalentCalculator />
+			</aside>
+		</div>
 	</div>
 </div>
 
@@ -129,9 +135,17 @@
 		}
 	}
 
-	.legend {
+	.side {
 		position: sticky;
 		top: 1rem;
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+		align-items: flex-start;
+	}
+
+	.legend,
+	.calc-box {
 		background: #fff;
 		border: 1px solid #ddd4c2;
 		border-radius: 8px;

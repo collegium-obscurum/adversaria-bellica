@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { clampQs, clampTalentValue } from '$lib/domain/talentCalc';
 	import type { MonsterCard, TalentKey } from '$lib/domain/types';
 
 	let { card = $bindable(), editable = false }: { card: MonsterCard; editable?: boolean } =
@@ -26,8 +27,24 @@
 				<div class="talent">
 					<b>{TALENT_LABELS[key]}</b>
 					{#if editable}
-						<input type="number" min="1" max="20" bind:value={talent.value} title="Wert" />
-						(QS <input type="number" min="1" max="6" bind:value={talent.maxQs} title="max. QS" />)
+						<input
+							type="number"
+							min="1"
+							max="99"
+							bind:value={talent.value}
+							onchange={() => (talent.value = clampTalentValue(talent.value))}
+							title="Wert"
+						/>
+						(QS
+						<input
+							class="qs"
+							type="number"
+							min="1"
+							max="6"
+							bind:value={talent.maxQs}
+							onchange={() => (talent.maxQs = clampQs(talent.maxQs))}
+							title="max. QS"
+						/>)
 					{:else}
 						{talent.value} (QS {talent.maxQs})
 					{/if}
@@ -69,5 +86,9 @@
 		width: 4mm;
 		padding: 0;
 		text-align: center;
+	}
+
+	.talent input.qs {
+		width: 3mm;
 	}
 </style>
