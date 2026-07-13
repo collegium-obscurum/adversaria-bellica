@@ -26,6 +26,8 @@
 </script>
 
 <article class="card" class:editable class:ornate>
+	<span class="brand-mark top">Collegium Obscurum</span>
+	<span class="brand-mark bottom">Adversaria Bellica</span>
 	{#if ornate}
 		{#each ['tl', 'tr', 'bl', 'br'] as position (position)}
 			<svg class="corner {position}" viewBox="0 0 20 20" aria-hidden="true">
@@ -154,6 +156,38 @@
 			inset 0 0 0 0.8mm var(--color-gold);
 		print-color-adjust: exact;
 		-webkit-print-color-adjust: exact;
+	}
+
+	.brand-mark {
+		position: absolute;
+		left: 0;
+		right: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 1.5mm;
+		font-family: var(--font-serif);
+		font-size: 6pt;
+		text-transform: uppercase;
+		letter-spacing: 0.2em;
+		color: var(--muted);
+		opacity: 0.45;
+		pointer-events: none;
+	}
+
+	.brand-mark::before,
+	.brand-mark::after {
+		content: '';
+		width: 8mm;
+		border-top: 0.2mm solid var(--line);
+	}
+
+	.brand-mark.top {
+		top: 1mm;
+	}
+
+	.brand-mark.bottom {
+		bottom: 1mm;
 	}
 
 	.corner {
