@@ -1,4 +1,4 @@
-import type { ActionEntry, MonsterCard, SpecialMove, WoundTrigger } from './types';
+import type { ActionEntry, CustomMove, MonsterCard, SpecialMove, WoundTrigger } from './types';
 import { WOUND_TRIGGERS } from './types';
 
 interface LegacyActionEntry {
@@ -47,5 +47,6 @@ export function migrateSpecialMoves(moves: unknown): Record<WoundTrigger, Specia
 export function migrateCard(raw: Record<string, unknown>): MonsterCard {
 	raw.actions = migrateActions(Array.isArray(raw.actions) ? raw.actions : []);
 	raw.specialMoves = migrateSpecialMoves(raw.specialMoves);
+	raw.customMoves = Array.isArray(raw.customMoves) ? (raw.customMoves as CustomMove[]) : [];
 	return raw as unknown as MonsterCard;
 }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { migrateActions, migrateSpecialMoves } from './migrations';
+import { migrateActions, migrateCard, migrateSpecialMoves } from './migrations';
 import type { ActionEntry, SpecialMove, WoundTrigger } from './types';
 
 describe('migrateActions', () => {
@@ -54,5 +54,18 @@ describe('migrateSpecialMoves', () => {
 	it('fills missing triggers with empty moves', () => {
 		const migrated = migrateSpecialMoves({});
 		expect(migrated.death).toEqual({ name: '', effect: '' });
+	});
+});
+
+describe('migrateCard', () => {
+	it('adds an empty customMoves list to cards without one', () => {
+		const card = migrateCard({ id: 'a', name: 'Wolf' });
+		expect(card.customMoves).toEqual([]);
+	});
+
+	it('keeps existing custom moves', () => {
+		const moves = [{ trigger: 'Bei Feuerschaden', name: 'Panik', effect: 'Flieht 1 Runde.' }];
+		const card = migrateCard({ id: 'a', name: 'Wolf', customMoves: moves });
+		expect(card.customMoves).toEqual(moves);
 	});
 });

@@ -15,7 +15,7 @@
 	import StatIcon from './StatIcon.svelte';
 	import type { MonsterCard, WoundTrigger } from './types';
 	import { WOUND_TRIGGERS } from './types';
-	import { woundThresholds } from './wounds';
+	import { triggerLabels, woundThresholds } from './wounds';
 
 	let {
 		card = $bindable(),
@@ -31,13 +31,7 @@
 	const ranges = $derived(actionRanges(card.actions));
 	const ornate = $derived(prefs.cardStyle === 'ornate');
 
-	const TRIGGER_LABELS: Record<WoundTrigger, string> = {
-		combatStart: 'Kampfbeginn',
-		hp75: '75% LeP',
-		hp50: '50% LeP',
-		hp25: '25% LeP',
-		death: 'Tod'
-	};
+	const labels = $derived(triggerLabels(card.lifePoints));
 
 	const TALENT_LABELS = {
 		body: 'Körper',
@@ -81,6 +75,20 @@
 	function removeTrigger(trigger: WoundTrigger) {
 		card.specialMoves[trigger] = { name: '', effect: '' };
 		addedTriggers = addedTriggers.filter((t) => t !== trigger);
+	}
+
+	const visibleCustomMoves = $derived(
+		card.customMoves.filter((move) => move.name.trim() !== '' || move.effect.trim() !== '')
+	);
+	let focusCustomIndex = $state<number | null>(null);
+
+	function addCustomMove() {
+		card.customMoves.push({ trigger: '', name: '', effect: '' });
+		focusCustomIndex = card.customMoves.length - 1;
+	}
+
+	function removeCustomMove(index: number) {
+		card.customMoves.splice(index, 1);
 	}
 
 	let dragIndex = $state<number | null>(null);
@@ -296,7 +304,7 @@
 					<h3>Spezialmanöver</h3>
 					{#each visibleTriggers as trigger (trigger)}
 						<div class="entry-row">
-							<span class="range">{TRIGGER_LABELS[trigger]} =</span>
+							<span class="range">{labels[trigger]} =</span>
 							<input
 								class="entry-name"
 								bind:value={card.specialMoves[trigger].name}
@@ -316,27 +324,60 @@
 							>
 						</div>
 					{/each}
-					{#if hiddenTriggers.length > 0}
-						<div class="add-triggers">
-							{#each hiddenTriggers as trigger (trigger)}
-								<button
-									type="button"
-									class="add"
-									onclick={() => {
-										addTrigger(trigger);
-									}}>+ {TRIGGER_LABELS[trigger]}</button
-								>
-							{/each}
+					{#each card.customMoves as move, index (move)}
+						<div class="entry-row">
+							<span class="range">
+								<input
+									class="trigger-input"
+									bind:value={move.trigger}
+									placeholder="Auslöser"
+									{@attach (node: HTMLInputElement) => {
+										if (index === focusCustomIndex) {
+											node.focus();
+											focusCustomIndex = null;
+										}
+									}}
+								/> =</span
+							>
+							<input class="entry-name" bind:value={move.name} placeholder="Name" />
+							<textarea class="entry-effect" bind:value={move.effect} placeholder="Effekt"
+							></textarea>
+							<button
+								type="button"
+								class="remove"
+								onclick={() => {
+									removeCustomMove(index);
+								}}
+								title="Entfernen">✕</button
+							>
 						</div>
-					{/if}
+					{/each}
+					<div class="add-triggers">
+						{#each hiddenTriggers as trigger (trigger)}
+							<button
+								type="button"
+								class="add"
+								onclick={() => {
+									addTrigger(trigger);
+								}}>+ {labels[trigger]}</button
+							>
+						{/each}
+						<button type="button" class="add" onclick={addCustomMove}>+ Eigener Auslöser</button>
+					</div>
 				</div>
-			{:else if visibleTriggers.length > 0}
+			{:else if visibleTriggers.length > 0 || visibleCustomMoves.length > 0}
 				<div class="special-moves">
 					<h3>Spezialmanöver</h3>
 					{#each visibleTriggers as trigger (trigger)}
 						{@const move = card.specialMoves[trigger]}
 						<p class="entry">
-							<b>{TRIGGER_LABELS[trigger]}{move.name ? ` = ${move.name}` : ''}</b>{#if move.effect}:
+							<b>{labels[trigger]}{move.name ? ` = ${move.name}` : ''}</b>{#if move.effect}:
+								{move.effect}{/if}
+						</p>
+					{/each}
+					{#each visibleCustomMoves as move (move)}
+						<p class="entry">
+							<b>{move.trigger}{move.name ? ` = ${move.name}` : ''}</b>{#if move.effect}:
 								{move.effect}{/if}
 						</p>
 					{/each}
@@ -729,8 +770,14 @@
 	}
 
 	.special-moves .range {
-		width: 22mm;
+		width: 24mm;
 		justify-content: flex-end;
+	}
+
+	.trigger-input {
+		width: 20mm;
+		font-weight: bold;
+		text-align: right;
 	}
 
 	.notes {

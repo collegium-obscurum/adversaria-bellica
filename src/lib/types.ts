@@ -21,6 +21,11 @@ export interface SpecialMove {
 	effect: string;
 }
 
+export interface CustomMove extends SpecialMove {
+	/** free-text trigger label, printed like the fixed wound triggers */
+	trigger: string;
+}
+
 export interface MonsterCard {
 	id: string;
 	name: string;
@@ -40,6 +45,7 @@ export interface MonsterCard {
 	talents: Record<TalentKey, TalentValue>;
 	actions: ActionEntry[];
 	specialMoves: Record<WoundTrigger, SpecialMove>;
+	customMoves: CustomMove[];
 }
 
 export function createEmptyCard(): MonsterCard {
@@ -76,6 +82,7 @@ export function createEmptyCard(): MonsterCard {
 			hp50: { name: '', effect: '' },
 			hp25: { name: '', effect: '' },
 			death: { name: '', effect: '' }
-		}
+		},
+		customMoves: []
 	};
 }
