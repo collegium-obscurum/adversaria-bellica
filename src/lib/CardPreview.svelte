@@ -624,6 +624,11 @@
 		border-bottom: 0.3mm solid #1a1a1a;
 	}
 
+	.special-moves .range {
+		width: 22mm;
+		justify-content: flex-end;
+	}
+
 	.notes {
 		margin: 0;
 		color: #444;
