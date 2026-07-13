@@ -13,12 +13,15 @@
 	import TalentCalculator from '$lib/components/TalentCalculator.svelte';
 	import { getCard, upsertCard } from '$lib/state/storage.svelte';
 	import { createEmptyCard } from '$lib/domain/types';
+	import { cardZoom } from '$lib/domain/cardZoom';
 
 	const editId = page.url.searchParams.get('id');
 	const existing = editId ? getCard(editId) : undefined;
 
 	let card = $state(existing ? structuredClone($state.snapshot(existing)) : createEmptyCard());
 	let cropperDialog: HTMLDialogElement;
+	let editorWidth = $state(0);
+	const zoom = $derived(cardZoom(editorWidth));
 
 	function save() {
 		if (!card.name.trim()) {
@@ -39,7 +42,7 @@
 	<title>{existing ? 'Karte bearbeiten' : 'Neue Karte'} – Adversaria Bellica</title>
 </svelte:head>
 
-<div class="editor">
+<div class="editor" bind:clientWidth={editorWidth}>
 	<div class="toolbar">
 		<h1>{existing ? 'Karte bearbeiten' : 'Neue Karte'}</h1>
 		<StyleToggle />
@@ -50,7 +53,7 @@
 	</div>
 
 	<div class="workspace">
-		<div class="card-zoom">
+		<div class="card-zoom" style:zoom>
 			<CardPreview
 				bind:card
 				editable
@@ -130,16 +133,6 @@
 		gap: 2rem;
 		align-items: flex-start;
 		flex-wrap: wrap;
-	}
-
-	.card-zoom {
-		zoom: 1.7;
-	}
-
-	@media (max-width: 900px) {
-		.card-zoom {
-			zoom: 1;
-		}
 	}
 
 	.side {
