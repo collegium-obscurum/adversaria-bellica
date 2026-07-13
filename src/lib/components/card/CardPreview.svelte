@@ -78,9 +78,9 @@
 			<SpecialMoves bind:card {editable} />
 
 			{#if editable}
-				{#if showNotes || card.notes.trim() !== ''}
-					<div class="notes-section">
-						<h3>Notizen</h3>
+				<div class="notes-section">
+					<h3>Notizen</h3>
+					{#if showNotes || card.notes.trim() !== ''}
 						<div class="removable">
 							<textarea
 								class="notes-input"
@@ -96,10 +96,10 @@
 								title="Notizen entfernen">✕</button
 							>
 						</div>
-					</div>
-				{:else}
-					<button type="button" class="add" onclick={() => (showNotes = true)}>+ Notizen</button>
-				{/if}
+					{:else}
+						<button type="button" class="add" onclick={() => (showNotes = true)}>+ Notizen</button>
+					{/if}
+				</div>
 			{:else if card.notes}
 				<div class="notes-section">
 					<h3>Notizen</h3>
