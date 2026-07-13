@@ -2,15 +2,59 @@
 	import CardPreview from '$lib/components/card/CardPreview.svelte';
 	import StatLabelToggle from '$lib/components/StatLabelToggle.svelte';
 	import StyleToggle from '$lib/components/StyleToggle.svelte';
+	import {
+		CARD_HEIGHT_MM,
+		CARD_WIDTH_MM,
+		CARDS_PER_PAGE,
+		cardSlotPosition,
+		cardsInSelectionOrder
+	} from '$lib/domain/printLayout';
 	import { prefs } from '$lib/state/preferences.svelte';
 	import { store } from '$lib/state/storage.svelte';
 
 	let selectedIds = $state<string[]>([]);
+	let pdfBusy = $state(false);
 
-	const selectedCards = $derived(store.cards.filter((card) => selectedIds.includes(card.id)));
+	function hideBrokenImage(event: Event) {
+		(event.currentTarget as HTMLImageElement).style.display = 'none';
+	}
+
+	const selectedCards = $derived(cardsInSelectionOrder(store.cards, selectedIds));
+
+	function toggleCard(id: string, checked: boolean) {
+		if (checked) {
+			selectedIds = [...selectedIds, id];
+		} else {
+			selectedIds = selectedIds.filter((existing) => existing !== id);
+		}
+	}
 
 	function selectAll() {
 		selectedIds = store.cards.map((card) => card.id);
+	}
+
+	async function downloadPdf() {
+		pdfBusy = true;
+		try {
+			const nodes = Array.from(document.querySelectorAll<HTMLElement>('.sheet .card'));
+			const { toPng } = await import('html-to-image');
+			const { jsPDF } = await import('jspdf');
+			const pdf = new jsPDF({ unit: 'mm', format: 'a4' });
+			for (let index = 0; index < nodes.length; index++) {
+				if (index > 0 && index % CARDS_PER_PAGE === 0) {
+					pdf.addPage();
+				}
+				const dataUrl = await toPng(nodes[index], { pixelRatio: 300 / 96 });
+				const { x, y } = cardSlotPosition(index);
+				pdf.addImage(dataUrl, 'PNG', x, y, CARD_WIDTH_MM, CARD_HEIGHT_MM, undefined, 'FAST');
+			}
+			pdf.save('adversaria-bellica-karten.pdf');
+		} catch (error) {
+			console.error(error);
+			alert('PDF-Erstellung fehlgeschlagen.');
+		} finally {
+			pdfBusy = false;
+		}
 	}
 </script>
 
@@ -36,9 +80,15 @@
 		<div class="picker">
 			{#each store.cards as card (card.id)}
 				<label class="chip" class:selected={selectedIds.includes(card.id)}>
-					<input type="checkbox" value={card.id} bind:group={selectedIds} />
+					<input
+						type="checkbox"
+						checked={selectedIds.includes(card.id)}
+						onchange={(event) => {
+							toggleCard(card.id, event.currentTarget.checked);
+						}}
+					/>
 					{#if card.image}
-						<img src={card.image} alt="" />
+						<img src={card.image} alt="" onerror={hideBrokenImage} />
 					{:else}
 						<span class="placeholder">{(card.name || '?').slice(0, 1)}</span>
 					{/if}
@@ -49,6 +99,15 @@
 		<div class="buttons">
 			<button type="button" onclick={selectAll}>Alle auswählen</button>
 			<button type="button" onclick={() => (selectedIds = [])}>Auswahl leeren</button>
+			<button
+				type="button"
+				disabled={selectedCards.length === 0 || pdfBusy}
+				onclick={() => {
+					void downloadPdf();
+				}}
+			>
+				{pdfBusy ? 'Erstelle …' : 'PDF herunterladen'}
+			</button>
 			<button
 				type="button"
 				class="print-button"
@@ -64,10 +123,8 @@
 </div>
 
 <div class="sheet">
-	{#each store.cards as card, index (card.id)}
-		{#if selectedIds.includes(card.id)}
-			<CardPreview bind:card={store.cards[index]} />
-		{/if}
+	{#each selectedCards as card (card.id)}
+		<CardPreview {card} />
 	{/each}
 </div>
 
@@ -181,6 +238,10 @@
 		.sheet {
 			width: 210mm;
 			gap: 0;
+		}
+
+		.sheet :global(.card) {
+			break-inside: avoid;
 		}
 	}
 
