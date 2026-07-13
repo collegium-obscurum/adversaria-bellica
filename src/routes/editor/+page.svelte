@@ -12,13 +12,15 @@
 	import StyleToggle from '$lib/components/StyleToggle.svelte';
 	import TalentCalculator from '$lib/components/TalentCalculator.svelte';
 	import { getCard, upsertCard } from '$lib/state/storage.svelte';
-	import { createEmptyCard } from '$lib/domain/types';
 	import { cardZoom } from '$lib/domain/cardZoom';
+	import { resolveEditorCard } from '$lib/domain/editorCard';
 
 	const editId = page.url.searchParams.get('id');
 	const existing = editId ? getCard(editId) : undefined;
+	const resolved = resolveEditorCard(editId, existing ? $state.snapshot(existing) : undefined);
 
-	let card = $state(existing ? structuredClone($state.snapshot(existing)) : createEmptyCard());
+	let card = $state(resolved.card);
+	let cardMissing = $state(resolved.missing);
 	let cropperDialog: HTMLDialogElement;
 	let editorWidth = $state(0);
 	const zoom = $derived(cardZoom(editorWidth));
@@ -43,6 +45,15 @@
 </svelte:head>
 
 <div class="editor" bind:clientWidth={editorWidth}>
+	{#if cardMissing}
+		<div class="notice" role="status">
+			<span>Karte nicht gefunden – neue Karte wird angelegt.</span>
+			<a href={resolve('/')}>Zur Bibliothek</a>
+			<button type="button" aria-label="Hinweis schließen" onclick={() => (cardMissing = false)}
+				>✕</button
+			>
+		</div>
+	{/if}
 	<div class="toolbar">
 		<h1>{existing ? 'Karte bearbeiten' : 'Neue Karte'}</h1>
 		<StyleToggle />
@@ -118,6 +129,31 @@
 		align-items: center;
 		gap: 1rem;
 		flex-wrap: wrap;
+	}
+
+	.notice {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		padding: 0.5rem 0.9rem;
+		background: var(--color-cream);
+		border: 1px solid var(--color-gold);
+		border-radius: var(--radius);
+		color: var(--color-ink-soft);
+	}
+
+	.notice a {
+		color: var(--color-brand);
+		font-weight: bold;
+	}
+
+	.notice button {
+		font: inherit;
+		border: none;
+		background: none;
+		padding: 0;
+		cursor: pointer;
+		color: var(--color-ink-soft);
 	}
 
 	h1 {
