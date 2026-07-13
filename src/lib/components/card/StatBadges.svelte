@@ -1,7 +1,8 @@
 <script lang="ts">
-	import { STAT_BADGES } from '$lib/domain/statBadges';
+	import { STAT_BADGES, badgeLabel } from '$lib/domain/statBadges';
 	import type { StatBadgeInfo, TextStatKey } from '$lib/domain/statBadges';
 	import StatIcon from '$lib/components/StatIcon.svelte';
+	import { prefs } from '$lib/state/preferences.svelte';
 	import type { MonsterCard } from '$lib/domain/types';
 
 	let { card = $bindable(), editable = false }: { card: MonsterCard; editable?: boolean } =
@@ -17,6 +18,10 @@
 		return '5.5pt';
 	}
 
+	function labelFontSize(label: string): string {
+		return label.length > 4 ? '3.8pt' : '5pt';
+	}
+
 	function clampLifePoints() {
 		if (!Number.isFinite(card.lifePoints) || card.lifePoints < 1) card.lifePoints = 1;
 	}
@@ -24,7 +29,13 @@
 
 <aside class="badges">
 	<div class="badge" title="{lifePointsBadge.label} ({lifePointsBadge.abbr})">
-		<span class="badge-icon"><StatIcon name={lifePointsBadge.key} /></span>
+		{#if prefs.statLabelMode === 'icons'}
+			<span class="badge-icon"><StatIcon name={lifePointsBadge.key} /></span>
+		{:else}
+			<span class="badge-label" style:font-size={labelFontSize(badgeLabel(lifePointsBadge))}
+				>{badgeLabel(lifePointsBadge)}</span
+			>
+		{/if}
 		{#if editable}
 			<input
 				type="number"
@@ -42,7 +53,13 @@
 	{#each textBadges as badge (badge.key)}
 		{#if editable || card[badge.key].trim() !== ''}
 			<div class="badge" title="{badge.label} ({badge.abbr})">
-				<span class="badge-icon"><StatIcon name={badge.key} /></span>
+				{#if prefs.statLabelMode === 'icons'}
+					<span class="badge-icon"><StatIcon name={badge.key} /></span>
+				{:else}
+					<span class="badge-label" style:font-size={labelFontSize(badgeLabel(badge))}
+						>{badgeLabel(badge)}</span
+					>
+				{/if}
 				{#if editable}
 					<input
 						type="text"
@@ -97,6 +114,11 @@
 	.badge-icon :global(svg) {
 		width: 100%;
 		height: 100%;
+	}
+
+	.badge-label {
+		line-height: 1;
+		letter-spacing: 0.02em;
 	}
 
 	.badge-value {

@@ -5,7 +5,9 @@
 	import CardPreview from '$lib/components/card/CardPreview.svelte';
 	import ImageCropper from '$lib/components/ImageCropper.svelte';
 	import StatIcon from '$lib/components/StatIcon.svelte';
+	import StatLabelToggle from '$lib/components/StatLabelToggle.svelte';
 	import { STAT_BADGES } from '$lib/domain/statBadges';
+	import { prefs } from '$lib/state/preferences.svelte';
 	import StyleToggle from '$lib/components/StyleToggle.svelte';
 	import TalentCalculator from '$lib/components/TalentCalculator.svelte';
 	import { getCard, upsertCard } from '$lib/state/storage.svelte';
@@ -40,6 +42,7 @@
 	<div class="toolbar">
 		<h1>{existing ? 'Karte bearbeiten' : 'Neue Karte'}</h1>
 		<StyleToggle />
+		<StatLabelToggle />
 		<a class="cancel" href={resolve('/')}>Abbrechen</a>
 		<button type="button" class="save" onclick={save}>Speichern</button>
 	</div>
@@ -61,7 +64,9 @@
 				<ul>
 					{#each STAT_BADGES as badge (badge.key)}
 						<li>
-							<span class="legend-icon"><StatIcon name={badge.key} /></span>
+							{#if prefs.statLabelMode === 'icons'}
+								<span class="legend-icon"><StatIcon name={badge.key} /></span>
+							{/if}
 							<b>{badge.abbr}</b>
 							<span>{badge.label}</span>
 						</li>

@@ -16,6 +16,10 @@ export interface StatBadgeInfo {
 	label: string;
 }
 
+export function badgeLabel(badge: StatBadgeInfo): string {
+	return badge.key === 'actionCount' ? 'Aktionen' : badge.abbr;
+}
+
 export const STAT_BADGES: StatBadgeInfo[] = [
 	{ key: 'lifePoints', abbr: 'LeP', label: 'Lebenspunkte' },
 	{ key: 'armor', abbr: 'RS', label: 'Rüstungsschutz' },

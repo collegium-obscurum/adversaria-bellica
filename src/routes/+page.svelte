@@ -100,10 +100,10 @@
 						</span>
 					</a>
 					<div class="stats">
-						<span title="Lebenspunkte"><StatIcon name="lifePoints" />{card.lifePoints}</span>
-						<span title="Rüstungsschutz"><StatIcon name="armor" />{card.armor}</span>
-						<span title="Initiative"><StatIcon name="initiative" />{card.initiative}</span>
-						<span title="Geschwindigkeit"><StatIcon name="speed" />{card.speed}</span>
+						<span title="Lebenspunkte"><small>LeP</small>{card.lifePoints}</span>
+						<span title="Rüstungsschutz"><small>RS</small>{card.armor}</span>
+						<span title="Initiative"><small>INI</small>{card.initiative}</span>
+						<span title="Geschwindigkeit"><small>GS</small>{card.speed}</span>
 					</div>
 					<div class="buttons">
 						<a href="{resolve('/editor')}?id={card.id}">Bearbeiten</a>
@@ -282,13 +282,13 @@
 
 	.stats span {
 		display: inline-flex;
+		flex-direction: column;
 		align-items: center;
-		gap: 0.3rem;
 	}
 
-	.stats :global(svg) {
-		width: 0.95rem;
-		height: 0.95rem;
+	.stats small {
+		font-size: 0.7rem;
+		color: #a5813c;
 	}
 
 	.buttons {

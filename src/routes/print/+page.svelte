@@ -1,5 +1,6 @@
 <script lang="ts">
 	import CardPreview from '$lib/components/card/CardPreview.svelte';
+	import StatLabelToggle from '$lib/components/StatLabelToggle.svelte';
 	import StyleToggle from '$lib/components/StyleToggle.svelte';
 	import { prefs } from '$lib/state/preferences.svelte';
 	import { store } from '$lib/state/storage.svelte';
@@ -25,6 +26,7 @@
 	{:else}
 		<div class="style-row">
 			<StyleToggle />
+			<StatLabelToggle />
 			{#if prefs.cardStyle === 'ornate'}
 				<span class="hint"
 					>Der aventurische Stil druckt vollflächig Farbe und braucht viel Tinte.</span
