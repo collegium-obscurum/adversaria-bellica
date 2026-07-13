@@ -8,8 +8,10 @@
 		setRangeEnd,
 		setRangeStart
 	} from './actions';
+	import { categoryOptions } from './creatureTypes';
 	import { prefs } from './preferences.svelte';
 	import { STAT_BADGES } from './statBadges';
+	import { store } from './storage.svelte';
 	import StatIcon from './StatIcon.svelte';
 	import type { MonsterCard, WoundTrigger } from './types';
 	import { WOUND_TRIGGERS } from './types';
@@ -44,6 +46,19 @@
 		knowledge: 'Wissen',
 		craft: 'Handwerk'
 	} as const;
+
+	const CUSTOM_TYPE = '__custom__';
+	let customCategory = $state(false);
+	const typeOptions = $derived(categoryOptions(store.cards, card.category));
+
+	function onCategoryChange(event: Event & { currentTarget: HTMLSelectElement }) {
+		const value = event.currentTarget.value;
+		if (value === CUSTOM_TYPE) {
+			customCategory = true;
+		} else {
+			card.category = value;
+		}
+	}
 
 	let showFlavor = $state(false);
 	let showNotes = $state(false);
@@ -112,11 +127,28 @@
 		<div class="title">
 			{#if editable}
 				<input class="name-input" bind:value={card.name} placeholder="Name" required />
-				<input
-					class="category-input"
-					bind:value={card.category}
-					placeholder="Typ (z.B. Tier, Dämon)"
-				/>
+				{#if customCategory}
+					<input
+						class="category-input"
+						bind:value={card.category}
+						placeholder="Eigener Typ"
+						onblur={() => (customCategory = false)}
+						onkeydown={(event) => {
+							if (event.key === 'Enter') event.currentTarget.blur();
+						}}
+						{@attach (node: HTMLInputElement) => {
+							node.focus();
+						}}
+					/>
+				{:else}
+					<select class="category-input" value={card.category} onchange={onCategoryChange}>
+						<option value="">– kein Typ –</option>
+						{#each typeOptions as type (type)}
+							<option value={type}>{type}</option>
+						{/each}
+						<option value={CUSTOM_TYPE}>Eigener Typ…</option>
+					</select>
+				{/if}
 			{:else}
 				<h2>{card.name || 'Unbenannt'}</h2>
 				{#if card.category}<span class="category">{card.category}</span>{/if}
@@ -714,6 +746,7 @@
 
 	/* edit controls */
 	.editable input,
+	.editable select,
 	.editable textarea {
 		font: inherit;
 		border: 0.2mm solid transparent;
@@ -723,11 +756,13 @@
 	}
 
 	.editable input:hover,
+	.editable select:hover,
 	.editable textarea:hover {
 		border-color: #c9c1b2;
 	}
 
 	.editable input:focus,
+	.editable select:focus,
 	.editable textarea:focus {
 		border-color: #8a7d5c;
 		outline: none;
@@ -743,6 +778,7 @@
 	}
 
 	.ornate.editable input:focus,
+	.ornate.editable select:focus,
 	.ornate.editable textarea:focus {
 		background: #fffbf0;
 	}
