@@ -12,17 +12,26 @@
 
 	let search = $state('');
 	let categoryFilter = $state('');
+	let sortAlpha = $state(false);
 
 	const categories = $derived(
 		[...new Set(store.cards.map((card) => card.category).filter(Boolean))].sort()
 	);
 
-	const filtered = $derived(
-		store.cards.filter((card) => {
+	const filtered = $derived.by(() => {
+		const matching = store.cards.filter((card) => {
 			if (categoryFilter && card.category !== categoryFilter) return false;
 			return card.name.toLowerCase().includes(search.toLowerCase());
-		})
-	);
+		});
+		if (sortAlpha) {
+			matching.sort((a, b) => a.name.localeCompare(b.name, 'de'));
+		}
+		return matching;
+	});
+
+	function hideBrokenImage(event: Event) {
+		(event.currentTarget as HTMLImageElement).style.display = 'none';
+	}
 
 	function onDelete(card: MonsterCard) {
 		if (confirm(`Karte „${card.name}" wirklich löschen?`)) {
@@ -75,6 +84,14 @@
 				<option value={category}>{category}</option>
 			{/each}
 		</select>
+		<button
+			type="button"
+			class="sort"
+			class:active={sortAlpha}
+			aria-pressed={sortAlpha}
+			title="Alphabetisch sortieren"
+			onclick={() => (sortAlpha = !sortAlpha)}>A–Z</button
+		>
 		<button type="button" onclick={onExport}>Export (JSON)</button>
 		<label class="import">
 			Import (JSON)
@@ -90,7 +107,7 @@
 				<li>
 					<a class="tile-head" href="{resolve('/editor')}?id={card.id}">
 						{#if card.image}
-							<img src={card.image} alt="" />
+							<img src={card.image} alt="" onerror={hideBrokenImage} />
 						{:else}
 							<span class="placeholder">{(card.name || '?').slice(0, 1)}</span>
 						{/if}
@@ -164,6 +181,11 @@
 
 	.import:hover {
 		border-color: var(--color-gold);
+	}
+
+	.sort.active {
+		border-color: var(--color-brand);
+		box-shadow: 0 0 0 1px var(--color-brand);
 	}
 
 	.import input {
