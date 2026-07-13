@@ -8,6 +8,7 @@
 		setRangeEnd,
 		setRangeStart
 	} from './actions';
+	import { prefs } from './preferences.svelte';
 	import StatIcon from './StatIcon.svelte';
 	import type { StatIconName } from './StatIcon.svelte';
 	import type { MonsterCard, WoundTrigger } from './types';
@@ -26,6 +27,7 @@
 
 	const thresholds = $derived(woundThresholds(card.lifePoints));
 	const ranges = $derived(actionRanges(card.actions));
+	const ornate = $derived(prefs.cardStyle === 'ornate');
 
 	const TRIGGER_LABELS: Record<WoundTrigger, string> = {
 		combatStart: 'Kampfbeginn',
@@ -108,7 +110,16 @@
 	}
 </script>
 
-<article class="card" class:editable>
+<article class="card" class:editable class:ornate>
+	{#if ornate}
+		{#each ['tl', 'tr', 'bl', 'br'] as position (position)}
+			<svg class="corner {position}" viewBox="0 0 20 20" aria-hidden="true">
+				<path d="M1.2 19 V6.5 Q1.2 1.2 6.5 1.2 H19" />
+				<path d="M4.4 19 V8.5 Q4.4 4.4 8.5 4.4 H19" />
+				<path class="gem" d="M8 7.9 l2 2 -2 2 -2 -2 Z" />
+			</svg>
+		{/each}
+	{/if}
 	<header>
 		{#if editable}
 			<button type="button" class="portrait" onclick={onPortraitClick} title="Bild wählen">
@@ -365,6 +376,10 @@
 
 <style>
 	.card {
+		--line: #1a1a1a;
+		--accent: #1a1a1a;
+		--muted: #444;
+		position: relative;
 		width: 105mm;
 		height: 148mm;
 		box-sizing: border-box;
@@ -372,8 +387,9 @@
 		display: flex;
 		flex-direction: column;
 		gap: 2mm;
+		color: #1a1a1a;
 		background: #fff;
-		border: 0.4mm solid #1a1a1a;
+		border: 0.4mm solid var(--line);
 		border-radius: 2mm;
 		font-size: 8.5pt;
 		line-height: 1.3;
@@ -386,6 +402,58 @@
 		min-height: 148mm;
 	}
 
+	.card.ornate {
+		--line: #8a6b3f;
+		--accent: #7a1e12;
+		--muted: #5c4a30;
+		color: #2a211a;
+		background: radial-gradient(ellipse at 30% 15%, #f7efdc 0%, #efe2c2 55%, #e2cfa4 100%);
+		border: 0.6mm solid #7a1e12;
+		box-shadow:
+			inset 0 0 0 0.5mm #f2e8d0,
+			inset 0 0 0 0.8mm #a5813c;
+		print-color-adjust: exact;
+		-webkit-print-color-adjust: exact;
+	}
+
+	.corner {
+		position: absolute;
+		width: 6.5mm;
+		height: 6.5mm;
+		fill: none;
+		stroke: #7a1e12;
+		stroke-width: 1.3;
+		pointer-events: none;
+	}
+
+	.corner .gem {
+		fill: #a5813c;
+		stroke: none;
+	}
+
+	.corner.tl {
+		top: 1.4mm;
+		left: 1.4mm;
+	}
+
+	.corner.tr {
+		top: 1.4mm;
+		right: 1.4mm;
+		transform: scaleX(-1);
+	}
+
+	.corner.bl {
+		bottom: 1.4mm;
+		left: 1.4mm;
+		transform: scaleY(-1);
+	}
+
+	.corner.br {
+		bottom: 1.4mm;
+		right: 1.4mm;
+		transform: scale(-1);
+	}
+
 	header {
 		display: flex;
 		align-items: center;
@@ -396,9 +464,14 @@
 		width: 22mm;
 		height: 22mm;
 		border-radius: 50%;
-		border: 0.4mm solid #1a1a1a;
+		border: 0.4mm solid var(--line);
 		object-fit: cover;
 		flex-shrink: 0;
+	}
+
+	.ornate .portrait {
+		border-color: #7a1e12;
+		box-shadow: 0 0 0 0.35mm #a5813c;
 	}
 
 	button.portrait {
@@ -427,20 +500,25 @@
 		display: flex;
 		flex-direction: column;
 		gap: 0.5mm;
-		border-bottom: 0.5mm double #1a1a1a;
+		border-bottom: 0.5mm double var(--line);
 		padding-bottom: 1mm;
+	}
+
+	.ornate .title {
+		border-bottom-color: #a5813c;
 	}
 
 	h2 {
 		margin: 0;
-		font-family: Georgia, 'Times New Roman', serif;
+		font-family: 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
 		font-size: 13pt;
+		color: var(--accent);
 	}
 
 	.category {
 		font-variant: small-caps;
 		letter-spacing: 0.05em;
-		color: #444;
+		color: var(--muted);
 	}
 
 	.columns {
@@ -468,13 +546,21 @@
 	.badge {
 		width: 10mm;
 		height: 10mm;
-		border: 0.4mm solid #1a1a1a;
+		border: 0.4mm solid var(--line);
 		border-radius: 50%;
 		display: flex;
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
 		background: #fff;
+	}
+
+	.ornate .badge {
+		--icon-cut: #7a1e12;
+		background: radial-gradient(circle at 35% 30%, #a33a2a 0%, #7a1e12 60%, #57120a 100%);
+		border-color: #4a0e07;
+		color: #f2e8d0;
+		box-shadow: 0 0 0 0.3mm #a5813c;
 	}
 
 	.badge-icon {
@@ -500,6 +586,7 @@
 		border: none;
 		background: transparent;
 		text-align: center;
+		color: inherit;
 		font: inherit;
 		font-weight: bold;
 		font-size: 9pt;
@@ -517,7 +604,7 @@
 	.flavor {
 		margin: 0;
 		font-style: italic;
-		color: #444;
+		color: var(--muted);
 	}
 
 	.actions {
@@ -574,7 +661,7 @@
 
 	.wounds {
 		padding: 1.5mm 2mm;
-		border: 0.3mm solid #1a1a1a;
+		border: 0.3mm solid var(--line);
 		border-radius: 1mm;
 	}
 
@@ -583,8 +670,14 @@
 		flex-wrap: wrap;
 		gap: 0.5mm 2mm;
 		padding: 1mm 1.5mm;
-		border: 0.3mm solid #1a1a1a;
+		border: 0.3mm solid var(--line);
 		border-radius: 1mm;
+	}
+
+	.ornate .wounds,
+	.ornate .talents {
+		background: rgb(255 250 232 / 55%);
+		border-color: #b99b5f;
 	}
 
 	.talent {
@@ -618,10 +711,12 @@
 
 	.special-moves h3 {
 		margin: 0;
+		font-family: 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
 		font-size: 8.5pt;
 		font-variant: small-caps;
 		letter-spacing: 0.05em;
-		border-bottom: 0.3mm solid #1a1a1a;
+		color: var(--accent);
+		border-bottom: 0.3mm solid var(--line);
 	}
 
 	.special-moves .range {
@@ -631,12 +726,12 @@
 
 	.notes {
 		margin: 0;
-		color: #444;
+		color: var(--muted);
 		font-size: 7.5pt;
 	}
 
 	.notes-input {
-		color: #444;
+		color: var(--muted);
 		font-size: 7.5pt;
 	}
 
@@ -671,9 +766,10 @@
 	}
 
 	.name-input {
-		font-family: Georgia, 'Times New Roman', serif;
+		font-family: 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
 		font-size: 13pt;
 		font-weight: bold;
+		color: var(--accent);
 		width: 100%;
 		box-sizing: border-box;
 	}
@@ -681,14 +777,14 @@
 	.category-input {
 		font-variant: small-caps;
 		letter-spacing: 0.05em;
-		color: #444;
+		color: var(--muted);
 		width: 100%;
 		box-sizing: border-box;
 	}
 
 	.flavor-input {
 		font-style: italic;
-		color: #444;
+		color: var(--muted);
 	}
 
 	.removable {

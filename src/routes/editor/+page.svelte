@@ -4,6 +4,7 @@
 	import { page } from '$app/state';
 	import CardPreview from '$lib/CardPreview.svelte';
 	import ImageCropper from '$lib/ImageCropper.svelte';
+	import StyleToggle from '$lib/StyleToggle.svelte';
 	import { getCard, upsertCard } from '$lib/storage.svelte';
 	import { createEmptyCard } from '$lib/types';
 
@@ -35,7 +36,8 @@
 <div class="editor">
 	<div class="toolbar">
 		<h1>{existing ? 'Karte bearbeiten' : 'Neue Karte'}</h1>
-		<a href={resolve('/')}>Abbrechen</a>
+		<StyleToggle />
+		<a class="cancel" href={resolve('/')}>Abbrechen</a>
 		<button type="button" class="save" onclick={save}>Speichern</button>
 	</div>
 
@@ -82,25 +84,40 @@
 		display: flex;
 		align-items: center;
 		gap: 1rem;
+		flex-wrap: wrap;
 	}
 
 	h1 {
 		margin: 0;
 	}
 
+	.cancel {
+		color: #5c4a30;
+	}
+
 	.card-zoom {
 		zoom: 1.7;
+	}
+
+	@media (max-width: 900px) {
+		.card-zoom {
+			zoom: 1;
+		}
 	}
 
 	.save {
 		padding: 0.5rem 1.5rem;
 		font: inherit;
 		font-weight: bold;
-		background: #2b2620;
-		color: #f5f3ee;
+		background: #7a1e12;
+		color: #f2e8d0;
 		border: none;
-		border-radius: 4px;
+		border-radius: 6px;
 		cursor: pointer;
+	}
+
+	.save:hover {
+		background: #8e2717;
 	}
 
 	dialog {

@@ -1,5 +1,7 @@
 <script lang="ts">
 	import CardPreview from '$lib/CardPreview.svelte';
+	import StyleToggle from '$lib/StyleToggle.svelte';
+	import { prefs } from '$lib/preferences.svelte';
 	import { store } from '$lib/storage.svelte';
 
 	let selectedIds = $state<string[]>([]);
@@ -21,10 +23,23 @@
 	{#if store.cards.length === 0}
 		<p>Keine Karten vorhanden.</p>
 	{:else}
+		<div class="style-row">
+			<StyleToggle />
+			{#if prefs.cardStyle === 'ornate'}
+				<span class="hint"
+					>Der aventurische Stil druckt vollflächig Farbe und braucht viel Tinte.</span
+				>
+			{/if}
+		</div>
 		<div class="picker">
 			{#each store.cards as card (card.id)}
-				<label>
+				<label class="chip" class:selected={selectedIds.includes(card.id)}>
 					<input type="checkbox" value={card.id} bind:group={selectedIds} />
+					{#if card.image}
+						<img src={card.image} alt="" />
+					{:else}
+						<span class="placeholder">{(card.name || '?').slice(0, 1)}</span>
+					{/if}
 					{card.name}
 				</label>
 			{/each}
@@ -53,11 +68,68 @@
 </div>
 
 <style>
+	.style-row {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		flex-wrap: wrap;
+		margin-bottom: 1rem;
+	}
+
+	.hint {
+		color: #7a1e12;
+		font-size: 0.85rem;
+	}
+
 	.picker {
 		display: flex;
-		flex-direction: column;
-		gap: 0.25rem;
+		flex-wrap: wrap;
+		gap: 0.5rem;
 		margin-bottom: 1rem;
+	}
+
+	.chip {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.3rem 0.8rem 0.3rem 0.3rem;
+		border: 1px solid #ddd4c2;
+		border-radius: 999px;
+		background: #fff;
+		cursor: pointer;
+	}
+
+	.chip.selected {
+		border-color: #7a1e12;
+		box-shadow: 0 0 0 1px #7a1e12;
+	}
+
+	.chip input {
+		position: absolute;
+		opacity: 0;
+		pointer-events: none;
+	}
+
+	.chip:has(input:focus-visible) {
+		outline: 2px solid #7a1e12;
+		outline-offset: 2px;
+	}
+
+	.chip img,
+	.placeholder {
+		width: 28px;
+		height: 28px;
+		border-radius: 50%;
+		object-fit: cover;
+	}
+
+	.placeholder {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background: #ece4d2;
+		color: #a5813c;
+		font-family: 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
 	}
 
 	.buttons {
@@ -70,16 +142,24 @@
 		font: inherit;
 		padding: 0.4rem 0.8rem;
 		border: 1px solid #c9c1b2;
-		border-radius: 4px;
+		border-radius: 6px;
 		background: #fff;
 		cursor: pointer;
 	}
 
+	button:hover {
+		border-color: #a5813c;
+	}
+
 	.print-button {
 		font-weight: bold;
-		background: #2b2620;
-		color: #f5f3ee;
+		background: #7a1e12;
+		color: #f2e8d0;
 		border: none;
+	}
+
+	.print-button:hover {
+		background: #8e2717;
 	}
 
 	.print-button:disabled {

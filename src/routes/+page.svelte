@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
+	import StatIcon from '$lib/StatIcon.svelte';
 	import { deleteCard, duplicateCard, exportJson, importJson, store } from '$lib/storage.svelte';
 	import type { MonsterCard } from '$lib/types';
 
@@ -53,55 +54,66 @@
 
 <h1>Bibliothek</h1>
 
-<div class="toolbar">
-	<input type="search" placeholder="Suche nach Name…" bind:value={search} />
-	<select bind:value={categoryFilter}>
-		<option value="">Alle Typen</option>
-		{#each categories as category (category)}
-			<option value={category}>{category}</option>
-		{/each}
-	</select>
-	<button type="button" onclick={onExport} disabled={store.cards.length === 0}>Export (JSON)</button
-	>
-	<label class="import">
-		Import (JSON)
-		<input type="file" accept="application/json,.json" onchange={onImport} />
-	</label>
-</div>
-
 {#if store.cards.length === 0}
-	<p>Noch keine Karten. <a href={resolve('/editor')}>Lege die erste an.</a></p>
-{:else if filtered.length === 0}
-	<p>Keine Karte passt zu Suche/Filter.</p>
+	<div class="empty">
+		<span class="empty-sigil"><StatIcon name="actionCount" /></span>
+		<p>Noch keine Gegner in der Bibliothek.</p>
+		<a class="primary" href={resolve('/editor')}>Erste Karte anlegen</a>
+	</div>
 {:else}
-	<ul class="cards">
-		{#each filtered as card (card.id)}
-			<li>
-				{#if card.image}
-					<img src={card.image} alt="" />
-				{:else}
-					<span class="placeholder"></span>
-				{/if}
-				<div class="info">
-					<strong>{card.name}</strong>
-					<small>
-						{card.category || 'ohne Typ'} · LeP {card.lifePoints} · RS {card.armor} · INI {card.initiative}
-					</small>
-				</div>
-				<div class="buttons">
-					<a href="{resolve('/editor')}?id={card.id}">Bearbeiten</a>
-					<button type="button" onclick={() => duplicateCard(card.id)}>Duplizieren</button>
-					<button
-						type="button"
-						class="danger"
-						onclick={() => {
-							onDelete(card);
-						}}>Löschen</button
-					>
-				</div>
-			</li>
-		{/each}
-	</ul>
+	<div class="toolbar">
+		<input type="search" placeholder="Suche nach Name…" bind:value={search} />
+		<select bind:value={categoryFilter}>
+			<option value="">Alle Typen</option>
+			{#each categories as category (category)}
+				<option value={category}>{category}</option>
+			{/each}
+		</select>
+		<button type="button" onclick={onExport}>Export (JSON)</button>
+		<label class="import">
+			Import (JSON)
+			<input type="file" accept="application/json,.json" onchange={onImport} />
+		</label>
+	</div>
+
+	{#if filtered.length === 0}
+		<p>Keine Karte passt zu Suche/Filter.</p>
+	{:else}
+		<ul class="cards">
+			{#each filtered as card (card.id)}
+				<li>
+					<a class="tile-head" href="{resolve('/editor')}?id={card.id}">
+						{#if card.image}
+							<img src={card.image} alt="" />
+						{:else}
+							<span class="placeholder">{(card.name || '?').slice(0, 1)}</span>
+						{/if}
+						<span class="naming">
+							<strong>{card.name}</strong>
+							<small>{card.category || 'ohne Typ'}</small>
+						</span>
+					</a>
+					<div class="stats">
+						<span title="Lebenspunkte"><StatIcon name="lifePoints" />{card.lifePoints}</span>
+						<span title="Rüstungsschutz"><StatIcon name="armor" />{card.armor}</span>
+						<span title="Initiative"><StatIcon name="initiative" />{card.initiative}</span>
+						<span title="Geschwindigkeit"><StatIcon name="speed" />{card.speed}</span>
+					</div>
+					<div class="buttons">
+						<a href="{resolve('/editor')}?id={card.id}">Bearbeiten</a>
+						<button type="button" onclick={() => duplicateCard(card.id)}>Duplizieren</button>
+						<button
+							type="button"
+							class="danger"
+							onclick={() => {
+								onDelete(card);
+							}}>Löschen</button
+						>
+					</div>
+				</li>
+			{/each}
+		</ul>
+	{/if}
 {/if}
 
 <style>
@@ -124,7 +136,7 @@
 		font: inherit;
 		padding: 0.4rem 0.6rem;
 		border: 1px solid #c9c1b2;
-		border-radius: 4px;
+		border-radius: 6px;
 		background: #fff;
 	}
 
@@ -132,66 +144,183 @@
 		cursor: pointer;
 	}
 
+	button:hover {
+		border-color: #a5813c;
+	}
+
 	.import {
 		border: 1px solid #c9c1b2;
-		border-radius: 4px;
+		border-radius: 6px;
 		background: #fff;
 		padding: 0.4rem 0.6rem;
 		cursor: pointer;
+	}
+
+	.import:hover {
+		border-color: #a5813c;
 	}
 
 	.import input {
 		display: none;
 	}
 
+	.empty {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.75rem;
+		padding: 4rem 1rem;
+		color: #5c4a30;
+	}
+
+	.empty-sigil {
+		width: 3.5rem;
+		height: 3.5rem;
+		color: #a5813c;
+		--icon-cut: #f4efe4;
+		line-height: 0;
+	}
+
+	.empty-sigil :global(svg) {
+		width: 100%;
+		height: 100%;
+	}
+
+	.empty p {
+		margin: 0;
+	}
+
+	.primary {
+		background: #7a1e12;
+		color: #f2e8d0;
+		text-decoration: none;
+		padding: 0.5rem 1.25rem;
+		border-radius: 6px;
+		font-weight: bold;
+	}
+
 	.cards {
 		list-style: none;
 		margin: 0;
 		padding: 0;
-		display: flex;
-		flex-direction: column;
-		gap: 0.5rem;
-	}
-
-	.cards img,
-	.placeholder {
-		width: 48px;
-		height: 48px;
-		border-radius: 50%;
-		flex-shrink: 0;
-	}
-
-	.placeholder {
-		background: #e5dfd2;
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+		gap: 0.75rem;
 	}
 
 	.cards li {
 		display: flex;
-		align-items: center;
-		gap: 1rem;
-		padding: 0.6rem 1rem;
+		flex-direction: column;
+		gap: 0.6rem;
+		padding: 0.9rem 1rem;
 		background: #fff;
-		border: 1px solid #c9c1b2;
-		border-radius: 4px;
+		border: 1px solid #ddd4c2;
+		border-radius: 8px;
 	}
 
-	.info {
-		flex: 1;
+	.tile-head {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		text-decoration: none;
+		color: inherit;
+	}
+
+	.tile-head img,
+	.placeholder {
+		width: 52px;
+		height: 52px;
+		border-radius: 50%;
+		flex-shrink: 0;
+		object-fit: cover;
+		border: 2px solid #e3d8c2;
+	}
+
+	.placeholder {
+		box-sizing: border-box;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background: #ece4d2;
+		color: #a5813c;
+		font-family: 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
+		font-size: 1.5rem;
+	}
+
+	.naming {
 		display: flex;
 		flex-direction: column;
+		min-width: 0;
 	}
 
-	.info small {
-		color: #666;
+	.naming strong {
+		font-family: 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
+		font-size: 1.05rem;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.naming small {
+		color: #5c4a30;
+		font-variant: small-caps;
+		letter-spacing: 0.04em;
+	}
+
+	.stats {
+		display: flex;
+		gap: 1rem;
+		color: #5c4a30;
+		font-size: 0.9rem;
+	}
+
+	.stats span {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.3rem;
+	}
+
+	.stats :global(svg) {
+		width: 0.95rem;
+		height: 0.95rem;
 	}
 
 	.buttons {
 		display: flex;
 		gap: 0.5rem;
 		align-items: center;
+		border-top: 1px solid #eee6d6;
+		padding-top: 0.6rem;
+		font-size: 0.9rem;
+	}
+
+	.buttons a {
+		color: #7a1e12;
+		font-weight: bold;
+		text-decoration: none;
+	}
+
+	.buttons a:hover {
+		text-decoration: underline;
+	}
+
+	.buttons button {
+		border: none;
+		background: none;
+		padding: 0;
+		color: #5c4a30;
+		font-size: 0.9rem;
+	}
+
+	.buttons button:hover {
+		text-decoration: underline;
 	}
 
 	.danger {
+		margin-left: auto;
+	}
+
+	.buttons .danger {
 		color: #a3231d;
 	}
 </style>
