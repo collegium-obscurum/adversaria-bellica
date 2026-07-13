@@ -48,11 +48,11 @@ describe('actionRanges', () => {
 		]);
 	});
 
-	it('partitions the default card actions into 1 / 2–8 / 9–15 / 16–19 / 20', () => {
+	it('partitions the default card actions into 1 / 2–6 / 7–15 / 16–19 / 20', () => {
 		expect(actionRanges(createEmptyCard().actions)).toEqual([
 			{ from: 1, to: 1 },
-			{ from: 2, to: 8 },
-			{ from: 9, to: 15 },
+			{ from: 2, to: 6 },
+			{ from: 7, to: 15 },
 			{ from: 16, to: 19 },
 			{ from: 20, to: 20 }
 		]);

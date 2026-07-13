@@ -73,8 +73,8 @@ export function createEmptyCard(): MonsterCard {
 		},
 		actions: [
 			{ span: 1, name: 'Kritischer Treffer', effect: '2W6+4 TP' },
-			{ span: 7, name: 'Angriff', effect: '1W6+2 TP' },
-			{ span: 7, name: 'Schwerer Angriff', effect: '1W6+4 TP' },
+			{ span: 5, name: 'Schwerer Angriff', effect: '1W6+4 TP' },
+			{ span: 9, name: 'Angriff', effect: '1W6+2 TP' },
 			{ span: 4, name: 'Fehlschlag', effect: 'Der Angriff geht daneben.' },
 			{
 				span: 1,
