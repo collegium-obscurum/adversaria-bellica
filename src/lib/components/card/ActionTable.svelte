@@ -64,8 +64,8 @@
 					ondragend={() => (dragIndex = null)}>⠿</span
 				>
 				<span class="range">
-					{#if index === 0}<span class="bound">1</span>{:else}<input
-							class="bound"
+					{#if index === 0}<span class="bound start">1</span>{:else}<input
+							class="bound start"
 							type="number"
 							min={ranges[index - 1].from + 1}
 							max={ranges[index].to}
@@ -74,9 +74,10 @@
 								setRangeStart(card.actions, index, Number(event.currentTarget.value));
 							}}
 							title="Bereichsanfang"
-						/>{/if}–{#if index === card.actions.length - 1}<span class="bound">{D20_FACES}+</span
+						/>{/if}&nbsp;–&nbsp;{#if index === card.actions.length - 1}<span class="bound end"
+							>{D20_FACES}+</span
 						>{:else}<input
-							class="bound"
+							class="bound end"
 							type="number"
 							min={ranges[index].from}
 							max={D20_FACES - (card.actions.length - 1 - index)}
@@ -140,15 +141,19 @@
 	}
 
 	.range .bound {
+		width: 6mm;
 		box-sizing: border-box;
 		padding: 0;
-		text-align: center;
 		font-weight: bold;
 		display: inline-block;
 	}
 
-	.range input.bound {
-		width: 5mm;
+	.range .start {
+		text-align: right;
+	}
+
+	.range .end {
+		text-align: left;
 	}
 
 	.note {
