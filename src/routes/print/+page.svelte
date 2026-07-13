@@ -81,7 +81,7 @@
 	}
 
 	.hint {
-		color: #7a1e12;
+		color: var(--color-brand);
 		font-size: 0.85rem;
 	}
 
@@ -97,15 +97,15 @@
 		align-items: center;
 		gap: 0.5rem;
 		padding: 0.3rem 0.8rem 0.3rem 0.3rem;
-		border: 1px solid #ddd4c2;
+		border: 1px solid var(--color-border-soft);
 		border-radius: 999px;
-		background: #fff;
+		background: var(--color-surface);
 		cursor: pointer;
 	}
 
 	.chip.selected {
-		border-color: #7a1e12;
-		box-shadow: 0 0 0 1px #7a1e12;
+		border-color: var(--color-brand);
+		box-shadow: 0 0 0 1px var(--color-brand);
 	}
 
 	.chip input {
@@ -115,7 +115,7 @@
 	}
 
 	.chip:has(input:focus-visible) {
-		outline: 2px solid #7a1e12;
+		outline: 2px solid var(--color-brand);
 		outline-offset: 2px;
 	}
 
@@ -132,8 +132,8 @@
 		align-items: center;
 		justify-content: center;
 		background: #ece4d2;
-		color: #a5813c;
-		font-family: 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
+		color: var(--color-gold);
+		font-family: var(--font-serif);
 	}
 
 	.buttons {
@@ -145,25 +145,25 @@
 	button {
 		font: inherit;
 		padding: 0.4rem 0.8rem;
-		border: 1px solid #c9c1b2;
-		border-radius: 6px;
-		background: #fff;
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius);
+		background: var(--color-surface);
 		cursor: pointer;
 	}
 
 	button:hover {
-		border-color: #a5813c;
+		border-color: var(--color-gold);
 	}
 
 	.print-button {
 		font-weight: bold;
-		background: #7a1e12;
-		color: #f2e8d0;
+		background: var(--color-brand);
+		color: var(--color-cream);
 		border: none;
 	}
 
 	.print-button:hover {
-		background: #8e2717;
+		background: var(--color-brand-hover);
 	}
 
 	.print-button:disabled {

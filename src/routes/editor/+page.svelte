@@ -122,7 +122,7 @@
 	}
 
 	.cancel {
-		color: #5c4a30;
+		color: var(--color-ink-soft);
 	}
 
 	.workspace {
@@ -153,19 +153,19 @@
 
 	.legend,
 	.calc-box {
-		background: #fff;
-		border: 1px solid #ddd4c2;
-		border-radius: 8px;
+		background: var(--color-surface);
+		border: 1px solid var(--color-border-soft);
+		border-radius: var(--radius-lg);
 		padding: 0.9rem 1.1rem;
 	}
 
 	.legend h2 {
 		margin: 0 0 0.5rem;
-		font-family: 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
+		font-family: var(--font-serif);
 		font-size: 1rem;
 		font-variant: small-caps;
 		letter-spacing: 0.05em;
-		color: #7a1e12;
+		color: var(--color-brand);
 	}
 
 	.legend ul {
@@ -191,7 +191,7 @@
 	.legend-icon {
 		width: 1.1rem;
 		height: 1.1rem;
-		color: #7a1e12;
+		color: var(--color-brand);
 		line-height: 0;
 	}
 
@@ -204,15 +204,15 @@
 		padding: 0.5rem 1.5rem;
 		font: inherit;
 		font-weight: bold;
-		background: #7a1e12;
-		color: #f2e8d0;
+		background: var(--color-brand);
+		color: var(--color-cream);
 		border: none;
-		border-radius: 6px;
+		border-radius: var(--radius);
 		cursor: pointer;
 	}
 
 	.save:hover {
-		background: #8e2717;
+		background: var(--color-brand-hover);
 	}
 
 	dialog {

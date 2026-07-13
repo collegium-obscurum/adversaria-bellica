@@ -144,14 +144,14 @@
 
 	.card.ornate {
 		--line: #8a6b3f;
-		--accent: #7a1e12;
-		--muted: #5c4a30;
-		color: #2a211a;
+		--accent: var(--color-brand);
+		--muted: var(--color-ink-soft);
+		color: var(--color-ink);
 		background: radial-gradient(ellipse at 30% 15%, #f7efdc 0%, #efe2c2 55%, #e2cfa4 100%);
-		border: 0.6mm solid #7a1e12;
+		border: 0.6mm solid var(--color-brand);
 		box-shadow:
-			inset 0 0 0 0.5mm #f2e8d0,
-			inset 0 0 0 0.8mm #a5813c;
+			inset 0 0 0 0.5mm var(--color-cream),
+			inset 0 0 0 0.8mm var(--color-gold);
 		print-color-adjust: exact;
 		-webkit-print-color-adjust: exact;
 	}
@@ -161,13 +161,13 @@
 		width: 6.5mm;
 		height: 6.5mm;
 		fill: none;
-		stroke: #7a1e12;
+		stroke: var(--color-brand);
 		stroke-width: 1.3;
 		pointer-events: none;
 	}
 
 	.corner .gem {
-		fill: #a5813c;
+		fill: var(--color-gold);
 		stroke: none;
 	}
 
@@ -223,7 +223,7 @@
 
 	.card.ornate .wounds {
 		background: rgb(255 250 232 / 55%);
-		border-color: #b99b5f;
+		border-color: var(--color-gold-soft);
 	}
 
 	.notes-section {
@@ -257,7 +257,7 @@
 	/* shared card styles: used by the section subcomponents too, hence :global */
 	.card :global(h3) {
 		margin: 0;
-		font-family: 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
+		font-family: var(--font-serif);
 		font-size: 8.5pt;
 		font-variant: small-caps;
 		letter-spacing: 0.05em;
@@ -296,10 +296,10 @@
 	.card :global(.add) {
 		font: inherit;
 		font-size: 7pt;
-		border: 0.2mm solid #c9c1b2;
+		border: 0.2mm solid var(--color-border);
 		border-radius: 0.8mm;
 		background: #f7f5ef;
-		color: #6b6353;
+		color: var(--color-muted);
 		cursor: pointer;
 		padding: 0.2mm 1mm;
 	}
@@ -332,13 +332,13 @@
 	.card.editable :global(input:hover),
 	.card.editable :global(select:hover),
 	.card.editable :global(textarea:hover) {
-		border-color: #c9c1b2;
+		border-color: var(--color-border);
 	}
 
 	.card.editable :global(input:focus),
 	.card.editable :global(select:focus),
 	.card.editable :global(textarea:focus) {
-		border-color: #8a7d5c;
+		border-color: var(--color-bronze);
 		outline: none;
 		background: #fdfcf8;
 	}

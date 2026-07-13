@@ -101,10 +101,15 @@
 	}
 
 	:global(.card.ornate) .badge {
-		background: radial-gradient(circle at 35% 30%, #a33a2a 0%, #7a1e12 60%, #57120a 100%);
+		background: radial-gradient(
+			circle at 35% 30%,
+			#a33a2a 0%,
+			var(--color-brand) 60%,
+			#57120a 100%
+		);
 		border-color: #4a0e07;
-		color: #f2e8d0;
-		box-shadow: 0 0 0 0.3mm #a5813c;
+		color: var(--color-cream);
+		box-shadow: 0 0 0 0.3mm var(--color-gold);
 	}
 
 	.badge-icon {
@@ -151,6 +156,6 @@
 	/* wax seals hold light text; the default bright focus box would swallow it */
 	:global(.card.ornate.editable) .badge input:focus {
 		background: rgb(0 0 0 / 25%);
-		border-color: #f2e8d0;
+		border-color: var(--color-cream);
 	}
 </style>

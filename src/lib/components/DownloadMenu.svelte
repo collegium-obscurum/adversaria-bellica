@@ -72,9 +72,9 @@
 	summary {
 		list-style: none;
 		padding: 0.5rem 1rem;
-		border: 1px solid #c9c1b2;
-		border-radius: 6px;
-		background: #fff;
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius);
+		background: var(--color-surface);
 		cursor: pointer;
 		user-select: none;
 	}
@@ -91,9 +91,9 @@
 		display: flex;
 		flex-direction: column;
 		min-width: 100%;
-		border: 1px solid #c9c1b2;
-		border-radius: 6px;
-		background: #fff;
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius);
+		background: var(--color-surface);
 		overflow: hidden;
 	}
 
@@ -108,7 +108,7 @@
 	}
 
 	.menu button:hover {
-		background: #f2e8d0;
+		background: var(--color-cream);
 	}
 
 	.capture-area {

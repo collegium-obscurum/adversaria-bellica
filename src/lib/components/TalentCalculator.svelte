@@ -84,11 +84,11 @@
 
 	h2 {
 		margin: 0 0 0.5rem;
-		font-family: 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
+		font-family: var(--font-serif);
 		font-size: 1rem;
 		font-variant: small-caps;
 		letter-spacing: 0.05em;
-		color: #7a1e12;
+		color: var(--color-brand);
 	}
 
 	.formula {
@@ -134,7 +134,7 @@
 		width: 1.8rem;
 		padding: 0.15rem 0.1rem;
 		text-align: center;
-		border: 1px solid #c9c1b2;
+		border: 1px solid var(--color-border);
 		border-radius: 4px;
 		appearance: textfield;
 	}

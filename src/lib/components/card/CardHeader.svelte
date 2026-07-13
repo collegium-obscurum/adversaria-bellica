@@ -88,8 +88,8 @@
 	}
 
 	:global(.card.ornate) .portrait {
-		border-color: #7a1e12;
-		box-shadow: 0 0 0 0.35mm #a5813c;
+		border-color: var(--color-brand);
+		box-shadow: 0 0 0 0.35mm var(--color-gold);
 	}
 
 	button.portrait {
@@ -123,12 +123,12 @@
 	}
 
 	:global(.card.ornate) .title {
-		border-bottom-color: #a5813c;
+		border-bottom-color: var(--color-gold);
 	}
 
 	h2 {
 		margin: 0;
-		font-family: 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
+		font-family: var(--font-serif);
 		font-size: 13pt;
 		color: var(--accent);
 	}
@@ -140,7 +140,7 @@
 	}
 
 	.name-input {
-		font-family: 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
+		font-family: var(--font-serif);
 		font-size: 13pt;
 		font-weight: bold;
 		color: var(--accent);

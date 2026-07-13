@@ -38,20 +38,41 @@
 </main>
 
 <style>
+	:global(:root) {
+		--color-brand: #7a1e12;
+		--color-brand-hover: #8e2717;
+		--color-danger: #a3231d;
+		--color-gold: #a5813c;
+		--color-gold-soft: #b99b5f;
+		--color-bronze: #8a7d5c;
+		--color-cream: #f2e8d0;
+		--color-parchment: #f4efe4;
+		--color-surface: #fff;
+		--color-ink: #2a211a;
+		--color-ink-deep: #262019;
+		--color-ink-soft: #5c4a30;
+		--color-muted: #6b6353;
+		--color-border: #c9c1b2;
+		--color-border-soft: #ddd4c2;
+		--font-serif: 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
+		--radius: 6px;
+		--radius-lg: 8px;
+	}
+
 	:global(body) {
 		margin: 0;
 		font-family: system-ui, sans-serif;
-		color: #2a211a;
-		background: #f4efe4;
+		color: var(--color-ink);
+		background: var(--color-parchment);
 	}
 
 	:global(h1) {
-		font-family: 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
-		color: #2a211a;
+		font-family: var(--font-serif);
+		color: var(--color-ink);
 	}
 
 	:global(:focus-visible) {
-		outline: 2px solid #7a1e12;
+		outline: 2px solid var(--color-brand);
 		outline-offset: 2px;
 	}
 
@@ -60,9 +81,9 @@
 		align-items: center;
 		gap: 2rem;
 		padding: 0.65rem 1.5rem;
-		background: #262019;
-		color: #f2e8d0;
-		border-bottom: 2px solid #a5813c;
+		background: var(--color-ink-deep);
+		color: var(--color-cream);
+		border-bottom: 2px solid var(--color-gold);
 	}
 
 	.brand {
@@ -70,13 +91,13 @@
 		align-items: center;
 		gap: 0.6rem;
 		text-decoration: none;
-		color: #f2e8d0;
+		color: var(--color-cream);
 	}
 
 	.sigil {
 		width: 1.5rem;
 		height: 1.5rem;
-		color: #a5813c;
+		color: var(--color-gold);
 		line-height: 0;
 	}
 
@@ -86,7 +107,7 @@
 	}
 
 	.wordmark {
-		font-family: 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
+		font-family: var(--font-serif);
 		font-variant: small-caps;
 		letter-spacing: 0.08em;
 		font-size: 1.15rem;
@@ -111,8 +132,8 @@
 	}
 
 	.links a.active {
-		color: #f2e8d0;
-		background: #7a1e12;
+		color: var(--color-cream);
+		background: var(--color-brand);
 	}
 
 	main {

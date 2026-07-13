@@ -141,9 +141,9 @@
 	button {
 		font: inherit;
 		padding: 0.4rem 0.6rem;
-		border: 1px solid #c9c1b2;
-		border-radius: 6px;
-		background: #fff;
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius);
+		background: var(--color-surface);
 	}
 
 	button {
@@ -151,19 +151,19 @@
 	}
 
 	button:hover {
-		border-color: #a5813c;
+		border-color: var(--color-gold);
 	}
 
 	.import {
-		border: 1px solid #c9c1b2;
-		border-radius: 6px;
-		background: #fff;
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius);
+		background: var(--color-surface);
 		padding: 0.4rem 0.6rem;
 		cursor: pointer;
 	}
 
 	.import:hover {
-		border-color: #a5813c;
+		border-color: var(--color-gold);
 	}
 
 	.import input {
@@ -176,13 +176,13 @@
 		align-items: center;
 		gap: 0.75rem;
 		padding: 4rem 1rem;
-		color: #5c4a30;
+		color: var(--color-ink-soft);
 	}
 
 	.empty-sigil {
 		width: 3.5rem;
 		height: 3.5rem;
-		color: #a5813c;
+		color: var(--color-gold);
 		line-height: 0;
 	}
 
@@ -196,11 +196,11 @@
 	}
 
 	.primary {
-		background: #7a1e12;
-		color: #f2e8d0;
+		background: var(--color-brand);
+		color: var(--color-cream);
 		text-decoration: none;
 		padding: 0.5rem 1.25rem;
-		border-radius: 6px;
+		border-radius: var(--radius);
 		font-weight: bold;
 	}
 
@@ -218,9 +218,9 @@
 		flex-direction: column;
 		gap: 0.6rem;
 		padding: 0.9rem 1rem;
-		background: #fff;
-		border: 1px solid #ddd4c2;
-		border-radius: 8px;
+		background: var(--color-surface);
+		border: 1px solid var(--color-border-soft);
+		border-radius: var(--radius-lg);
 	}
 
 	.tile-head {
@@ -247,8 +247,8 @@
 		align-items: center;
 		justify-content: center;
 		background: #ece4d2;
-		color: #a5813c;
-		font-family: 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
+		color: var(--color-gold);
+		font-family: var(--font-serif);
 		font-size: 1.5rem;
 	}
 
@@ -259,7 +259,7 @@
 	}
 
 	.naming strong {
-		font-family: 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
+		font-family: var(--font-serif);
 		font-size: 1.05rem;
 		overflow: hidden;
 		text-overflow: ellipsis;
@@ -267,7 +267,7 @@
 	}
 
 	.naming small {
-		color: #5c4a30;
+		color: var(--color-ink-soft);
 		font-variant: small-caps;
 		letter-spacing: 0.04em;
 	}
@@ -275,7 +275,7 @@
 	.stats {
 		display: flex;
 		gap: 1rem;
-		color: #5c4a30;
+		color: var(--color-ink-soft);
 		font-size: 0.9rem;
 	}
 
@@ -287,7 +287,7 @@
 
 	.stats small {
 		font-size: 0.7rem;
-		color: #a5813c;
+		color: var(--color-gold);
 	}
 
 	.buttons {
@@ -300,7 +300,7 @@
 	}
 
 	.buttons a {
-		color: #7a1e12;
+		color: var(--color-brand);
 		font-weight: bold;
 		text-decoration: none;
 	}
@@ -313,7 +313,7 @@
 		border: none;
 		background: none;
 		padding: 0;
-		color: #5c4a30;
+		color: var(--color-ink-soft);
 		font-size: 0.9rem;
 	}
 
@@ -326,6 +326,6 @@
 	}
 
 	.buttons .danger {
-		color: #a3231d;
+		color: var(--color-danger);
 	}
 </style>

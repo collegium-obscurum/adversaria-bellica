@@ -131,7 +131,7 @@
 	}
 
 	.entry-row.drop-target {
-		outline: 0.3mm dashed #8a7d5c;
+		outline: 0.3mm dashed var(--color-bronze);
 	}
 
 	.handle {
@@ -160,6 +160,6 @@
 		margin: 0;
 		font-size: 7pt;
 		font-style: italic;
-		color: #6b6353;
+		color: var(--color-muted);
 	}
 </style>

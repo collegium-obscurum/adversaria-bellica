@@ -66,7 +66,7 @@
 
 	:global(.card.ornate) .talents {
 		background: rgb(255 250 232 / 55%);
-		border-color: #b99b5f;
+		border-color: var(--color-gold-soft);
 	}
 
 	.talent-row {

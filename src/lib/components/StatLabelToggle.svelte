@@ -26,9 +26,9 @@
 <style>
 	.toggle {
 		display: inline-flex;
-		border: 1px solid #c9c1b2;
+		border: 1px solid var(--color-border);
 		border-radius: 999px;
-		background: #fff;
+		background: var(--color-surface);
 		padding: 2px;
 	}
 
@@ -38,13 +38,13 @@
 		border: none;
 		border-radius: 999px;
 		background: transparent;
-		color: #6b6353;
+		color: var(--color-muted);
 		padding: 0.25rem 0.9rem;
 		cursor: pointer;
 	}
 
 	button.active {
-		background: #7a1e12;
-		color: #f2e8d0;
+		background: var(--color-brand);
+		color: var(--color-cream);
 	}
 </style>
