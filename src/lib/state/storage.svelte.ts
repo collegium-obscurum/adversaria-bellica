@@ -1,7 +1,7 @@
 import { browser } from '$app/environment';
 import { SvelteSet } from 'svelte/reactivity';
-import { migrateCard } from './migrations';
-import type { MonsterCard } from './types';
+import { migrateCard } from '$lib/domain/migrations';
+import type { MonsterCard } from '$lib/domain/types';
 
 const STORAGE_KEY = 'adversaria-bellica.cards';
 

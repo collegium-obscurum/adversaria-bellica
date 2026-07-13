@@ -2,7 +2,7 @@
 	import favicon from '$lib/assets/favicon.svg';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
-	import StatIcon from '$lib/StatIcon.svelte';
+	import StatIcon from '$lib/components/StatIcon.svelte';
 	import type { Snippet } from 'svelte';
 
 	let { children }: { children: Snippet } = $props();

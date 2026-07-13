@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { CARD_STYLES, type CardStyle } from './cardStyle';
-	import { prefs, setCardStyle } from './preferences.svelte';
+	import { CARD_STYLES, type CardStyle } from '$lib/domain/cardStyle';
+	import { prefs, setCardStyle } from '$lib/state/preferences.svelte';
 
 	const LABELS: Record<CardStyle, string> = {
 		minimal: 'Druckfreundlich',

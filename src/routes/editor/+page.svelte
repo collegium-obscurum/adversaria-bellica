@@ -2,13 +2,13 @@
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
-	import CardPreview from '$lib/CardPreview.svelte';
-	import ImageCropper from '$lib/ImageCropper.svelte';
-	import StatIcon from '$lib/StatIcon.svelte';
-	import { STAT_BADGES } from '$lib/statBadges';
-	import StyleToggle from '$lib/StyleToggle.svelte';
-	import { getCard, upsertCard } from '$lib/storage.svelte';
-	import { createEmptyCard } from '$lib/types';
+	import CardPreview from '$lib/components/card/CardPreview.svelte';
+	import ImageCropper from '$lib/components/ImageCropper.svelte';
+	import StatIcon from '$lib/components/StatIcon.svelte';
+	import { STAT_BADGES } from '$lib/domain/statBadges';
+	import StyleToggle from '$lib/components/StyleToggle.svelte';
+	import { getCard, upsertCard } from '$lib/state/storage.svelte';
+	import { createEmptyCard } from '$lib/domain/types';
 
 	const editId = page.url.searchParams.get('id');
 	const existing = editId ? getCard(editId) : undefined;

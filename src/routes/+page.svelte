@@ -1,8 +1,14 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
-	import StatIcon from '$lib/StatIcon.svelte';
-	import { deleteCard, duplicateCard, exportJson, importJson, store } from '$lib/storage.svelte';
-	import type { MonsterCard } from '$lib/types';
+	import StatIcon from '$lib/components/StatIcon.svelte';
+	import {
+		deleteCard,
+		duplicateCard,
+		exportJson,
+		importJson,
+		store
+	} from '$lib/state/storage.svelte';
+	import type { MonsterCard } from '$lib/domain/types';
 
 	let search = $state('');
 	let categoryFilter = $state('');

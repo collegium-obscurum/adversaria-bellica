@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { StatKey } from './statBadges';
+	import type { StatKey } from '$lib/domain/statBadges';
 
 	export type StatIconName = StatKey;
 

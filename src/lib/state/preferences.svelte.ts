@@ -1,5 +1,5 @@
 import { browser } from '$app/environment';
-import { parseCardStyle, type CardStyle } from './cardStyle';
+import { parseCardStyle, type CardStyle } from '$lib/domain/cardStyle';
 
 const STYLE_KEY = 'adversaria-bellica.cardStyle';
 

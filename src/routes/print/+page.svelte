@@ -1,8 +1,8 @@
 <script lang="ts">
-	import CardPreview from '$lib/CardPreview.svelte';
-	import StyleToggle from '$lib/StyleToggle.svelte';
-	import { prefs } from '$lib/preferences.svelte';
-	import { store } from '$lib/storage.svelte';
+	import CardPreview from '$lib/components/card/CardPreview.svelte';
+	import StyleToggle from '$lib/components/StyleToggle.svelte';
+	import { prefs } from '$lib/state/preferences.svelte';
+	import { store } from '$lib/state/storage.svelte';
 
 	let selectedIds = $state<string[]>([]);
 
@@ -62,8 +62,10 @@
 </div>
 
 <div class="sheet">
-	{#each selectedCards as card (card.id)}
-		<CardPreview {card} />
+	{#each store.cards as card, index (card.id)}
+		{#if selectedIds.includes(card.id)}
+			<CardPreview bind:card={store.cards[index]} />
+		{/if}
 	{/each}
 </div>
 
