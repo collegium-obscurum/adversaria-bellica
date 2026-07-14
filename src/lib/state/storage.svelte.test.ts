@@ -50,6 +50,24 @@ describe('persist on quota failure', () => {
 	});
 });
 
+describe('duplicateCard', () => {
+	it('clones a stored card despite the $state proxy and appends it', async () => {
+		const storage = await loadStorageModule();
+		// In the browser, store.cards hands out $state proxies; structuredClone
+		// throws DataCloneError on proxies. SSR-compiled $state has no proxy,
+		// so wrap the card ourselves to reproduce the client behaviour.
+		const original = new Proxy({ ...createEmptyCard(), name: 'Wolf' }, {});
+		storage.upsertCard(original);
+
+		const copy = storage.duplicateCard(original.id);
+
+		expect(copy).toBeDefined();
+		expect(copy?.name).toBe('Wolf (Kopie)');
+		expect(copy?.id).not.toBe(original.id);
+		expect(storage.store.cards.map((card) => card.name)).toEqual(['Wolf', 'Wolf (Kopie)']);
+	});
+});
+
 describe('importJson', () => {
 	it('funnels imported cards through migrateCard so missing fields get defaults', async () => {
 		const storage = await loadStorageModule();

@@ -52,7 +52,9 @@ export function deleteCard(id: string) {
 export function duplicateCard(id: string): MonsterCard | undefined {
 	const original = getCard(id);
 	if (!original) return undefined;
-	const copy = structuredClone(original);
+	// structuredClone rejects $state proxies; JSON round-trip matches the
+	// localStorage persistence shape and reads through the proxy
+	const copy = JSON.parse(JSON.stringify(original)) as MonsterCard;
 	copy.id = crypto.randomUUID();
 	copy.name = `${copy.name} (Kopie)`;
 	store.cards.push(copy);
