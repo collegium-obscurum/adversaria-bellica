@@ -45,7 +45,7 @@
 </script>
 
 {#if editable}
-	<div class="special-moves">
+	<div class="special-moves editor">
 		<h3>Spezialmanöver</h3>
 		{#each visibleTriggers as trigger (trigger)}
 			<div class="entry-row">
@@ -131,9 +131,29 @@
 		gap: 0.333em;
 	}
 
-	.special-moves .range {
-		width: 24mm;
+	/* shared column tracks so trigger/name widths line up across rows */
+	.special-moves.editor {
+		display: grid;
+		grid-template-columns: fit-content(30mm) 22mm 1fr auto;
+		gap: 0.333em 1mm;
+	}
+
+	.special-moves.editor > h3,
+	.special-moves.editor > .add-triggers {
+		grid-column: 1 / -1;
+	}
+
+	.special-moves.editor > .entry-row {
+		grid-column: 1 / -1;
+		display: grid;
+		grid-template-columns: subgrid;
+	}
+
+	/* :global(.card) outranks CardPreview's `.card :global(.range)` nowrap */
+	:global(.card) .special-moves .range {
 		justify-content: flex-end;
+		text-align: right;
+		white-space: normal;
 	}
 
 	.trigger-input {
