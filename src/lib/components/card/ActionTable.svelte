@@ -111,6 +111,10 @@
 			</p>
 		{/if}
 	{/each}
+	<p class="note">
+		Zusätzlich zu seinen Aktionen kann sich das Wesen einmal pro Runde um GS bewegen. Ist kein Held
+		in Reichweite, kann es pro Runde eine Aktion nutzen, um die doppelte Distanz zurückzulegen.
+	</p>
 	{#if editable}
 		<button
 			type="button"
