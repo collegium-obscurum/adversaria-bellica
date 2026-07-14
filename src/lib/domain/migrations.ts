@@ -1,13 +1,14 @@
 import type {
 	ActionEntry,
+	AttributeKey,
 	CustomMove,
 	MonsterCard,
 	SpecialMove,
+	TalentEntry,
 	TalentKey,
-	TalentValue,
 	WoundTrigger
 } from './types';
-import { TALENT_KEYS, WOUND_TRIGGERS } from './types';
+import { ATTRIBUTE_KEYS, TALENT_KEYS, WOUND_TRIGGERS } from './types';
 import { FIT_FLOOR, type FitResult } from './cardFit';
 
 interface LegacyActionEntry {
@@ -84,18 +85,41 @@ export function migrateCustomMoves(raw: unknown): CustomMove[] {
 	return result;
 }
 
-export function migrateTalents(raw: unknown): Record<TalentKey, TalentValue> {
+function numberOrNull(value: unknown): number | null {
+	return typeof value === 'number' && Number.isFinite(value) ? value : null;
+}
+
+/** Pre-derivation cards stored {value, maxQs} per talent; those become manual overrides. */
+export function migrateTalents(raw: unknown): Record<TalentKey, TalentEntry> {
 	const record = typeof raw === 'object' && raw !== null ? (raw as Record<string, unknown>) : {};
-	const result = {} as Record<TalentKey, TalentValue>;
+	const result = {} as Record<TalentKey, TalentEntry>;
 	for (const key of TALENT_KEYS) {
 		const value =
 			typeof record[key] === 'object' && record[key] !== null
 				? (record[key] as Record<string, unknown>)
 				: {};
-		result[key] = {
-			value: typeof value.value === 'number' ? value.value : 0,
-			maxQs: typeof value.maxQs === 'number' ? value.maxQs : 0
-		};
+		if ('fw' in value || 'valueOverride' in value || 'maxQsOverride' in value) {
+			result[key] = {
+				fw: numberOrNull(value.fw),
+				valueOverride: numberOrNull(value.valueOverride),
+				maxQsOverride: numberOrNull(value.maxQsOverride)
+			};
+		} else {
+			result[key] = {
+				fw: null,
+				valueOverride: numberOrNull(value.value),
+				maxQsOverride: numberOrNull(value.maxQs)
+			};
+		}
+	}
+	return result;
+}
+
+export function migrateAttributes(raw: unknown): Record<AttributeKey, number | null> {
+	const record = typeof raw === 'object' && raw !== null ? (raw as Record<string, unknown>) : {};
+	const result = {} as Record<AttributeKey, number | null>;
+	for (const key of ATTRIBUTE_KEYS) {
+		result[key] = numberOrNull(record[key]);
 	}
 	return result;
 }
@@ -143,6 +167,7 @@ export function migrateCard(raw: Record<string, unknown>): MonsterCard {
 	raw.flavorText = textOrEmpty(raw.flavorText);
 	raw.notes = textOrEmpty(raw.notes);
 	raw.image = typeof raw.image === 'string' ? raw.image : null;
+	raw.attributes = migrateAttributes(raw.attributes);
 	raw.talents = migrateTalents(raw.talents);
 	raw.actions = migrateActions(Array.isArray(raw.actions) ? raw.actions : []);
 	raw.specialMoves = migrateSpecialMoves(raw.specialMoves);

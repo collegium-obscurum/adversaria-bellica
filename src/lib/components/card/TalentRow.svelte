@@ -1,22 +1,31 @@
 <script lang="ts">
-	import { clampQs, clampTalentValue } from '$lib/domain/talentCalc';
+	import {
+		clampQs,
+		clampTalentValue,
+		effectiveTalent,
+		TALENT_LABELS
+	} from '$lib/domain/talentCalc';
 	import type { MonsterCard, TalentKey } from '$lib/domain/types';
 
 	let { card = $bindable(), editable = false }: { card: MonsterCard; editable?: boolean } =
 		$props();
 
-	const TALENT_LABELS: Record<TalentKey, string> = {
-		body: 'Körper',
-		social: 'Gesellschaft',
-		nature: 'Natur',
-		knowledge: 'Wissen',
-		craft: 'Handwerk'
-	};
-
 	const TALENT_ROWS: TalentKey[][] = [
 		['body', 'social'],
 		['nature', 'knowledge', 'craft']
 	];
+
+	function setValueOverride(key: TalentKey, input: HTMLInputElement) {
+		const talent = card.talents[key];
+		talent.valueOverride = input.value === '' ? null : clampTalentValue(Number(input.value));
+		input.value = String(effectiveTalent(card.attributes, talent, key).value);
+	}
+
+	function setMaxQsOverride(key: TalentKey, input: HTMLInputElement) {
+		const talent = card.talents[key];
+		talent.maxQsOverride = input.value === '' ? null : clampQs(Number(input.value));
+		input.value = String(effectiveTalent(card.attributes, talent, key).maxQs);
+	}
 </script>
 
 <div class="talents">
@@ -24,6 +33,7 @@
 		<div class="talent-row">
 			{#each row as key (key)}
 				{@const talent = card.talents[key]}
+				{@const shown = effectiveTalent(card.attributes, talent, key)}
 				<div class="talent">
 					<b>{TALENT_LABELS[key]}</b>
 					{#if editable}
@@ -31,22 +41,28 @@
 							type="number"
 							min="1"
 							max="99"
-							bind:value={talent.value}
-							onchange={() => (talent.value = clampTalentValue(talent.value))}
-							title="Wert"
+							class:overridden={talent.valueOverride !== null}
+							value={shown.value}
+							onchange={(event) => {
+								setValueOverride(key, event.currentTarget);
+							}}
+							title="Wert (leeren = berechnet)"
 						/>
 						(QS
 						<input
 							class="qs"
+							class:overridden={talent.maxQsOverride !== null}
 							type="number"
 							min="1"
 							max="6"
-							bind:value={talent.maxQs}
-							onchange={() => (talent.maxQs = clampQs(talent.maxQs))}
-							title="max. QS"
+							value={shown.maxQs}
+							onchange={(event) => {
+								setMaxQsOverride(key, event.currentTarget);
+							}}
+							title="max. QS (leeren = berechnet)"
 						/>)
 					{:else}
-						{talent.value} (QS {talent.maxQs})
+						{shown.value} (QS {shown.maxQs})
 					{/if}
 				</div>
 			{/each}
@@ -90,5 +106,10 @@
 
 	.talent input.qs {
 		width: 3mm;
+	}
+
+	.talent input.overridden {
+		font-weight: bold;
+		text-decoration: underline dotted;
 	}
 </style>

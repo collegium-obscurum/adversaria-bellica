@@ -8,6 +8,26 @@ export interface TalentValue {
 export const TALENT_KEYS = ['body', 'social', 'nature', 'knowledge', 'craft'] as const;
 export type TalentKey = (typeof TALENT_KEYS)[number];
 
+export const ATTRIBUTE_KEYS = [
+	'courage',
+	'sagacity',
+	'intuition',
+	'charisma',
+	'dexterity',
+	'agility',
+	'constitution',
+	'strength'
+] as const;
+export type AttributeKey = (typeof ATTRIBUTE_KEYS)[number];
+
+export interface TalentEntry {
+	/** skill value (FW) feeding the derived talent value; null = not entered */
+	fw: number | null;
+	/** manual override; null = use the derived value */
+	valueOverride: number | null;
+	maxQsOverride: number | null;
+}
+
 export interface ActionEntry {
 	/** number of d20 faces this row covers; rows partition 1–20 in list order */
 	span: number;
@@ -44,7 +64,8 @@ export interface MonsterCard {
 	soulPower: string;
 	toughness: string;
 	actionCount: string;
-	talents: Record<TalentKey, TalentValue>;
+	attributes: Record<AttributeKey, number | null>;
+	talents: Record<TalentKey, TalentEntry>;
 	actions: ActionEntry[];
 	specialMoves: Record<WoundTrigger, SpecialMove>;
 	customMoves: CustomMove[];
@@ -68,12 +89,22 @@ export function createEmptyCard(): MonsterCard {
 		soulPower: '0',
 		toughness: '0',
 		actionCount: '1',
+		attributes: {
+			courage: null,
+			sagacity: null,
+			intuition: null,
+			charisma: null,
+			dexterity: null,
+			agility: null,
+			constitution: null,
+			strength: null
+		},
 		talents: {
-			body: { value: 10, maxQs: 3 },
-			social: { value: 5, maxQs: 2 },
-			nature: { value: 10, maxQs: 3 },
-			knowledge: { value: 5, maxQs: 2 },
-			craft: { value: 5, maxQs: 2 }
+			body: { fw: null, valueOverride: null, maxQsOverride: null },
+			social: { fw: null, valueOverride: null, maxQsOverride: null },
+			nature: { fw: null, valueOverride: null, maxQsOverride: null },
+			knowledge: { fw: null, valueOverride: null, maxQsOverride: null },
+			craft: { fw: null, valueOverride: null, maxQsOverride: null }
 		},
 		actions: [
 			{ span: 1, name: 'Kritischer Treffer', effect: '2W6+4 TP' },

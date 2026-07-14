@@ -1,11 +1,43 @@
-import type { TalentKey } from './types';
+import type { AttributeKey, TalentEntry, TalentKey, TalentValue } from './types';
 
-export const TALENT_GROUP_ATTRIBUTES: Record<TalentKey, [string, string, string]> = {
-	body: ['GE', 'MU', 'KK'],
-	social: ['CH', 'IN', 'MU'],
-	nature: ['KL', 'GE', 'KO'],
-	knowledge: ['KL', 'IN', 'FF'],
-	craft: ['FF', 'KO', 'KK']
+export interface AttributeInfo {
+	key: AttributeKey;
+	abbr: string;
+	label: string;
+}
+
+export const ATTRIBUTES: AttributeInfo[] = [
+	{ key: 'courage', abbr: 'MU', label: 'Mut' },
+	{ key: 'sagacity', abbr: 'KL', label: 'Klugheit' },
+	{ key: 'intuition', abbr: 'IN', label: 'Intuition' },
+	{ key: 'charisma', abbr: 'CH', label: 'Charisma' },
+	{ key: 'dexterity', abbr: 'FF', label: 'Fingerfertigkeit' },
+	{ key: 'agility', abbr: 'GE', label: 'Gewandtheit' },
+	{ key: 'constitution', abbr: 'KO', label: 'Konstitution' },
+	{ key: 'strength', abbr: 'KK', label: 'Körperkraft' }
+];
+
+export const ATTRIBUTE_ABBR = Object.fromEntries(
+	ATTRIBUTES.map((attr) => [attr.key, attr.abbr])
+) as Record<AttributeKey, string>;
+
+export const TALENT_LABELS: Record<TalentKey, string> = {
+	body: 'Körper',
+	social: 'Gesellschaft',
+	nature: 'Natur',
+	knowledge: 'Wissen',
+	craft: 'Handwerk'
+};
+
+export const TALENT_GROUP_ATTRIBUTES: Record<
+	TalentKey,
+	[AttributeKey, AttributeKey, AttributeKey]
+> = {
+	body: ['agility', 'courage', 'strength'],
+	social: ['charisma', 'intuition', 'courage'],
+	nature: ['sagacity', 'agility', 'constitution'],
+	knowledge: ['sagacity', 'intuition', 'dexterity'],
+	craft: ['dexterity', 'constitution', 'strength']
 };
 
 export function clampTalentValue(value: number): number {
@@ -25,4 +57,32 @@ export function talentValue(attr1: number, attr2: number, attr3: number, fw: num
 
 export function talentMaxQs(fw: number): number {
 	return clampQs(Math.ceil(fw / 3));
+}
+
+/** Value derived from the card attributes and the group's FW; empty inputs count as 0. */
+export function derivedTalent(
+	attributes: Record<AttributeKey, number | null>,
+	fw: number | null,
+	key: TalentKey
+): TalentValue {
+	const [attr1, attr2, attr3] = TALENT_GROUP_ATTRIBUTES[key].map(
+		(attrKey) => attributes[attrKey] ?? 0
+	);
+	return {
+		value: talentValue(attr1, attr2, attr3, fw ?? 0),
+		maxQs: talentMaxQs(fw ?? 0)
+	};
+}
+
+/** What the card shows: the manual override where set, the derived value otherwise. */
+export function effectiveTalent(
+	attributes: Record<AttributeKey, number | null>,
+	talent: TalentEntry,
+	key: TalentKey
+): TalentValue {
+	const derived = derivedTalent(attributes, talent.fw, key);
+	return {
+		value: talent.valueOverride ?? derived.value,
+		maxQs: talent.maxQsOverride ?? derived.maxQs
+	};
 }

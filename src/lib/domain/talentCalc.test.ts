@@ -1,5 +1,27 @@
 import { describe, expect, it } from 'vitest';
-import { clampQs, clampTalentValue, talentMaxQs, talentValue } from './talentCalc';
+import {
+	clampQs,
+	clampTalentValue,
+	derivedTalent,
+	effectiveTalent,
+	talentMaxQs,
+	talentValue
+} from './talentCalc';
+import type { AttributeKey } from './types';
+
+function attributes(values: Partial<Record<AttributeKey, number>> = {}) {
+	return {
+		courage: null,
+		sagacity: null,
+		intuition: null,
+		charisma: null,
+		dexterity: null,
+		agility: null,
+		constitution: null,
+		strength: null,
+		...values
+	};
+}
 
 describe('talentValue', () => {
 	it('computes (sum - 25) / 2 + FW', () => {
@@ -54,5 +76,32 @@ describe('talentMaxQs', () => {
 	it('clamps to a minimum of 1', () => {
 		expect(talentMaxQs(0)).toBe(1);
 		expect(talentMaxQs(2)).toBe(1);
+	});
+});
+
+describe('derivedTalent', () => {
+	it('uses the group attributes (body = GE, MU, KK)', () => {
+		const attrs = attributes({ agility: 12, courage: 12, strength: 12 });
+		expect(derivedTalent(attrs, 6, 'body')).toEqual({ value: 12, maxQs: 2 });
+	});
+
+	it('treats empty attributes and FW as 0 and clamps to 1', () => {
+		expect(derivedTalent(attributes(), null, 'body')).toEqual({ value: 1, maxQs: 1 });
+	});
+});
+
+describe('effectiveTalent', () => {
+	const attrs = attributes({ agility: 12, courage: 12, strength: 12 });
+
+	it('returns the derived value when no override is set', () => {
+		const talent = { fw: 6, valueOverride: null, maxQsOverride: null };
+		expect(effectiveTalent(attrs, talent, 'body')).toEqual({ value: 12, maxQs: 2 });
+	});
+
+	it('prefers overrides independently per field', () => {
+		const talent = { fw: 6, valueOverride: 15, maxQsOverride: null };
+		expect(effectiveTalent(attrs, talent, 'body')).toEqual({ value: 15, maxQs: 2 });
+		const qsOnly = { fw: 6, valueOverride: null, maxQsOverride: 4 };
+		expect(effectiveTalent(attrs, qsOnly, 'body')).toEqual({ value: 12, maxQs: 4 });
 	});
 });

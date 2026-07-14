@@ -130,7 +130,7 @@
 				</ul>
 			</aside>
 			<aside class="calc-box">
-				<TalentCalculator />
+				<TalentCalculator bind:card />
 			</aside>
 		</div>
 	</div>

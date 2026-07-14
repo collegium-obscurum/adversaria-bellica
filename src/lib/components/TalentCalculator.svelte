@@ -1,22 +1,14 @@
 <script lang="ts">
-	import { TALENT_GROUP_ATTRIBUTES, talentMaxQs, talentValue } from '$lib/domain/talentCalc';
-	import { TALENT_KEYS, type TalentKey } from '$lib/domain/types';
+	import {
+		ATTRIBUTE_ABBR,
+		ATTRIBUTES,
+		derivedTalent,
+		TALENT_GROUP_ATTRIBUTES,
+		TALENT_LABELS
+	} from '$lib/domain/talentCalc';
+	import { TALENT_KEYS, type MonsterCard } from '$lib/domain/types';
 
-	const TALENT_LABELS: Record<TalentKey, string> = {
-		body: 'Körper',
-		social: 'Gesellschaft',
-		nature: 'Natur',
-		knowledge: 'Wissen',
-		craft: 'Handwerk'
-	};
-
-	let attr1 = $state(10);
-	let attr2 = $state(10);
-	let attr3 = $state(10);
-	let fw = $state(5);
-
-	const value = $derived(talentValue(attr1, attr2, attr3, fw));
-	const maxQs = $derived(talentMaxQs(fw));
+	let { card = $bindable() }: { card: MonsterCard } = $props();
 </script>
 
 <section class="talent-calc">
@@ -40,40 +32,29 @@
 		FW = Fertigkeitswert des mittleren gelisteten Talents der Gruppe (bei gerader Anzahl der
 		niedrigere der beiden mittleren).
 	</p>
+	<div class="attributes">
+		{#each ATTRIBUTES as attribute (attribute.key)}
+			<label title={attribute.label}>
+				<span>{attribute.abbr}</span>
+				<input type="number" bind:value={card.attributes[attribute.key]} />
+			</label>
+		{/each}
+	</div>
 	<table>
 		<tbody>
 			{#each TALENT_KEYS as key (key)}
+				{@const derived = derivedTalent(card.attributes, card.talents[key].fw, key)}
 				<tr>
 					<th>{TALENT_LABELS[key]}</th>
-					<td>{TALENT_GROUP_ATTRIBUTES[key].join(', ')}</td>
+					<td>{TALENT_GROUP_ATTRIBUTES[key].map((attr) => ATTRIBUTE_ABBR[attr]).join(', ')}</td>
+					<td class="fw-cell">
+						FW <input type="number" min="0" bind:value={card.talents[key].fw} aria-label="FW" />
+					</td>
+					<td class="result">= <b>{derived.value}</b> (QS <b>{derived.maxQs}</b>)</td>
 				</tr>
 			{/each}
 		</tbody>
 	</table>
-	<div class="formula calc-row">
-		<span class="frac">
-			<span class="numerator">
-				<input type="number" bind:value={attr1} aria-label="Eigenschaft 1" />
-				<span>+</span>
-				<input type="number" bind:value={attr2} aria-label="Eigenschaft 2" />
-				<span>+</span>
-				<input type="number" bind:value={attr3} aria-label="Eigenschaft 3" />
-				<span>− 25</span>
-			</span>
-			<span>2</span>
-		</span>
-		<span>+</span>
-		<input
-			type="number"
-			min="0"
-			bind:value={fw}
-			aria-label="FW"
-			title="FW des mittleren gelisteten Talents der Gruppe"
-		/>
-		<span>=</span>
-		<b>{value}</b>
-		<span>(QS <b>{maxQs}</b>)</span>
-	</div>
 	<p class="note">Divisionen werden aufgerundet · Wert und QS mindestens 1</p>
 </section>
 
@@ -114,6 +95,25 @@
 		margin-bottom: 0.15rem;
 	}
 
+	.attributes {
+		display: grid;
+		grid-template-columns: repeat(4, auto);
+		gap: 0.3rem 0.5rem;
+		justify-content: start;
+		margin: 0.5rem 0;
+	}
+
+	.attributes label {
+		display: flex;
+		align-items: center;
+		gap: 0.25rem;
+	}
+
+	.attributes span {
+		font-weight: bold;
+		width: 1.4rem;
+	}
+
 	table {
 		border-collapse: collapse;
 		margin: 0.5rem 0;
@@ -125,8 +125,17 @@
 		font-weight: bold;
 	}
 
-	.calc-row {
-		font-size: 1rem;
+	td {
+		padding-right: 0.6rem;
+	}
+
+	.fw-cell {
+		white-space: nowrap;
+	}
+
+	.result {
+		white-space: nowrap;
+		padding-right: 0;
 	}
 
 	input {
