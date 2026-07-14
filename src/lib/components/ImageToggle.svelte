@@ -33,12 +33,12 @@
 
 	button {
 		font: inherit;
-		font-size: 0.85rem;
+		font-size: 0.8rem;
 		border: none;
 		border-radius: 999px;
 		background: transparent;
 		color: var(--color-muted);
-		padding: 0.25rem 0.9rem;
+		padding: 0.25rem 0.6rem;
 		cursor: pointer;
 	}
 

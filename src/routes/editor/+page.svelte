@@ -168,7 +168,7 @@
 	.toolbar {
 		display: flex;
 		align-items: center;
-		gap: 1rem;
+		gap: 0.6rem;
 		flex-wrap: wrap;
 	}
 
@@ -199,6 +199,7 @@
 
 	h1 {
 		margin: 0;
+		font-size: 1.5rem;
 	}
 
 	.cancel {
