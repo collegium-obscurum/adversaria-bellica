@@ -266,7 +266,7 @@
 		min-height: 0;
 	}
 
-	.card:not(.editable) .columns {
+	.card:not(.editable) .body {
 		overflow: hidden;
 	}
 
