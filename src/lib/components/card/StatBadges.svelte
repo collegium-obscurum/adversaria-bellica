@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { STAT_BADGES, badgeLabel } from '$lib/domain/statBadges';
-	import type { StatBadgeInfo, TextStatKey } from '$lib/domain/statBadges';
-	import StatIcon from '$lib/components/StatIcon.svelte';
+	import { STAT_BADGES } from '$lib/domain/statBadges';
+	import type { StatBadgeInfo, StatKey, TextStatKey } from '$lib/domain/statBadges';
+	import BadgeFace from './BadgeFace.svelte';
 	import { prefs } from '$lib/state/preferences.svelte';
 	import type { MonsterCard } from '$lib/domain/types';
 
@@ -21,56 +21,83 @@
 		return '5.5pt';
 	}
 
-	function labelFontSize(label: string): string {
-		return label.length > 4 ? '3.8pt' : '5pt';
-	}
-
 	function clampLifePoints() {
 		if (!Number.isFinite(card.lifePoints) || card.lifePoints < 1) card.lifePoints = 1;
+	}
+
+	function isHidden(key: StatKey): boolean {
+		return card.hiddenStats.includes(key);
+	}
+
+	function toggleHidden(key: StatKey) {
+		if (isHidden(key)) {
+			card.hiddenStats = card.hiddenStats.filter((hiddenKey) => hiddenKey !== key);
+		} else {
+			card.hiddenStats = [...card.hiddenStats, key];
+		}
+	}
+
+	function toggleTitle(key: StatKey): string {
+		return isHidden(key)
+			? 'Wird nicht gedruckt – klicken zum Einblenden'
+			: 'Klicken zum Ausblenden';
 	}
 </script>
 
 <aside class="badges">
-	<div class="badge" title="{lifePointsBadge.label} ({lifePointsBadge.abbr})">
-		{#if prefs.statLabelMode === 'icons'}
-			<span class="badge-icon"><StatIcon name={lifePointsBadge.key} cutColor={iconCutColor} /></span
-			>
-		{:else}
-			<span class="badge-label" style:font-size={labelFontSize(badgeLabel(lifePointsBadge))}
-				>{badgeLabel(lifePointsBadge)}</span
-			>
-		{/if}
-		{#if editable}
-			<input
-				type="number"
-				min="1"
-				bind:value={card.lifePoints}
-				onblur={clampLifePoints}
-				style:font-size={valueFontSize(card.lifePoints)}
-			/>
-		{:else}
-			<span class="badge-value" style:font-size={valueFontSize(card.lifePoints)}
-				>{card.lifePoints}</span
-			>
-		{/if}
-	</div>
+	{#if editable || !isHidden('lifePoints')}
+		<div
+			class="badge"
+			class:stat-hidden={editable && isHidden('lifePoints')}
+			title="{lifePointsBadge.label} ({lifePointsBadge.abbr})"
+		>
+			{#if editable}
+				<button
+					type="button"
+					class="badge-toggle"
+					title={toggleTitle('lifePoints')}
+					onclick={() => {
+						toggleHidden('lifePoints');
+					}}><BadgeFace badge={lifePointsBadge} cutColor={iconCutColor} /></button
+				>
+				<input
+					type="number"
+					min="1"
+					bind:value={card.lifePoints}
+					onblur={clampLifePoints}
+					style:font-size={valueFontSize(card.lifePoints)}
+				/>
+			{:else}
+				<BadgeFace badge={lifePointsBadge} cutColor={iconCutColor} />
+				<span class="badge-value" style:font-size={valueFontSize(card.lifePoints)}
+					>{card.lifePoints}</span
+				>
+			{/if}
+		</div>
+	{/if}
 	{#each textBadges as badge (badge.key)}
-		{#if editable || card[badge.key].trim() !== ''}
-			<div class="badge" title="{badge.label} ({badge.abbr})">
-				{#if prefs.statLabelMode === 'icons'}
-					<span class="badge-icon"><StatIcon name={badge.key} cutColor={iconCutColor} /></span>
-				{:else}
-					<span class="badge-label" style:font-size={labelFontSize(badgeLabel(badge))}
-						>{badgeLabel(badge)}</span
-					>
-				{/if}
+		{#if editable || !isHidden(badge.key)}
+			<div
+				class="badge"
+				class:stat-hidden={editable && isHidden(badge.key)}
+				title="{badge.label} ({badge.abbr})"
+			>
 				{#if editable}
+					<button
+						type="button"
+						class="badge-toggle"
+						title={toggleTitle(badge.key)}
+						onclick={() => {
+							toggleHidden(badge.key);
+						}}><BadgeFace {badge} cutColor={iconCutColor} /></button
+					>
 					<input
 						type="text"
 						bind:value={card[badge.key]}
 						style:font-size={valueFontSize(card[badge.key])}
 					/>
 				{:else}
+					<BadgeFace {badge} cutColor={iconCutColor} />
 					<span class="badge-value" style:font-size={valueFontSize(card[badge.key])}
 						>{card[badge.key]}</span
 					>
@@ -112,21 +139,29 @@
 		box-shadow: 0 0 0 0.3mm var(--color-gold);
 	}
 
-	.badge-icon {
-		width: 3.2mm;
-		height: 3.2mm;
-		display: block;
+	/* unstamped seal: hidden badges drop their fill and fade to a dashed sketch */
+	.badge.stat-hidden,
+	:global(.card.ornate) .badge.stat-hidden {
+		background: transparent;
+		border-style: dashed;
+		box-shadow: none;
+		color: inherit;
+		opacity: 0.45;
+		transition: opacity 120ms;
+	}
+
+	.badge.stat-hidden:hover {
+		opacity: 0.7;
+	}
+
+	.badge-toggle {
+		font: inherit;
+		color: inherit;
+		background: none;
+		border: none;
+		padding: 0;
+		cursor: pointer;
 		line-height: 0;
-	}
-
-	.badge-icon :global(svg) {
-		width: 100%;
-		height: 100%;
-	}
-
-	.badge-label {
-		line-height: 1;
-		letter-spacing: 0.02em;
 	}
 
 	.badge-value {

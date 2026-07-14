@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { prefs } from '$lib/state/preferences.svelte';
+	import { STAT_BADGES } from '$lib/domain/statBadges';
 	import { computeCardFit, type FitResult } from '$lib/domain/cardFit';
 	import type { MonsterCard } from '$lib/domain/types';
 	import { woundThresholds } from '$lib/domain/wounds';
@@ -23,6 +24,8 @@
 
 	const thresholds = $derived(woundThresholds(card.lifePoints));
 	const ornate = $derived(prefs.cardStyle === 'ornate');
+	// when every badge is hidden the whole column disappears and the body takes its width
+	const allBadgesHidden = $derived(card.hiddenStats.length === STAT_BADGES.length);
 
 	let showFlavor = $state(false);
 	let showNotes = $state(false);
@@ -141,7 +144,9 @@
 			{/if}
 		</div>
 
-		<StatBadges bind:card {editable} />
+		{#if editable || !allBadgesHidden}
+			<StatBadges bind:card {editable} />
+		{/if}
 	</div>
 
 	<TalentRow bind:card {editable} />

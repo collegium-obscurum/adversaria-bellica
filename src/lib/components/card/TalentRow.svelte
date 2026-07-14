@@ -26,52 +26,88 @@
 		talent.maxQsOverride = input.value === '' ? null : clampQs(Number(input.value));
 		input.value = String(effectiveTalent(card.attributes, talent, key).maxQs);
 	}
+
+	function showTalents() {
+		card.talentsHidden = false;
+	}
 </script>
 
-<div class="talents">
-	{#each TALENT_ROWS as row (row[0])}
-		<div class="talent-row">
-			{#each row as key (key)}
-				{@const talent = card.talents[key]}
-				{@const shown = effectiveTalent(card.attributes, talent, key)}
-				<div class="talent">
-					<b>{TALENT_LABELS[key]}</b>
-					{#if editable}
-						<input
-							type="number"
-							min="1"
-							max="99"
-							class:overridden={talent.valueOverride !== null}
-							value={shown.value}
-							onchange={(event) => {
-								setValueOverride(key, event.currentTarget);
-							}}
-							title="Wert (leeren = berechnet)"
-						/>
-						(QS
-						<input
-							class="qs"
-							class:overridden={talent.maxQsOverride !== null}
-							type="number"
-							min="1"
-							max="6"
-							value={shown.maxQs}
-							onchange={(event) => {
-								setMaxQsOverride(key, event.currentTarget);
-							}}
-							title="max. QS (leeren = berechnet)"
-						/>)
-					{:else}
+{#if card.talentsHidden && editable}
+	<button
+		type="button"
+		class="talents talents-hidden"
+		title="Wird nicht gedruckt – klicken zum Einblenden"
+		onclick={showTalents}
+	>
+		{#each TALENT_ROWS as row (row[0])}
+			<span class="talent-row">
+				{#each row as key (key)}
+					{@const shown = effectiveTalent(card.attributes, card.talents[key], key)}
+					<span class="talent">
+						<b>{TALENT_LABELS[key]}</b>
 						{shown.value} (QS {shown.maxQs})
-					{/if}
-				</div>
-			{/each}
-		</div>
-	{/each}
-</div>
+					</span>
+				{/each}
+			</span>
+		{/each}
+	</button>
+{:else if !card.talentsHidden}
+	<div class="talents">
+		{#if editable}
+			<button
+				type="button"
+				class="remove hide-toggle"
+				title="Talente ausblenden (Werte bleiben erhalten)"
+				onclick={() => {
+					card.talentsHidden = true;
+				}}>✕</button
+			>
+		{/if}
+		{#each TALENT_ROWS as row (row[0])}
+			<div class="talent-row">
+				{#each row as key (key)}
+					{@const talent = card.talents[key]}
+					{@const shown = effectiveTalent(card.attributes, talent, key)}
+					<div class="talent">
+						<b>{TALENT_LABELS[key]}</b>
+						{#if editable}
+							<input
+								type="number"
+								min="1"
+								max="99"
+								class:overridden={talent.valueOverride !== null}
+								value={shown.value}
+								onchange={(event) => {
+									setValueOverride(key, event.currentTarget);
+								}}
+								title="Wert (leeren = berechnet)"
+							/>
+							(QS
+							<input
+								class="qs"
+								class:overridden={talent.maxQsOverride !== null}
+								type="number"
+								min="1"
+								max="6"
+								value={shown.maxQs}
+								onchange={(event) => {
+									setMaxQsOverride(key, event.currentTarget);
+								}}
+								title="max. QS (leeren = berechnet)"
+							/>)
+						{:else}
+							{shown.value} (QS {shown.maxQs})
+						{/if}
+					</div>
+				{/each}
+			</div>
+		{/each}
+	</div>
+{/if}
 
 <style>
 	.talents {
+		position: relative;
 		display: flex;
 		flex-direction: column;
 		gap: 0.5mm;
@@ -83,6 +119,28 @@
 	:global(.card.ornate) .talents {
 		background: rgb(255 250 232 / 55%);
 		border-color: var(--color-gold-soft);
+	}
+
+	/* unstamped seal: the hidden block drops its fill and fades to a dashed sketch */
+	.talents.talents-hidden,
+	:global(.card.ornate) .talents.talents-hidden {
+		font: inherit;
+		color: inherit;
+		background: transparent;
+		border-style: dashed;
+		opacity: 0.45;
+		cursor: pointer;
+		transition: opacity 120ms;
+	}
+
+	.talents.talents-hidden:hover {
+		opacity: 0.7;
+	}
+
+	.hide-toggle {
+		position: absolute;
+		top: -1mm;
+		right: -1mm;
 	}
 
 	.talent-row {

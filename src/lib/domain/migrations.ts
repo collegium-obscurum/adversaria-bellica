@@ -10,6 +10,7 @@ import type {
 } from './types';
 import { ATTRIBUTE_KEYS, TALENT_KEYS, WOUND_TRIGGERS } from './types';
 import { FIT_FLOOR, type FitResult } from './cardFit';
+import { STAT_BADGES, type StatKey } from './statBadges';
 
 interface LegacyActionEntry {
 	from: number;
@@ -145,6 +146,22 @@ export function migrateStats(raw: Record<string, unknown>): void {
 	raw.lifePoints = Number.isFinite(lifePoints) ? Math.max(1, lifePoints) : 1;
 }
 
+/**
+ * Cards saved before explicit visibility hid empty badges implicitly; deriving hiddenStats
+ * from the empty fields keeps their print output unchanged. Expects stats already migrated.
+ */
+export function migrateHiddenStats(raw: Record<string, unknown>): StatKey[] {
+	const validKeys = STAT_BADGES.map((badge) => badge.key);
+	if (Array.isArray(raw.hiddenStats)) {
+		return validKeys.filter((key) => (raw.hiddenStats as unknown[]).includes(key));
+	}
+	const hidden: StatKey[] = [];
+	for (const key of TEXT_STAT_KEYS) {
+		if ((raw[key] as string).trim() === '') hidden.push(key);
+	}
+	return hidden;
+}
+
 /** Cards saved before fit tracking count as fitting until their next save re-measures them. */
 export function migrateFit(raw: unknown): FitResult {
 	if (typeof raw !== 'object' || raw === null) {
@@ -174,5 +191,7 @@ export function migrateCard(raw: Record<string, unknown>): MonsterCard {
 	raw.customMoves = migrateCustomMoves(raw.customMoves);
 	raw.fit = migrateFit(raw.fit);
 	migrateStats(raw);
+	raw.hiddenStats = migrateHiddenStats(raw);
+	raw.talentsHidden = raw.talentsHidden === true;
 	return raw as unknown as MonsterCard;
 }

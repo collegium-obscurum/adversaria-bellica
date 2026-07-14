@@ -1,4 +1,5 @@
 import type { FitResult } from './cardFit';
+import type { StatKey } from './statBadges';
 
 export interface TalentValue {
 	value: number;
@@ -69,6 +70,9 @@ export interface MonsterCard {
 	actions: ActionEntry[];
 	specialMoves: Record<WoundTrigger, SpecialMove>;
 	customMoves: CustomMove[];
+	/** badges excluded from print/preview; visibility is explicit, empty badges print as empty circles */
+	hiddenStats: StatKey[];
+	talentsHidden: boolean;
 	/** print fit measured on last save; display recomputes live, the library badge reads this */
 	fit: FitResult;
 }
@@ -125,6 +129,8 @@ export function createEmptyCard(): MonsterCard {
 			death: { name: '', effect: '' }
 		},
 		customMoves: [],
+		hiddenStats: [],
+		talentsHidden: false,
 		fit: { scale: 1, fits: true, imageHidden: false }
 	};
 }

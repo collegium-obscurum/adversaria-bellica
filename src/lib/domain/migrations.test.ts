@@ -134,6 +134,37 @@ describe('migrateFit', () => {
 	});
 });
 
+describe('migrateHiddenStats via migrateCard', () => {
+	it('derives hiddenStats from empty text stats on cards without the field', () => {
+		const card = migrateCard({ id: 'a', name: 'Wolf', armor: '2', speed: '8' });
+		expect(card.hiddenStats.sort()).toEqual(
+			['initiative', 'defense', 'soulPower', 'toughness', 'actionCount'].sort()
+		);
+		expect(card.hiddenStats).not.toContain('lifePoints');
+	});
+
+	it('treats whitespace-only stats as empty', () => {
+		const card = migrateCard({ id: 'a', name: 'Wolf', armor: '  ' });
+		expect(card.hiddenStats).toContain('armor');
+	});
+
+	it('keeps a stored hiddenStats list, even with empty stats visible', () => {
+		const card = migrateCard({ id: 'a', name: 'Wolf', hiddenStats: ['lifePoints'] });
+		expect(card.hiddenStats).toEqual(['lifePoints']);
+	});
+
+	it('drops unknown keys from a stored hiddenStats list', () => {
+		const card = migrateCard({ id: 'a', name: 'Wolf', hiddenStats: ['armor', 'garbage', 42] });
+		expect(card.hiddenStats).toEqual(['armor']);
+	});
+
+	it('defaults talentsHidden to false and keeps a stored true', () => {
+		expect(migrateCard({ id: 'a' }).talentsHidden).toBe(false);
+		expect(migrateCard({ id: 'a', talentsHidden: 'yes' }).talentsHidden).toBe(false);
+		expect(migrateCard({ id: 'a', talentsHidden: true }).talentsHidden).toBe(true);
+	});
+});
+
 describe('migrateCard', () => {
 	it('migrates stats too', () => {
 		const card = migrateCard({ id: 'a', name: 'Wolf', armor: 2, lifePoints: 0 });
