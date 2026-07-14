@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { migrateActions, migrateCard, migrateSpecialMoves, migrateStats } from './migrations';
+import {
+	migrateActions,
+	migrateCard,
+	migrateFit,
+	migrateSpecialMoves,
+	migrateStats
+} from './migrations';
 import type { ActionEntry, SpecialMove, WoundTrigger } from './types';
 
 describe('migrateActions', () => {
@@ -95,6 +101,39 @@ describe('migrateStats', () => {
 	});
 });
 
+describe('migrateFit', () => {
+	it('defaults missing fit to a fitting card', () => {
+		expect(migrateFit(undefined)).toEqual({ scale: 1, fits: true, imageHidden: false });
+	});
+
+	it('passes a stored fit through', () => {
+		expect(migrateFit({ scale: 0.85, fits: true, imageHidden: false })).toEqual({
+			scale: 0.85,
+			fits: true,
+			imageHidden: false
+		});
+		expect(migrateFit({ scale: 0.7, fits: false, imageHidden: true })).toEqual({
+			scale: 0.7,
+			fits: false,
+			imageHidden: true
+		});
+	});
+
+	it('defaults imageHidden for fits stored before image dropping', () => {
+		expect(migrateFit({ scale: 0.85, fits: true })).toEqual({
+			scale: 0.85,
+			fits: true,
+			imageHidden: false
+		});
+	});
+
+	it('clamps malformed scales into the valid range', () => {
+		expect(migrateFit({ scale: 3, fits: true }).scale).toBe(1);
+		expect(migrateFit({ scale: 0.1, fits: true }).scale).toBe(0.7);
+		expect(migrateFit({ scale: 'abc', fits: true }).scale).toBe(1);
+	});
+});
+
 describe('migrateCard', () => {
 	it('migrates stats too', () => {
 		const card = migrateCard({ id: 'a', name: 'Wolf', armor: 2, lifePoints: 0 });
@@ -128,6 +167,7 @@ describe('migrateCard', () => {
 		expect(card.customMoves).toEqual([]);
 		expect(card.lifePoints).toBe(1);
 		expect(card.armor).toBe('');
+		expect(card.fit).toEqual({ scale: 1, fits: true, imageHidden: false });
 	});
 
 	it('sanitizes wrong-typed fields', () => {

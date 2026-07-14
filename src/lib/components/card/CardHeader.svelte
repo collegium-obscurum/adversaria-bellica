@@ -79,7 +79,7 @@
 	header {
 		display: flex;
 		align-items: center;
-		gap: 3mm;
+		gap: 1em;
 	}
 
 	.portrait {
@@ -94,6 +94,10 @@
 	:global(.card.ornate) .portrait {
 		border-color: var(--color-brand);
 		box-shadow: 0 0 0 0.35mm var(--color-gold);
+	}
+
+	:global(.card.hide-portrait) img.portrait {
+		display: none;
 	}
 
 	button.portrait {
@@ -121,9 +125,9 @@
 		flex: 1;
 		display: flex;
 		flex-direction: column;
-		gap: 0.5mm;
+		gap: 0.167em;
 		border-bottom: 0.5mm double var(--line);
-		padding-bottom: 1mm;
+		padding-bottom: 0.333em;
 	}
 
 	:global(.card.ornate) .title {
@@ -133,7 +137,7 @@
 	h2 {
 		margin: 0;
 		font-family: var(--font-serif);
-		font-size: 13pt;
+		font-size: 1.53em;
 		color: var(--accent);
 	}
 

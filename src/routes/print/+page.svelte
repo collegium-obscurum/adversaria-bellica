@@ -2,6 +2,7 @@
 	import CardPreview from '$lib/components/card/CardPreview.svelte';
 	import StatLabelToggle from '$lib/components/StatLabelToggle.svelte';
 	import StyleToggle from '$lib/components/StyleToggle.svelte';
+	import ImageToggle from '$lib/components/ImageToggle.svelte';
 	import defaultCardBack from '$lib/assets/card-back.svg';
 	import { BACK_IMAGE_HEIGHT_PX, BACK_IMAGE_WIDTH_PX, coverCropRect } from '$lib/domain/cardBack';
 	import {
@@ -159,6 +160,7 @@
 		<div class="style-row">
 			<StyleToggle />
 			<StatLabelToggle />
+			<ImageToggle />
 			{#if prefs.cardStyle === 'ornate'}
 				<span class="hint"
 					>Der aventurische Stil druckt vollflächig Farbe und braucht viel Tinte.</span

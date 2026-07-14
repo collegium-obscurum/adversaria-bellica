@@ -4,6 +4,7 @@ import { parseStatLabelMode, type StatLabelMode } from '$lib/domain/statLabelMod
 
 const STYLE_KEY = 'adversaria-bellica.cardStyle';
 const STAT_LABEL_KEY = 'adversaria-bellica.statLabelMode';
+const PRINT_IMAGES_KEY = 'adversaria-bellica.printImages';
 
 function loadStyle(): CardStyle {
 	if (!browser) return 'minimal';
@@ -15,7 +16,16 @@ function loadStatLabelMode(): StatLabelMode {
 	return parseStatLabelMode(localStorage.getItem(STAT_LABEL_KEY));
 }
 
-export const prefs = $state({ cardStyle: loadStyle(), statLabelMode: loadStatLabelMode() });
+function loadPrintImages(): boolean {
+	if (!browser) return true;
+	return localStorage.getItem(PRINT_IMAGES_KEY) !== 'false';
+}
+
+export const prefs = $state({
+	cardStyle: loadStyle(),
+	statLabelMode: loadStatLabelMode(),
+	printImages: loadPrintImages()
+});
 
 export function setCardStyle(style: CardStyle) {
 	prefs.cardStyle = style;
@@ -30,6 +40,15 @@ export function setStatLabelMode(mode: StatLabelMode) {
 	prefs.statLabelMode = mode;
 	try {
 		localStorage.setItem(STAT_LABEL_KEY, mode);
+	} catch {
+		// preference just won't survive the reload
+	}
+}
+
+export function setPrintImages(enabled: boolean) {
+	prefs.printImages = enabled;
+	try {
+		localStorage.setItem(PRINT_IMAGES_KEY, String(enabled));
 	} catch {
 		// preference just won't survive the reload
 	}

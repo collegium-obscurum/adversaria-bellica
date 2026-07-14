@@ -1,3 +1,5 @@
+import type { FitResult } from './cardFit';
+
 export interface TalentValue {
 	value: number;
 	maxQs: number;
@@ -46,6 +48,8 @@ export interface MonsterCard {
 	actions: ActionEntry[];
 	specialMoves: Record<WoundTrigger, SpecialMove>;
 	customMoves: CustomMove[];
+	/** print fit measured on last save; display recomputes live, the library badge reads this */
+	fit: FitResult;
 }
 
 export function createEmptyCard(): MonsterCard {
@@ -89,6 +93,7 @@ export function createEmptyCard(): MonsterCard {
 			hp25: { name: '', effect: '' },
 			death: { name: '', effect: '' }
 		},
-		customMoves: []
+		customMoves: [],
+		fit: { scale: 1, fits: true, imageHidden: false }
 	};
 }

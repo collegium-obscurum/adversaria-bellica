@@ -128,7 +128,7 @@
 	.special-moves {
 		display: flex;
 		flex-direction: column;
-		gap: 1mm;
+		gap: 0.333em;
 	}
 
 	.special-moves .range {

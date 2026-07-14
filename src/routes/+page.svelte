@@ -122,6 +122,19 @@
 		<ul class="cards">
 			{#each filtered as card (card.id)}
 				<li>
+					{#if !card.fit.fits || card.fit.imageHidden}
+						<span class="tile-flags">
+							{#if card.fit.imageHidden}
+								<span class="flag" title="Bild passt nicht auf die Karte und wird weggelassen"
+									>ohne Bild</span
+								>
+							{/if}
+							{#if !card.fit.fits}
+								<span class="flag danger" title="Inhalt passt nicht auf die Karte">Passt nicht</span
+								>
+							{/if}
+						</span>
+					{/if}
 					<a class="tile-head" href="{resolve('/editor')}?id={card.id}">
 						{#if card.image}
 							<img src={card.image} alt="" onerror={hideBrokenImage} />
@@ -298,6 +311,7 @@
 	}
 
 	.cards li {
+		position: relative;
 		display: flex;
 		flex-direction: column;
 		gap: 0.6rem;
@@ -305,6 +319,28 @@
 		background: var(--color-surface);
 		border: 1px solid var(--color-border-soft);
 		border-radius: var(--radius-lg);
+	}
+
+	.tile-flags {
+		position: absolute;
+		top: 0.5rem;
+		right: 0.5rem;
+		display: flex;
+		gap: 0.3rem;
+	}
+
+	.flag {
+		padding: 0.1rem 0.45rem;
+		border-radius: var(--radius);
+		background: var(--color-border);
+		color: var(--color-ink-soft);
+		font-size: 0.7rem;
+		font-weight: bold;
+	}
+
+	.flag.danger {
+		background: var(--color-danger);
+		color: #fff;
 	}
 
 	.tile-head {

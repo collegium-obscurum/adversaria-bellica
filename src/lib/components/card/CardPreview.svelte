@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { prefs } from '$lib/state/preferences.svelte';
+	import { computeCardFit, type FitResult } from '$lib/domain/cardFit';
 	import type { MonsterCard } from '$lib/domain/types';
 	import { woundThresholds } from '$lib/domain/wounds';
 	import ActionTable from './ActionTable.svelte';
@@ -11,11 +12,13 @@
 	let {
 		card = $bindable(),
 		editable = false,
-		onPortraitClick
+		onPortraitClick,
+		onFit
 	}: {
 		card: MonsterCard;
 		editable?: boolean;
 		onPortraitClick?: () => void;
+		onFit?: (fit: FitResult) => void;
 	} = $props();
 
 	const thresholds = $derived(woundThresholds(card.lifePoints));
@@ -23,9 +26,37 @@
 
 	let showFlavor = $state(false);
 	let showNotes = $state(false);
+
+	let cardElement = $state<HTMLElement>();
+	let bodyElement = $state<HTMLElement>();
+	let hidePortrait = $state(false);
+
+	$effect(() => {
+		if (editable || !cardElement || !bodyElement) return;
+		const cardNode = cardElement;
+		const bodyNode = bodyElement;
+		// re-run whenever any card content or the card style changes
+		JSON.stringify($state.snapshot(card));
+		void prefs.cardStyle;
+		const imagesEnabled = prefs.printImages;
+		const fit = computeCardFit(imagesEnabled && card.image !== null, (scale, imageHidden) => {
+			cardNode.style.setProperty('--fit-scale', String(scale));
+			// classList instead of state: the measure loop needs the DOM updated synchronously
+			cardNode.classList.toggle('hide-portrait', imageHidden || !imagesEnabled);
+			return bodyNode.scrollHeight - bodyNode.clientHeight > 1;
+		});
+		hidePortrait = fit.imageHidden || !imagesEnabled;
+		onFit?.(fit);
+	});
 </script>
 
-<article class="card" class:editable class:ornate>
+<article
+	class="card"
+	class:editable
+	class:ornate
+	class:hide-portrait={hidePortrait}
+	bind:this={cardElement}
+>
 	<span class="brand-mark top">Collegium Obscurum</span>
 	<span class="brand-mark bottom">Adversaria Bellica</span>
 	{#if ornate}
@@ -38,7 +69,7 @@
 		{/each}
 	{/if}
 	<div class="columns">
-		<div class="body">
+		<div class="body" bind:this={bodyElement}>
 			<CardHeader bind:card {editable} {onPortraitClick} />
 
 			{#if editable}
@@ -235,11 +266,18 @@
 		min-height: 0;
 	}
 
+	.card:not(.editable) .columns {
+		overflow: hidden;
+	}
+
+	/* body text and spacing are em-based so --fit-scale shrinks them together;
+	   badges, talent box and card chrome keep their fixed sizes */
 	.body {
 		flex: 1;
 		display: flex;
 		flex-direction: column;
-		gap: 2mm;
+		font-size: calc(8.5pt * var(--fit-scale, 1));
+		gap: 0.667em;
 		min-width: 0;
 	}
 
@@ -250,7 +288,7 @@
 	}
 
 	.wounds {
-		padding: 1.5mm 2mm;
+		padding: 0.5em 0.667em;
 		border: 0.3mm solid var(--line);
 		border-radius: 1mm;
 	}
@@ -263,18 +301,18 @@
 	.notes-section {
 		display: flex;
 		flex-direction: column;
-		gap: 1mm;
+		gap: 0.333em;
 	}
 
 	.notes {
 		margin: 0;
 		color: var(--muted);
-		font-size: 7.5pt;
+		font-size: 0.882em;
 	}
 
 	.notes-input {
 		color: var(--muted);
-		font-size: 7.5pt;
+		font-size: 0.882em;
 	}
 
 	.flavor-input {
@@ -292,7 +330,7 @@
 	.card :global(h3) {
 		margin: 0;
 		font-family: var(--font-serif);
-		font-size: 8.5pt;
+		font-size: 1em;
 		font-variant: small-caps;
 		letter-spacing: 0.05em;
 		color: var(--accent);

@@ -18,6 +18,8 @@
 	async function captureCard(): Promise<string> {
 		snapshot = $state.snapshot(card);
 		await tick();
+		// one frame so the fit effect's --fit-scale is applied before capture
+		await new Promise(requestAnimationFrame);
 		const node = captureArea?.querySelector<HTMLElement>('.card');
 		if (!node) throw new Error('Capture card not mounted');
 		const { toPng } = await import('html-to-image');

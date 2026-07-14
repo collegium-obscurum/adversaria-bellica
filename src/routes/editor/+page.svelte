@@ -6,6 +6,7 @@
 	import ImageCropper from '$lib/components/ImageCropper.svelte';
 	import StatIcon from '$lib/components/StatIcon.svelte';
 	import StatLabelToggle from '$lib/components/StatLabelToggle.svelte';
+	import ImageToggle from '$lib/components/ImageToggle.svelte';
 	import DownloadMenu from '$lib/components/DownloadMenu.svelte';
 	import { STAT_BADGES } from '$lib/domain/statBadges';
 	import { prefs } from '$lib/state/preferences.svelte';
@@ -13,6 +14,7 @@
 	import TalentCalculator from '$lib/components/TalentCalculator.svelte';
 	import { getCard, upsertCard } from '$lib/state/storage.svelte';
 	import { cardZoom } from '$lib/domain/cardZoom';
+	import type { FitResult } from '$lib/domain/cardFit';
 	import { resolveEditorCard } from '$lib/domain/editorCard';
 
 	const editId = page.url.searchParams.get('id');
@@ -26,6 +28,7 @@
 	let cropperDialog: HTMLDialogElement;
 	let editorWidth = $state(0);
 	let skipGuard = false;
+	let fit = $state<FitResult>({ scale: 1, fits: true, imageHidden: false });
 	const zoom = $derived(cardZoom(editorWidth));
 
 	beforeNavigate((navigation) => {
@@ -44,6 +47,7 @@
 			alert('Die Karte braucht einen Namen.');
 			return;
 		}
+		card.fit = { ...fit };
 		upsertCard($state.snapshot(card));
 		skipGuard = true;
 		void goto(resolve('/'));
@@ -73,18 +77,39 @@
 		<h1>{existing ? 'Karte bearbeiten' : 'Neue Karte'}</h1>
 		<StyleToggle />
 		<StatLabelToggle />
+		<ImageToggle />
 		<DownloadMenu {card} />
 		<a class="cancel" href={resolve('/')} onclick={() => (skipGuard = true)}>Abbrechen</a>
 		<button type="button" class="save" onclick={save}>Speichern</button>
 	</div>
 
 	<div class="workspace">
-		<div class="card-zoom" style:zoom>
+		<div class="card-column">
+			{#if !fit.fits}
+				<p class="fit-hint exceeded" role="status">Inhalt passt nicht auf die Karte.</p>
+			{:else if fit.imageHidden || fit.scale < 1}
+				<p class="fit-hint" role="status">
+					{#if fit.imageHidden}Bild passt nicht auf die Karte und wird weggelassen.{/if}
+					{#if fit.scale < 1}Text wird auf {Math.round(fit.scale * 100)}&nbsp;% verkleinert.{/if}
+				</p>
+			{/if}
+			<div class="card-zoom" style:zoom>
+				<CardPreview
+					bind:card
+					editable
+					onPortraitClick={() => {
+						cropperDialog.showModal();
+					}}
+				/>
+			</div>
+		</div>
+
+		<!-- offscreen display-mode copy: measures the print fit while editing -->
+		<div class="fit-measure" aria-hidden="true">
 			<CardPreview
 				bind:card
-				editable
-				onPortraitClick={() => {
-					cropperDialog.showModal();
+				onFit={(result: FitResult) => {
+					fit = result;
 				}}
 			/>
 		</div>
@@ -185,6 +210,30 @@
 		gap: 2rem;
 		align-items: flex-start;
 		flex-wrap: wrap;
+	}
+
+	.card-column {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	.fit-hint {
+		margin: 0;
+		font-size: 0.85rem;
+		color: var(--color-ink-soft);
+	}
+
+	.fit-hint.exceeded {
+		color: var(--color-danger);
+		font-weight: bold;
+	}
+
+	.fit-measure {
+		position: absolute;
+		left: -300mm;
+		top: 0;
+		pointer-events: none;
 	}
 
 	.side {
