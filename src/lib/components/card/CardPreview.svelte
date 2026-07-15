@@ -292,6 +292,12 @@
 		color: var(--color-cream);
 	}
 
+	/* focus swaps in a light background, so the light banner text must darken */
+	.banner-input:focus,
+	.card.ornate .banner .banner-input:focus {
+		color: var(--color-ink);
+	}
+
 	.banner-input {
 		font-family: inherit;
 		font-variant: inherit;
