@@ -76,6 +76,6 @@ describe('importJson', () => {
 		const card = storage.store.cards[0];
 		expect(card.flavorText).toBe('');
 		expect(card.talents.body).toEqual({ fw: null, valueOverride: null, maxQsOverride: null });
-		expect(card.specialMoves.death).toEqual({ name: '', effect: '' });
+		expect(card.specialMoves.death).toEqual({ name: '', effect: '', color: null });
 	});
 });

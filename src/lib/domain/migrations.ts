@@ -9,6 +9,7 @@ import type {
 	WoundTrigger
 } from './types';
 import { ATTRIBUTE_KEYS, TALENT_KEYS, WOUND_TRIGGERS } from './types';
+import { parseEntryColor } from './entryColor';
 import { FIT_FLOOR, type FitResult } from './cardFit';
 import { STAT_BADGES, type StatKey } from './statBadges';
 
@@ -46,7 +47,8 @@ export function migrateActions(actions: unknown[]): ActionEntry[] {
 		result.push({
 			span: Number.isFinite(span) ? Math.max(1, Math.round(span)) : 1,
 			name: textOrEmpty(record.name),
-			effect: textOrEmpty(record.effect)
+			effect: textOrEmpty(record.effect),
+			color: parseEntryColor(record.color)
 		});
 	}
 	return result;
@@ -60,12 +62,16 @@ export function migrateSpecialMoves(moves: unknown): Record<WoundTrigger, Specia
 	for (const trigger of WOUND_TRIGGERS) {
 		const value = record[trigger];
 		if (typeof value === 'string') {
-			result[trigger] = { name: '', effect: value };
+			result[trigger] = { name: '', effect: value, color: null };
 		} else if (typeof value === 'object' && value !== null) {
 			const move = value as Record<string, unknown>;
-			result[trigger] = { name: textOrEmpty(move.name), effect: textOrEmpty(move.effect) };
+			result[trigger] = {
+				name: textOrEmpty(move.name),
+				effect: textOrEmpty(move.effect),
+				color: parseEntryColor(move.color)
+			};
 		} else {
-			result[trigger] = { name: '', effect: '' };
+			result[trigger] = { name: '', effect: '', color: null };
 		}
 	}
 	return result;
@@ -80,7 +86,8 @@ export function migrateCustomMoves(raw: unknown): CustomMove[] {
 		result.push({
 			trigger: textOrEmpty(record.trigger),
 			name: textOrEmpty(record.name),
-			effect: textOrEmpty(record.effect)
+			effect: textOrEmpty(record.effect),
+			color: parseEntryColor(record.color)
 		});
 	}
 	return result;

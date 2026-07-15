@@ -157,6 +157,12 @@
 		--line: #1a1a1a;
 		--accent: #1a1a1a;
 		--muted: #444;
+		--tint-red: #c0392b;
+		--tint-orange: #d35400;
+		--tint-green: #1e8449;
+		--tint-blue: #1f618d;
+		--tint-purple: #7d3c98;
+		--tint-brown: #6e4a1f;
 		position: relative;
 		width: 105mm;
 		height: 148mm;
@@ -184,6 +190,12 @@
 		--line: #8a6b3f;
 		--accent: var(--color-brand);
 		--muted: var(--color-ink-soft);
+		--tint-red: #7a1e12;
+		--tint-orange: #a45a1c;
+		--tint-green: #4a6741;
+		--tint-blue: #3a5068;
+		--tint-purple: #5e3a5e;
+		--tint-brown: #6b4a2f;
 		color: var(--color-ink);
 		background: radial-gradient(ellipse at 30% 15%, #f7efdc 0%, #efe2c2 55%, #e2cfa4 100%);
 		border: 0.6mm solid var(--color-brand);
@@ -344,6 +356,40 @@
 
 	.card :global(.entry) {
 		margin: 0;
+	}
+
+	/* entry colors: tint sets color, the dot paints itself via currentColor */
+	.card :global(.tint-red) {
+		color: var(--tint-red);
+	}
+
+	.card :global(.tint-orange) {
+		color: var(--tint-orange);
+	}
+
+	.card :global(.tint-green) {
+		color: var(--tint-green);
+	}
+
+	.card :global(.tint-blue) {
+		color: var(--tint-blue);
+	}
+
+	.card :global(.tint-purple) {
+		color: var(--tint-purple);
+	}
+
+	.card :global(.tint-brown) {
+		color: var(--tint-brown);
+	}
+
+	.card :global(.color-dot) {
+		display: inline-block;
+		width: 0.55em;
+		height: 0.55em;
+		border-radius: 50%;
+		background: currentColor;
+		vertical-align: baseline;
 	}
 
 	.card :global(.entry-row) {

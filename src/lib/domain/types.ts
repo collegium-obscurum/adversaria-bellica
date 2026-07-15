@@ -1,4 +1,5 @@
 import type { FitResult } from './cardFit';
+import type { EntryColor } from './entryColor';
 import type { StatKey } from './statBadges';
 
 export interface TalentValue {
@@ -34,6 +35,7 @@ export interface ActionEntry {
 	span: number;
 	name: string;
 	effect: string;
+	color: EntryColor | null;
 }
 
 export const WOUND_TRIGGERS = ['combatStart', 'hp75', 'hp50', 'hp25', 'death'] as const;
@@ -42,6 +44,7 @@ export type WoundTrigger = (typeof WOUND_TRIGGERS)[number];
 export interface SpecialMove {
 	name: string;
 	effect: string;
+	color: EntryColor | null;
 }
 
 export interface CustomMove extends SpecialMove {
@@ -111,22 +114,23 @@ export function createEmptyCard(): MonsterCard {
 			craft: { fw: null, valueOverride: null, maxQsOverride: null }
 		},
 		actions: [
-			{ span: 1, name: 'Kritischer Treffer', effect: '2W6+4 TP' },
-			{ span: 5, name: 'Schwerer Angriff', effect: '1W6+4 TP' },
-			{ span: 9, name: 'Angriff', effect: '1W6+2 TP' },
-			{ span: 4, name: 'Fehlschlag', effect: 'Der Angriff geht daneben.' },
+			{ span: 1, name: 'Kritischer Treffer', effect: '2W6+4 TP', color: null },
+			{ span: 5, name: 'Schwerer Angriff', effect: '1W6+4 TP', color: null },
+			{ span: 9, name: 'Angriff', effect: '1W6+2 TP', color: null },
+			{ span: 4, name: 'Fehlschlag', effect: 'Der Angriff geht daneben.', color: null },
 			{
 				span: 1,
 				name: 'Flucht',
-				effect: 'Erstes Mal: sucht einen Fluchtweg. Zweites Mal: entkommt.'
+				effect: 'Erstes Mal: sucht einen Fluchtweg. Zweites Mal: entkommt.',
+				color: null
 			}
 		],
 		specialMoves: {
-			combatStart: { name: '', effect: '' },
-			hp75: { name: '', effect: '' },
-			hp50: { name: '', effect: '' },
-			hp25: { name: '', effect: '' },
-			death: { name: '', effect: '' }
+			combatStart: { name: '', effect: '', color: null },
+			hp75: { name: '', effect: '', color: null },
+			hp50: { name: '', effect: '', color: null },
+			hp25: { name: '', effect: '', color: null },
+			death: { name: '', effect: '', color: null }
 		},
 		customMoves: [],
 		hiddenStats: [],

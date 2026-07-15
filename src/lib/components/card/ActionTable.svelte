@@ -9,6 +9,8 @@
 		setRangeStart
 	} from '$lib/domain/actions';
 	import type { MonsterCard } from '$lib/domain/types';
+	import { prefs } from '$lib/state/preferences.svelte';
+	import ColorPicker from './ColorPicker.svelte';
 
 	let { card = $bindable(), editable = false }: { card: MonsterCard; editable?: boolean } =
 		$props();
@@ -63,6 +65,7 @@
 					}}
 					ondragend={() => (dragIndex = null)}>⠿</span
 				>
+				<ColorPicker bind:color={action.color} />
 				<span class="range">
 					{#if index === 0}<span class="bound start">1</span>{:else}<input
 							class="bound start"
@@ -105,7 +108,10 @@
 			</div>
 		{:else}
 			<p class="entry">
-				<b>{rangeLabel(ranges[index], index === card.actions.length - 1)} = {action.name}</b
+				{#if action.color && prefs.colorMode === 'dot'}<span class="color-dot tint-{action.color}"
+					></span>&nbsp;{/if}<b
+					class={action.color && prefs.colorMode === 'text' ? `tint-${action.color}` : ''}
+					>{rangeLabel(ranges[index], index === card.actions.length - 1)} = {action.name}</b
 				>{#if action.effect}:
 					{action.effect}{/if}
 			</p>

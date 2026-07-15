@@ -24,6 +24,22 @@ beforeEach(() => {
 	vi.stubGlobal('localStorage', fakeLocalStorage());
 });
 
+describe('colorMode preference', () => {
+	it('defaults to colored text', async () => {
+		const state = await loadModule();
+		expect(state.prefs.colorMode).toBe('text');
+	});
+
+	it('persists the mode across module reloads', async () => {
+		const first = await loadModule();
+		first.setColorMode('dot');
+		expect(first.prefs.colorMode).toBe('dot');
+
+		const second = await loadModule();
+		expect(second.prefs.colorMode).toBe('dot');
+	});
+});
+
 describe('printImages preference', () => {
 	it('defaults to printing images', async () => {
 		const state = await loadModule();

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import CardPreview from '$lib/components/card/CardPreview.svelte';
+	import ColorModeToggle from '$lib/components/ColorModeToggle.svelte';
 	import StatLabelToggle from '$lib/components/StatLabelToggle.svelte';
 	import StyleToggle from '$lib/components/StyleToggle.svelte';
 	import ImageToggle from '$lib/components/ImageToggle.svelte';
@@ -160,6 +161,7 @@
 		<div class="style-row">
 			<StyleToggle />
 			<StatLabelToggle />
+			<ColorModeToggle />
 			<ImageToggle />
 			{#if prefs.cardStyle === 'ornate'}
 				<span class="hint"

@@ -2,6 +2,8 @@
 	import type { MonsterCard, WoundTrigger } from '$lib/domain/types';
 	import { WOUND_TRIGGERS } from '$lib/domain/types';
 	import { triggerLabels } from '$lib/domain/wounds';
+	import { prefs } from '$lib/state/preferences.svelte';
+	import ColorPicker from './ColorPicker.svelte';
 
 	let { card = $bindable(), editable = false }: { card: MonsterCard; editable?: boolean } =
 		$props();
@@ -25,7 +27,7 @@
 	}
 
 	function removeTrigger(trigger: WoundTrigger) {
-		card.specialMoves[trigger] = { name: '', effect: '' };
+		card.specialMoves[trigger] = { name: '', effect: '', color: null };
 		addedTriggers = addedTriggers.filter((t) => t !== trigger);
 	}
 
@@ -35,7 +37,7 @@
 	let focusCustomIndex = $state<number | null>(null);
 
 	function addCustomMove() {
-		card.customMoves.push({ trigger: '', name: '', effect: '' });
+		card.customMoves.push({ trigger: '', name: '', effect: '', color: null });
 		focusCustomIndex = card.customMoves.length - 1;
 	}
 
@@ -49,6 +51,7 @@
 		<h3>Spezialmanöver</h3>
 		{#each visibleTriggers as trigger (trigger)}
 			<div class="entry-row">
+				<ColorPicker bind:color={card.specialMoves[trigger].color} />
 				<span class="range">{labels[trigger]} =</span>
 				<input class="entry-name" bind:value={card.specialMoves[trigger].name} placeholder="Name" />
 				<textarea
@@ -67,6 +70,7 @@
 		{/each}
 		{#each card.customMoves as move, index (move)}
 			<div class="entry-row">
+				<ColorPicker bind:color={move.color} />
 				<span class="range">
 					<input
 						class="trigger-input"
@@ -111,13 +115,21 @@
 		{#each visibleTriggers as trigger (trigger)}
 			{@const move = card.specialMoves[trigger]}
 			<p class="entry">
-				<b>{labels[trigger]}{move.name ? ` = ${move.name}` : ''}</b>{#if move.effect}:
+				{#if move.color && prefs.colorMode === 'dot'}<span class="color-dot tint-{move.color}"
+					></span>&nbsp;{/if}<b
+					class={move.color && prefs.colorMode === 'text' ? `tint-${move.color}` : ''}
+					>{labels[trigger]}{move.name ? ` = ${move.name}` : ''}</b
+				>{#if move.effect}:
 					{move.effect}{/if}
 			</p>
 		{/each}
 		{#each visibleCustomMoves as move (move)}
 			<p class="entry">
-				<b>{move.trigger}{move.name ? ` = ${move.name}` : ''}</b>{#if move.effect}:
+				{#if move.color && prefs.colorMode === 'dot'}<span class="color-dot tint-{move.color}"
+					></span>&nbsp;{/if}<b
+					class={move.color && prefs.colorMode === 'text' ? `tint-${move.color}` : ''}
+					>{move.trigger}{move.name ? ` = ${move.name}` : ''}</b
+				>{#if move.effect}:
 					{move.effect}{/if}
 			</p>
 		{/each}
@@ -134,7 +146,7 @@
 	/* shared column tracks so trigger/name widths line up across rows */
 	.special-moves.editor {
 		display: grid;
-		grid-template-columns: fit-content(30mm) 22mm 1fr auto;
+		grid-template-columns: auto fit-content(30mm) 22mm 1fr auto;
 		gap: 0.333em 1mm;
 	}
 

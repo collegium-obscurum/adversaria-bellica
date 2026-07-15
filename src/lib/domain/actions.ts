@@ -34,7 +34,7 @@ export function rangeLabel(range: ActionRange, isLast = false): string {
 
 /** Append a span-1 row; if the total exceeds 20, the largest row shrinks by 1. */
 export function addAction(entries: ActionEntry[]) {
-	entries.push({ span: 1, name: '', effect: '' });
+	entries.push({ span: 1, name: '', effect: '', color: null });
 	const total = entries.reduce((sum, entry) => sum + entry.span, 0);
 	if (total > D20_FACES) {
 		let largest = entries[0];

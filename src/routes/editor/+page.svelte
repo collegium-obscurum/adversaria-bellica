@@ -5,6 +5,7 @@
 	import CardPreview from '$lib/components/card/CardPreview.svelte';
 	import ImageCropper from '$lib/components/ImageCropper.svelte';
 	import StatIcon from '$lib/components/StatIcon.svelte';
+	import ColorModeToggle from '$lib/components/ColorModeToggle.svelte';
 	import StatLabelToggle from '$lib/components/StatLabelToggle.svelte';
 	import ImageToggle from '$lib/components/ImageToggle.svelte';
 	import DownloadMenu from '$lib/components/DownloadMenu.svelte';
@@ -77,6 +78,7 @@
 		<h1>{existing ? 'Karte bearbeiten' : 'Neue Karte'}</h1>
 		<StyleToggle />
 		<StatLabelToggle />
+		<ColorModeToggle />
 		<ImageToggle />
 		<DownloadMenu {card} />
 		<a class="cancel" href={resolve('/')} onclick={() => (skipGuard = true)}>Abbrechen</a>

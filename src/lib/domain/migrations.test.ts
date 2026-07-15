@@ -16,14 +16,14 @@ describe('migrateActions', () => {
 			{ from: 20, to: 20, name: 'Krit', effect: '2W6' }
 		]);
 		expect(migrated).toEqual([
-			{ span: 5, name: 'Fehlschlag', effect: '' },
-			{ span: 14, name: 'Angriff', effect: '1W6' },
-			{ span: 1, name: 'Krit', effect: '2W6' }
+			{ span: 5, name: 'Fehlschlag', effect: '', color: null },
+			{ span: 14, name: 'Angriff', effect: '1W6', color: null },
+			{ span: 1, name: 'Krit', effect: '2W6', color: null }
 		]);
 	});
 
 	it('passes span rows through unchanged', () => {
-		const entries: ActionEntry[] = [{ span: 20, name: 'x', effect: '' }];
+		const entries: ActionEntry[] = [{ span: 20, name: 'x', effect: '', color: 'red' }];
 		expect(migrateActions(entries)).toEqual(entries);
 	});
 
@@ -33,9 +33,18 @@ describe('migrateActions', () => {
 
 	it('defaults malformed rows and drops non-objects', () => {
 		expect(migrateActions([{ span: 'abc' }, null, 'garbage', { span: 3.4, name: 'x' }])).toEqual([
-			{ span: 1, name: '', effect: '' },
-			{ span: 3, name: 'x', effect: '' }
+			{ span: 1, name: '', effect: '', color: null },
+			{ span: 3, name: 'x', effect: '', color: null }
 		]);
+	});
+
+	it('nulls unknown color values', () => {
+		const migrated = migrateActions([
+			{ span: 2, name: 'a', effect: '', color: 'green' },
+			{ span: 2, name: 'b', effect: '', color: '#ff0000' }
+		]);
+		expect(migrated[0].color).toBe('green');
+		expect(migrated[1].color).toBeNull();
 	});
 });
 
@@ -48,25 +57,30 @@ describe('migrateSpecialMoves', () => {
 			hp25: '',
 			death: ''
 		});
-		expect(migrated.combatStart).toEqual({ name: '', effect: 'Brüllt laut.' });
-		expect(migrated.hp50).toEqual({ name: '', effect: 'Netz' });
-		expect(migrated.hp75).toEqual({ name: '', effect: '' });
+		expect(migrated.combatStart).toEqual({ name: '', effect: 'Brüllt laut.', color: null });
+		expect(migrated.hp50).toEqual({ name: '', effect: 'Netz', color: null });
+		expect(migrated.hp75).toEqual({ name: '', effect: '', color: null });
 	});
 
-	it('passes object moves through', () => {
+	it('passes object moves through, keeping their color', () => {
 		const moves: Record<WoundTrigger, SpecialMove> = {
-			combatStart: { name: 'Wutschrei', effect: '2W6' },
-			hp75: { name: '', effect: '' },
-			hp50: { name: '', effect: '' },
-			hp25: { name: '', effect: '' },
-			death: { name: '', effect: '' }
+			combatStart: { name: 'Wutschrei', effect: '2W6', color: 'purple' },
+			hp75: { name: '', effect: '', color: null },
+			hp50: { name: '', effect: '', color: null },
+			hp25: { name: '', effect: '', color: null },
+			death: { name: '', effect: '', color: null }
 		};
 		expect(migrateSpecialMoves(moves)).toEqual(moves);
 	});
 
+	it('adds a null color to pre-color moves', () => {
+		const migrated = migrateSpecialMoves({ combatStart: { name: 'Wutschrei', effect: '2W6' } });
+		expect(migrated.combatStart).toEqual({ name: 'Wutschrei', effect: '2W6', color: null });
+	});
+
 	it('fills missing triggers with empty moves', () => {
 		const migrated = migrateSpecialMoves({});
-		expect(migrated.death).toEqual({ name: '', effect: '' });
+		expect(migrated.death).toEqual({ name: '', effect: '', color: null });
 	});
 });
 
@@ -177,8 +191,14 @@ describe('migrateCard', () => {
 		expect(card.customMoves).toEqual([]);
 	});
 
-	it('keeps existing custom moves', () => {
+	it('keeps existing custom moves and adds a null color', () => {
 		const moves = [{ trigger: 'Bei Feuerschaden', name: 'Panik', effect: 'Flieht 1 Runde.' }];
+		const card = migrateCard({ id: 'a', name: 'Wolf', customMoves: moves });
+		expect(card.customMoves).toEqual([{ ...moves[0], color: null }]);
+	});
+
+	it('keeps custom move colors', () => {
+		const moves = [{ trigger: 'Bei Feuerschaden', name: 'Panik', effect: '', color: 'orange' }];
 		const card = migrateCard({ id: 'a', name: 'Wolf', customMoves: moves });
 		expect(card.customMoves).toEqual(moves);
 	});
@@ -196,7 +216,7 @@ describe('migrateCard', () => {
 		expect(card.attributes.courage).toBeNull();
 		expect(card.attributes.strength).toBeNull();
 		expect(card.actions).toEqual([]);
-		expect(card.specialMoves.death).toEqual({ name: '', effect: '' });
+		expect(card.specialMoves.death).toEqual({ name: '', effect: '', color: null });
 		expect(card.customMoves).toEqual([]);
 		expect(card.lifePoints).toBe(1);
 		expect(card.armor).toBe('');
@@ -217,7 +237,7 @@ describe('migrateCard', () => {
 		expect(card.flavorText).toBe('');
 		expect(card.image).toBeNull();
 		expect(card.talents.body).toEqual({ fw: null, valueOverride: null, maxQsOverride: 2 });
-		expect(card.customMoves).toEqual([{ trigger: 'Feuer', name: '', effect: '' }]);
+		expect(card.customMoves).toEqual([{ trigger: 'Feuer', name: '', effect: '', color: null }]);
 	});
 
 	it('turns pre-derivation talent values into manual overrides', () => {
