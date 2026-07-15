@@ -12,12 +12,14 @@
 		store
 	} from '$lib/state/storage.svelte';
 	import { cardFitZoom } from '$lib/domain/cardZoom';
+	import { filterCards, WITHOUT } from '$lib/domain/libraryFilter';
 	import { prefs } from '$lib/state/preferences.svelte';
 	import { STAT_BADGES } from '$lib/domain/statBadges';
 	import type { MonsterCard } from '$lib/domain/types';
 
 	let search = $state('');
 	let categoryFilter = $state('');
+	let bannerFilter = $state('');
 	let sortAlpha = $state(false);
 	let viewCard = $state<MonsterCard | undefined>();
 	let viewDialog: HTMLDialogElement;
@@ -36,10 +38,15 @@
 		[...new Set(store.cards.map((card) => card.category).filter(Boolean))].sort()
 	);
 
+	const banners = $derived(
+		[...new Set(store.cards.map((card) => card.banner).filter((banner) => banner.trim()))].sort()
+	);
+
 	const filtered = $derived.by(() => {
-		const matching = store.cards.filter((card) => {
-			if (categoryFilter && card.category !== categoryFilter) return false;
-			return card.name.toLowerCase().includes(search.toLowerCase());
+		const matching = filterCards(store.cards, {
+			search,
+			category: categoryFilter,
+			banner: bannerFilter
 		});
 		if (sortAlpha) {
 			matching.sort((a, b) => a.name.localeCompare(b.name, 'de'));
@@ -113,8 +120,16 @@
 		<input type="search" placeholder="Suche nach Name…" bind:value={search} />
 		<select bind:value={categoryFilter}>
 			<option value="">Alle Typen</option>
+			<option value={WITHOUT}>ohne Typ</option>
 			{#each categories as category (category)}
 				<option value={category}>{category}</option>
+			{/each}
+		</select>
+		<select bind:value={bannerFilter}>
+			<option value="">Alle Banner</option>
+			<option value={WITHOUT}>ohne Banner</option>
+			{#each banners as banner (banner)}
+				<option value={banner}>{banner}</option>
 			{/each}
 		</select>
 		<button
@@ -224,8 +239,8 @@
 >
 	{#if viewCard}
 		<div class="view-toolbar">
-			<OptionsMenu />
 			<DownloadMenu card={viewCard} />
+			<OptionsMenu />
 			<button
 				type="button"
 				class="view-close"
@@ -523,9 +538,12 @@
 	.view-toolbar {
 		display: flex;
 		align-items: center;
-		justify-content: space-between;
-		gap: 1rem;
+		gap: 0.75rem;
 		margin-bottom: 0.75rem;
+	}
+
+	.view-toolbar .view-close {
+		margin-left: auto;
 	}
 
 	.view-close {
