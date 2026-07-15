@@ -174,6 +174,13 @@
 		{/if}
 	</div>
 
+	{#if view === 'samples'}
+		<p class="samples-note">
+			Vorlagen kommen ohne Bilder, aus Urheberrechtsgründen. Eigene Bilder können nach dem Kopieren
+			ergänzt werden.
+		</p>
+	{/if}
+
 	{#if filtered.length === 0}
 		<p>Keine Karte passt zu Suche/Filter.</p>
 	{:else}
@@ -321,6 +328,12 @@
 		align-items: center;
 		flex-wrap: wrap;
 		margin-bottom: 1.5rem;
+	}
+
+	.samples-note {
+		color: var(--color-ink-soft);
+		font-size: 0.9rem;
+		margin: -0.75rem 0 1.5rem;
 	}
 
 	.toolbar input[type='search'] {

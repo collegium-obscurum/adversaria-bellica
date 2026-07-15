@@ -39,7 +39,8 @@
 <div class="actions">
 	<h3>Aktionen (1w20)</h3>
 	<p class="note">
-		Erschwernisse (Schmerz, Zustände) erhöhen das Wurfergebnis. Eine 1 bleibt eine 1.
+		Erschwernisse (Schmerz, Zustände) erhöhen das Wurfergebnis. Eine 1 bleibt eine 1. Ist eine
+		Aktion nicht möglich, gilt die nächste darunter.
 	</p>
 	{#each card.actions as action, index (action)}
 		{#if editable}
