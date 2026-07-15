@@ -117,10 +117,12 @@
 			</p>
 		{/if}
 	{/each}
-	<p class="note">
-		Bewegung (GS) einmal pro Runde zusätzlich zu den Aktionen, oder eine Aktion für doppelte
-		Distanz.
-	</p>
+	{#if !card.hiddenStats.includes('speed')}
+		<p class="note">
+			Bewegung (GS) einmal pro Runde zusätzlich zu den Aktionen, oder eine Aktion für doppelte
+			Distanz.
+		</p>
+	{/if}
 	{#if editable}
 		<button
 			type="button"
