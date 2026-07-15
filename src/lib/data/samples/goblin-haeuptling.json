@@ -1,0 +1,121 @@
+[
+	{
+		"id": "6c695d93-7b1b-4dec-ae46-f917edaad947",
+		"name": "Goblin Häuptling",
+		"category": "Kulturschaffender",
+		"banner": "Anführer",
+		"bannerColor": null,
+		"flavorText": "Seine Krone ist ein verbeulter Zwergenhelm. Die Geschichte dahinter erzählt er gern. Sie wird jedes Mal blutiger.",
+		"notes": "Wenn kein Stammesfeind existiert, wird ein zufälliger Held gewählt.",
+		"image": null,
+		"lifePoints": 42,
+		"armor": "2",
+		"initiative": "16",
+		"speed": "6",
+		"defense": "8",
+		"soulPower": "3",
+		"toughness": "1",
+		"sizeCategory": "",
+		"actionCount": "2",
+		"attributes": {
+			"courage": 14,
+			"sagacity": 11,
+			"intuition": 15,
+			"charisma": 10,
+			"dexterity": 12,
+			"agility": 15,
+			"constitution": 10,
+			"strength": 13
+		},
+		"talents": {
+			"body": {
+				"fw": 7,
+				"value": 16,
+				"maxQs": 3
+			},
+			"social": {
+				"fw": 4,
+				"value": 11,
+				"maxQs": 2
+			},
+			"nature": {
+				"fw": null,
+				"value": 6,
+				"maxQs": 1
+			},
+			"knowledge": {
+				"fw": null,
+				"value": 7,
+				"maxQs": 1
+			},
+			"craft": {
+				"fw": 3,
+				"value": 8,
+				"maxQs": 1
+			}
+		},
+		"actions": [
+			{
+				"span": 2,
+				"name": "Kriegsschrei",
+				"effect": "Alle Helden haben für die Runde Verteidigung-2.",
+				"color": null
+			},
+			{
+				"span": 5,
+				"name": "Stammesfeind",
+				"effect": "Alle Goblins greifen mit ihrer nächsten Aktion den Held an, der dem Häuptling zuletzt Schaden gemacht hat.",
+				"color": null
+			},
+			{
+				"span": 7,
+				"name": "Taktischer Rückzug",
+				"effect": "Alle Goblins bewegen sich gleich ihrer GS, ohne dabei Passierschläge auszulösen.",
+				"color": null
+			},
+			{
+				"span": 4,
+				"name": "Wut",
+				"effect": "Der Häuptling kreischt unverständliche Befehle.",
+				"color": null
+			}
+		],
+		"specialMoves": {
+			"combatStart": {
+				"name": "Hierher I",
+				"effect": "Es erscheinen 2 Goblin Krieger.",
+				"color": null
+			},
+			"hp75": {
+				"name": "Hierher II",
+				"effect": "Es erscheinen 2 Goblin Krieger und 1 Goblin Schamane",
+				"color": null
+			},
+			"hp50": {
+				"name": "Hierher III",
+				"effect": "Es erscheinen 2 Goblin Krieger und 2 Goblins.",
+				"color": null
+			},
+			"hp25": {
+				"name": "Hierher IV",
+				"effect": "Es erscheint ein Goblin, der dem Häuptling die Krone klaut.",
+				"color": null
+			},
+			"death": {
+				"name": "Weg hier.",
+				"effect": "Alle Goblins flüchten.",
+				"color": null
+			}
+		},
+		"customMoves": [],
+		"hiddenStats": [
+			"sizeCategory"
+		],
+		"talentsHidden": false,
+		"fit": {
+			"scale": 0.85,
+			"fits": true,
+			"imageHidden": false
+		}
+	}
+]

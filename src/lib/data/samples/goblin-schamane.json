@@ -1,0 +1,134 @@
+[
+	{
+		"id": "4929cb81-7e05-4b2a-8396-d13b654ea149",
+		"name": "Goblin Schamane",
+		"category": "Kulturschaffender",
+		"banner": "",
+		"bannerColor": null,
+		"flavorText": "„Mailam Rekdai sieht dich. Mailam Rekdai hungert.\"",
+		"notes": "Bleiben hinter anderen Goblins. Greifen Helden an, die im Nahkampf mit anderen Goblins sind.",
+		"image": null,
+		"lifePoints": 30,
+		"armor": "0",
+		"initiative": "10",
+		"speed": "8",
+		"defense": "7",
+		"soulPower": "2",
+		"toughness": "1",
+		"sizeCategory": "",
+		"actionCount": "1",
+		"attributes": {
+			"courage": 13,
+			"sagacity": 12,
+			"intuition": 15,
+			"charisma": 13,
+			"dexterity": 11,
+			"agility": 13,
+			"constitution": 12,
+			"strength": 13
+		},
+		"talents": {
+			"body": {
+				"fw": 6,
+				"value": 13,
+				"maxQs": 2
+			},
+			"social": {
+				"fw": 7,
+				"value": 15,
+				"maxQs": 3
+			},
+			"nature": {
+				"fw": null,
+				"value": 6,
+				"maxQs": 1
+			},
+			"knowledge": {
+				"fw": null,
+				"value": 7,
+				"maxQs": 1
+			},
+			"craft": {
+				"fw": null,
+				"value": 6,
+				"maxQs": 1
+			}
+		},
+		"actions": [
+			{
+				"span": 1,
+				"name": "Blitzschlag",
+				"effect": "(16m) 2W6+4 TP.  Brennend auf kleiner Fläche.",
+				"color": null
+			},
+			{
+				"span": 9,
+				"name": "Hauch des Elements",
+				"effect": "(8m) 1W6+4 TP.  Körperbeherrschung-1 oder liegend.",
+				"color": null
+			},
+			{
+				"span": 3,
+				"name": "Schamanenknüppel",
+				"effect": "1W6+3 TP.",
+				"color": null
+			},
+			{
+				"span": 5,
+				"name": "Versprecher",
+				"effect": "Der Schamane verspricht sich bei seiner Liturgieformel.",
+				"color": null
+			},
+			{
+				"span": 2,
+				"name": "Flucht",
+				"effect": "Erstes Mal: sucht einen Fluchtweg. Zweites Mal: entkommt.",
+				"color": null
+			}
+		],
+		"specialMoves": {
+			"combatStart": {
+				"name": "Zorn der Natur",
+				"effect": "Das Wetter wird in  2 KR zu einem Gewitter.",
+				"color": null
+			},
+			"hp75": {
+				"name": "",
+				"effect": "",
+				"color": null
+			},
+			"hp50": {
+				"name": "",
+				"effect": "",
+				"color": null
+			},
+			"hp25": {
+				"name": "",
+				"effect": "",
+				"color": null
+			},
+			"death": {
+				"name": "Aufopferung",
+				"effect": "Alle in 3m Entfernung nehmen 2W6+4 TP.",
+				"color": null
+			}
+		},
+		"customMoves": [
+			{
+				"trigger": "Im Nahkampf",
+				"name": "Verteidigungshaltung",
+				"effect": "RS wird zu 2. Aktionen 2 - 13 wird zu Schamanenknüppel",
+				"color": null
+			}
+		],
+		"hiddenStats": [
+			"sizeCategory"
+		],
+		"talentsHidden": false,
+		"fit": {
+			"scale": 0.95,
+			"fits": true,
+			"imageHidden": false
+		}
+	}
+]

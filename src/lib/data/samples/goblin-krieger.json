@@ -1,0 +1,134 @@
+[
+	{
+		"id": "1d27fc8c-114f-40d4-a958-c3bbeeb1fcdc",
+		"name": "Goblin Krieger",
+		"category": "Kulturschaffender",
+		"banner": "",
+		"bannerColor": null,
+		"flavorText": "„Klein, krumm, gierig – und schneller mit dem Messer, als du 'Praios' sagen kannst.\"",
+		"notes": "Gutes Gehör. Sehen im Dunkeln. Greifen zufällige Gegner an.",
+		"image": null,
+		"lifePoints": 32,
+		"armor": "1",
+		"initiative": "14",
+		"speed": "8",
+		"defense": "9",
+		"soulPower": "-1",
+		"toughness": "1",
+		"sizeCategory": "",
+		"actionCount": "1",
+		"attributes": {
+			"courage": 12,
+			"sagacity": 10,
+			"intuition": 14,
+			"charisma": 13,
+			"dexterity": 14,
+			"agility": 15,
+			"constitution": 13,
+			"strength": 12
+		},
+		"talents": {
+			"body": {
+				"fw": 7,
+				"value": 14,
+				"maxQs": 3
+			},
+			"social": {
+				"fw": 3,
+				"value": 10,
+				"maxQs": 1
+			},
+			"nature": {
+				"fw": null,
+				"value": 7,
+				"maxQs": 1
+			},
+			"knowledge": {
+				"fw": null,
+				"value": 7,
+				"maxQs": 1
+			},
+			"craft": {
+				"fw": null,
+				"value": 7,
+				"maxQs": 1
+			}
+		},
+		"actions": [
+			{
+				"span": 2,
+				"name": "Messer in den Rücken",
+				"effect": "2W6+6 TP und liegend",
+				"color": null
+			},
+			{
+				"span": 7,
+				"name": "Bogenschuss",
+				"effect": "(50m) 1W6+6 TP",
+				"color": null
+			},
+			{
+				"span": 6,
+				"name": "Dolchangriff",
+				"effect": "1W6+4 TP, Verteidigung-2",
+				"color": null
+			},
+			{
+				"span": 4,
+				"name": "Streiten",
+				"effect": "Der Goblin streitet mit anderen oder sich selbst.",
+				"color": null
+			},
+			{
+				"span": 1,
+				"name": "Flucht",
+				"effect": "Erstes Mal: sucht einen Fluchtweg. Zweites Mal: entkommt.",
+				"color": null
+			}
+		],
+		"specialMoves": {
+			"combatStart": {
+				"name": "Hinterhalt",
+				"effect": "Wenn Helden überrascht sind. Held mit niedrigsten LeP erhält 1W6+6 TP.",
+				"color": null
+			},
+			"hp75": {
+				"name": "",
+				"effect": "",
+				"color": null
+			},
+			"hp50": {
+				"name": "",
+				"effect": "",
+				"color": null
+			},
+			"hp25": {
+				"name": "",
+				"effect": "",
+				"color": null
+			},
+			"death": {
+				"name": "",
+				"effect": "",
+				"color": null
+			}
+		},
+		"customMoves": [
+			{
+				"trigger": "Sobald nicht mehr in Überzahl",
+				"name": "Flucht",
+				"effect": "Streiten wird zur Flucht Aktion.",
+				"color": null
+			}
+		],
+		"hiddenStats": [
+			"sizeCategory"
+		],
+		"talentsHidden": false,
+		"fit": {
+			"scale": 1,
+			"fits": true,
+			"imageHidden": false
+		}
+	}
+]
