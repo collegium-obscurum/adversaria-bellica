@@ -24,7 +24,8 @@
 
 <style>
 	.toggle {
-		display: inline-flex;
+		display: inline-grid;
+		grid-template-columns: 1fr 1fr;
 		border: 1px solid var(--color-border);
 		border-radius: 999px;
 		background: var(--color-surface);
@@ -40,6 +41,7 @@
 		color: var(--color-muted);
 		padding: 0.25rem 0.6rem;
 		cursor: pointer;
+		text-align: center;
 	}
 
 	button.active {

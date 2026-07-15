@@ -230,8 +230,8 @@ describe('migrateCard', () => {
 		expect(card.flavorText).toBe('');
 		expect(card.notes).toBe('');
 		expect(card.image).toBeNull();
-		expect(card.talents.body).toEqual({ fw: null, valueOverride: null, maxQsOverride: null });
-		expect(card.talents.craft).toEqual({ fw: null, valueOverride: null, maxQsOverride: null });
+		expect(card.talents.body).toEqual({ fw: null, value: 1, maxQs: 1 });
+		expect(card.talents.craft).toEqual({ fw: null, value: 1, maxQs: 1 });
 		expect(card.attributes.courage).toBeNull();
 		expect(card.attributes.strength).toBeNull();
 		expect(card.actions).toEqual([]);
@@ -255,30 +255,44 @@ describe('migrateCard', () => {
 		expect(card.name).toBe('');
 		expect(card.flavorText).toBe('');
 		expect(card.image).toBeNull();
-		expect(card.talents.body).toEqual({ fw: null, valueOverride: null, maxQsOverride: 2 });
+		expect(card.talents.body).toEqual({ fw: null, value: 1, maxQs: 2 });
 		expect(card.customMoves).toEqual([{ trigger: 'Feuer', name: '', effect: '', color: null }]);
 	});
 
-	it('turns pre-derivation talent values into manual overrides', () => {
+	it('keeps plain talent values as they are', () => {
 		const card = migrateCard({
 			id: 'a',
 			name: 'Wolf',
-			talents: { body: { value: 10, maxQs: 3 }, social: { value: 5, maxQs: 2 } }
+			talents: { body: { fw: 4, value: 10, maxQs: 3 }, social: { value: 5, maxQs: 2 } }
 		});
-		expect(card.talents.body).toEqual({ fw: null, valueOverride: 10, maxQsOverride: 3 });
-		expect(card.talents.social).toEqual({ fw: null, valueOverride: 5, maxQsOverride: 2 });
+		expect(card.talents.body).toEqual({ fw: 4, value: 10, maxQs: 3 });
+		expect(card.talents.social).toEqual({ fw: null, value: 5, maxQs: 2 });
 	});
 
-	it('keeps current-shape talents and attributes as they are', () => {
+	it('bakes derivation-era talents into plain values using the card attributes', () => {
 		const card = migrateCard({
 			id: 'a',
 			name: 'Wolf',
-			attributes: { courage: 14, strength: 12 },
-			talents: { body: { fw: 7, valueOverride: null, maxQsOverride: null } }
+			attributes: { agility: 12, courage: 12, strength: 12 },
+			talents: {
+				body: { fw: 6, valueOverride: null, maxQsOverride: null },
+				social: { fw: 6, valueOverride: 15, maxQsOverride: null }
+			}
+		});
+		// (12+12+12-25)/2 rounded up = 6, +FW 6
+		expect(card.talents.body).toEqual({ fw: 6, value: 12, maxQs: 2 });
+		expect(card.talents.social.value).toBe(15);
+		expect(card.talents.social.fw).toBe(6);
+	});
+
+	it('keeps migrated attributes', () => {
+		const card = migrateCard({
+			id: 'a',
+			name: 'Wolf',
+			attributes: { courage: 14, strength: 12 }
 		});
 		expect(card.attributes.courage).toBe(14);
 		expect(card.attributes.strength).toBe(12);
 		expect(card.attributes.sagacity).toBeNull();
-		expect(card.talents.body).toEqual({ fw: 7, valueOverride: null, maxQsOverride: null });
 	});
 });

@@ -2,6 +2,7 @@
 	import { resolve } from '$app/paths';
 	import CardPreview from '$lib/components/card/CardPreview.svelte';
 	import DownloadMenu from '$lib/components/DownloadMenu.svelte';
+	import OptionsMenu from '$lib/components/OptionsMenu.svelte';
 	import StatIcon from '$lib/components/StatIcon.svelte';
 	import {
 		deleteCard,
@@ -211,6 +212,7 @@
 >
 	{#if viewCard}
 		<div class="view-toolbar">
+			<OptionsMenu />
 			<DownloadMenu card={viewCard} />
 			<button
 				type="button"

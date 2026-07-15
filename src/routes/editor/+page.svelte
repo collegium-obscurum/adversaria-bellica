@@ -5,13 +5,10 @@
 	import CardPreview from '$lib/components/card/CardPreview.svelte';
 	import ImageCropper from '$lib/components/ImageCropper.svelte';
 	import StatIcon from '$lib/components/StatIcon.svelte';
-	import ColorModeToggle from '$lib/components/ColorModeToggle.svelte';
-	import StatLabelToggle from '$lib/components/StatLabelToggle.svelte';
-	import ImageToggle from '$lib/components/ImageToggle.svelte';
 	import DownloadMenu from '$lib/components/DownloadMenu.svelte';
+	import OptionsMenu from '$lib/components/OptionsMenu.svelte';
 	import { STAT_BADGES } from '$lib/domain/statBadges';
 	import { prefs } from '$lib/state/preferences.svelte';
-	import StyleToggle from '$lib/components/StyleToggle.svelte';
 	import TalentCalculator from '$lib/components/TalentCalculator.svelte';
 	import { getCard, upsertCard } from '$lib/state/storage.svelte';
 	import { cardZoom } from '$lib/domain/cardZoom';
@@ -76,10 +73,7 @@
 	{/if}
 	<div class="toolbar">
 		<h1>{existing ? 'Karte bearbeiten' : 'Neue Karte'}</h1>
-		<StyleToggle />
-		<StatLabelToggle />
-		<ColorModeToggle />
-		<ImageToggle />
+		<OptionsMenu />
 		<DownloadMenu {card} />
 		<a class="cancel" href={resolve('/')} onclick={() => (skipGuard = true)}>Abbrechen</a>
 		<button type="button" class="save" onclick={save}>Speichern</button>

@@ -1,3 +1,4 @@
+import { TALENT_KEYS } from './types';
 import type { AttributeKey, TalentEntry, TalentKey, TalentValue } from './types';
 
 export interface AttributeInfo {
@@ -74,15 +75,13 @@ export function derivedTalent(
 	};
 }
 
-/** What the card shows: the manual override where set, the derived value otherwise. */
-export function effectiveTalent(
+/** True when every group's derived value matches what the card currently prints. */
+export function talentsInSync(
 	attributes: Record<AttributeKey, number | null>,
-	talent: TalentEntry,
-	key: TalentKey
-): TalentValue {
-	const derived = derivedTalent(attributes, talent.fw, key);
-	return {
-		value: talent.valueOverride ?? derived.value,
-		maxQs: talent.maxQsOverride ?? derived.maxQs
-	};
+	talents: Record<TalentKey, TalentEntry>
+): boolean {
+	return TALENT_KEYS.every((key) => {
+		const derived = derivedTalent(attributes, talents[key].fw, key);
+		return derived.value === talents[key].value && derived.maxQs === talents[key].maxQs;
+	});
 }

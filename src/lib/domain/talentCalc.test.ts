@@ -3,11 +3,11 @@ import {
 	clampQs,
 	clampTalentValue,
 	derivedTalent,
-	effectiveTalent,
 	talentMaxQs,
+	talentsInSync,
 	talentValue
 } from './talentCalc';
-import type { AttributeKey } from './types';
+import type { AttributeKey, TalentEntry, TalentKey } from './types';
 
 function attributes(values: Partial<Record<AttributeKey, number>> = {}) {
 	return {
@@ -90,18 +90,23 @@ describe('derivedTalent', () => {
 	});
 });
 
-describe('effectiveTalent', () => {
+describe('talentsInSync', () => {
 	const attrs = attributes({ agility: 12, courage: 12, strength: 12 });
 
-	it('returns the derived value when no override is set', () => {
-		const talent = { fw: 6, valueOverride: null, maxQsOverride: null };
-		expect(effectiveTalent(attrs, talent, 'body')).toEqual({ value: 12, maxQs: 2 });
+	function talents(overrides: Partial<Record<TalentKey, TalentEntry>> = {}) {
+		const result = {} as Record<TalentKey, TalentEntry>;
+		for (const key of ['body', 'social', 'nature', 'knowledge', 'craft'] as TalentKey[]) {
+			result[key] = overrides[key] ?? { fw: null, value: 1, maxQs: 1 };
+		}
+		return result;
+	}
+
+	it('is true when every printed value matches its derivation', () => {
+		expect(talentsInSync(attrs, talents({ body: { fw: 6, value: 12, maxQs: 2 } }))).toBe(true);
 	});
 
-	it('prefers overrides independently per field', () => {
-		const talent = { fw: 6, valueOverride: 15, maxQsOverride: null };
-		expect(effectiveTalent(attrs, talent, 'body')).toEqual({ value: 15, maxQs: 2 });
-		const qsOnly = { fw: 6, valueOverride: null, maxQsOverride: 4 };
-		expect(effectiveTalent(attrs, qsOnly, 'body')).toEqual({ value: 12, maxQs: 4 });
+	it('is false when a value or QS diverges', () => {
+		expect(talentsInSync(attrs, talents({ body: { fw: 6, value: 15, maxQs: 2 } }))).toBe(false);
+		expect(talentsInSync(attrs, talents({ body: { fw: 6, value: 12, maxQs: 4 } }))).toBe(false);
 	});
 });

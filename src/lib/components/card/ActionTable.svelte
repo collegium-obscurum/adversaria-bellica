@@ -91,7 +91,7 @@
 							title="Bereichsende"
 						/>{/if} =
 				</span>
-				<input class="entry-name" bind:value={action.name} placeholder="Name" />
+				<textarea class="entry-name" bind:value={action.name} placeholder="Name"></textarea>
 				<textarea
 					class="entry-effect"
 					bind:value={action.effect}

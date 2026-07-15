@@ -171,6 +171,11 @@
 		line-height: 1.1;
 	}
 
+	/* empty badges keep the value line so the icon stays at the top like in the editor */
+	.badge-value:empty::before {
+		content: '\200b';
+	}
+
 	.badge input {
 		width: 8mm;
 		border: none;

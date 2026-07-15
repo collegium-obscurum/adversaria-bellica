@@ -25,9 +25,16 @@
 
 	const thresholds = $derived(card.lifePoints === null ? null : woundThresholds(card.lifePoints));
 	const ornate = $derived(prefs.cardStyle === 'ornate');
+	let showBanner = $state(false);
 	// the banner strip replaces the top brand mark and top corner ornaments
-	const hasBanner = $derived(editable || card.banner.trim() !== '');
+	const hasBanner = $derived(card.banner.trim() !== '' || (editable && showBanner));
 	const cornerPositions = $derived(hasBanner ? ['bl', 'br'] : ['tl', 'tr', 'bl', 'br']);
+
+	function removeBanner() {
+		card.banner = '';
+		card.bannerColor = null;
+		showBanner = false;
+	}
 	// when every badge is hidden the whole column disappears and the body takes its width
 	const allBadgesHidden = $derived(card.hiddenStats.length === STAT_BADGES.length);
 
@@ -70,12 +77,20 @@
 			{#if editable}
 				<input class="banner-input" bind:value={card.banner} placeholder="Banner" />
 				<ColorPicker bind:color={card.bannerColor} />
+				<button type="button" class="remove" onclick={removeBanner} title="Banner entfernen"
+					>✕</button
+				>
 			{:else}
 				<span class="banner-label">{card.banner}</span>
 			{/if}
 		</div>
 	{:else}
 		<span class="brand-mark top">Collegium Obscurum</span>
+		{#if editable}
+			<button type="button" class="add add-banner" onclick={() => (showBanner = true)}
+				>+ Banner</button
+			>
+		{/if}
 	{/if}
 	<span class="brand-mark bottom">Adversaria Bellica</span>
 	{#if ornate}
@@ -296,6 +311,15 @@
 		text-align: center;
 		color: inherit;
 		width: 60%;
+	}
+
+	/* floats in the whitespace between the top brand mark and the header,
+	   out of flow so it neither covers the mark nor pushes the card content */
+	.card .add-banner {
+		position: absolute;
+		top: 4.8mm;
+		left: 50%;
+		transform: translateX(-50%);
 	}
 
 	.corner {
@@ -532,6 +556,13 @@
 		min-height: 1.4em;
 		width: 100%;
 		box-sizing: border-box;
+	}
+
+	/* name fields wrap instead of clipping; fixed width keeps rows aligned */
+	.card.editable :global(textarea.entry-name) {
+		width: 22mm;
+		flex-shrink: 0;
+		font-weight: bold;
 	}
 
 	.card.editable :global(input[type='number']) {

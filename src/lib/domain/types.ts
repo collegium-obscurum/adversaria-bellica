@@ -23,11 +23,11 @@ export const ATTRIBUTE_KEYS = [
 export type AttributeKey = (typeof ATTRIBUTE_KEYS)[number];
 
 export interface TalentEntry {
-	/** skill value (FW) feeding the derived talent value; null = not entered */
+	/** skill value (FW), a calculator input; null = not entered */
 	fw: number | null;
-	/** manual override; null = use the derived value */
-	valueOverride: number | null;
-	maxQsOverride: number | null;
+	/** what the card prints; only changed by editing the row or applying the calculator */
+	value: number;
+	maxQs: number;
 }
 
 export interface ActionEntry {
@@ -114,11 +114,11 @@ export function createEmptyCard(): MonsterCard {
 			strength: null
 		},
 		talents: {
-			body: { fw: null, valueOverride: null, maxQsOverride: null },
-			social: { fw: null, valueOverride: null, maxQsOverride: null },
-			nature: { fw: null, valueOverride: null, maxQsOverride: null },
-			knowledge: { fw: null, valueOverride: null, maxQsOverride: null },
-			craft: { fw: null, valueOverride: null, maxQsOverride: null }
+			body: { fw: null, value: 1, maxQs: 1 },
+			social: { fw: null, value: 1, maxQs: 1 },
+			nature: { fw: null, value: 1, maxQs: 1 },
+			knowledge: { fw: null, value: 1, maxQs: 1 },
+			craft: { fw: null, value: 1, maxQs: 1 }
 		},
 		actions: [
 			{ span: 1, name: 'Kritischer Treffer', effect: '2W6+4 TP', color: null },

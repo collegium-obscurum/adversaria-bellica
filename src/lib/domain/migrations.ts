@@ -9,6 +9,7 @@ import type {
 	WoundTrigger
 } from './types';
 import { ATTRIBUTE_KEYS, TALENT_KEYS, WOUND_TRIGGERS } from './types';
+import { clampQs, clampTalentValue, derivedTalent } from './talentCalc';
 import { parseEntryColor } from './entryColor';
 import { FIT_FLOOR, type FitResult } from './cardFit';
 import { STAT_BADGES, type StatKey } from './statBadges';
@@ -97,8 +98,15 @@ function numberOrNull(value: unknown): number | null {
 	return typeof value === 'number' && Number.isFinite(value) ? value : null;
 }
 
-/** Pre-derivation cards stored {value, maxQs} per talent; those become manual overrides. */
-export function migrateTalents(raw: unknown): Record<TalentKey, TalentEntry> {
+/**
+ * Talents are plain printed values plus the FW calculator input. Derivation-era cards
+ * ({fw, valueOverride, maxQsOverride}) get their effective values baked in, which needs
+ * the already-migrated attributes.
+ */
+export function migrateTalents(
+	raw: unknown,
+	attributes: Record<AttributeKey, number | null>
+): Record<TalentKey, TalentEntry> {
 	const record = typeof raw === 'object' && raw !== null ? (raw as Record<string, unknown>) : {};
 	const result = {} as Record<TalentKey, TalentEntry>;
 	for (const key of TALENT_KEYS) {
@@ -106,17 +114,19 @@ export function migrateTalents(raw: unknown): Record<TalentKey, TalentEntry> {
 			typeof record[key] === 'object' && record[key] !== null
 				? (record[key] as Record<string, unknown>)
 				: {};
-		if ('fw' in value || 'valueOverride' in value || 'maxQsOverride' in value) {
+		const fw = numberOrNull(value.fw);
+		if ('valueOverride' in value || 'maxQsOverride' in value) {
+			const derived = derivedTalent(attributes, fw, key);
 			result[key] = {
-				fw: numberOrNull(value.fw),
-				valueOverride: numberOrNull(value.valueOverride),
-				maxQsOverride: numberOrNull(value.maxQsOverride)
+				fw,
+				value: numberOrNull(value.valueOverride) ?? derived.value,
+				maxQs: numberOrNull(value.maxQsOverride) ?? derived.maxQs
 			};
 		} else {
 			result[key] = {
-				fw: null,
-				valueOverride: numberOrNull(value.value),
-				maxQsOverride: numberOrNull(value.maxQs)
+				fw,
+				value: clampTalentValue(numberOrNull(value.value) ?? 1),
+				maxQs: clampQs(numberOrNull(value.maxQs) ?? 1)
 			};
 		}
 	}
@@ -195,7 +205,7 @@ export function migrateCard(raw: Record<string, unknown>): MonsterCard {
 	raw.notes = textOrEmpty(raw.notes);
 	raw.image = typeof raw.image === 'string' ? raw.image : null;
 	raw.attributes = migrateAttributes(raw.attributes);
-	raw.talents = migrateTalents(raw.talents);
+	raw.talents = migrateTalents(raw.talents, raw.attributes as Record<AttributeKey, number | null>);
 	raw.actions = migrateActions(Array.isArray(raw.actions) ? raw.actions : []);
 	raw.specialMoves = migrateSpecialMoves(raw.specialMoves);
 	raw.customMoves = migrateCustomMoves(raw.customMoves);

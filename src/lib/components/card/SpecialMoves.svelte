@@ -57,7 +57,8 @@
 			<div class="entry-row">
 				<ColorPicker bind:color={card.specialMoves[trigger].color} />
 				<span class="range">{labels[trigger]} =</span>
-				<input class="entry-name" bind:value={card.specialMoves[trigger].name} placeholder="Name" />
+				<textarea class="entry-name" bind:value={card.specialMoves[trigger].name} placeholder="Name"
+				></textarea>
 				<textarea
 					class="entry-effect"
 					bind:value={card.specialMoves[trigger].effect}
@@ -76,19 +77,18 @@
 			<div class="entry-row">
 				<ColorPicker bind:color={move.color} />
 				<span class="range">
-					<input
+					<textarea
 						class="trigger-input"
 						bind:value={move.trigger}
 						placeholder="Auslöser"
-						{@attach (node: HTMLInputElement) => {
+						{@attach (node: HTMLTextAreaElement) => {
 							if (index === focusCustomIndex) {
 								node.focus();
 								focusCustomIndex = null;
 							}
-						}}
-					/> =</span
+						}}></textarea> =</span
 				>
-				<input class="entry-name" bind:value={move.name} placeholder="Name" />
+				<textarea class="entry-name" bind:value={move.name} placeholder="Name"></textarea>
 				<textarea class="entry-effect" bind:value={move.effect} placeholder="Effekt"></textarea>
 				<button
 					type="button"
@@ -165,17 +165,18 @@
 		grid-template-columns: subgrid;
 	}
 
-	/* :global(.card) outranks CardPreview's `.card :global(.range)` nowrap */
+	/* :global(.card) outranks CardPreview's `.card :global(.range)` nowrap;
+	   left-aligned because right alignment reads oddly once the text wraps */
 	:global(.card) .special-moves .range {
-		justify-content: flex-end;
-		text-align: right;
+		justify-content: flex-start;
+		text-align: left;
 		white-space: normal;
 	}
 
-	.trigger-input {
+	/* .card.editable prefix outranks CardPreview's generic textarea width: 100% */
+	:global(.card.editable) .trigger-input {
 		width: 20mm;
 		font-weight: bold;
-		text-align: right;
 	}
 
 	.add-triggers {
