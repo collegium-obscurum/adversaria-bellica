@@ -36,4 +36,9 @@ describe('triggerLabels', () => {
 			death: 'Tod'
 		});
 	});
+
+	it('still yields event labels without HP; HP slots are hidden by the caller', () => {
+		expect(triggerLabels(null).combatStart).toBe('Kampfbeginn');
+		expect(triggerLabels(null).death).toBe('Tod');
+	});
 });

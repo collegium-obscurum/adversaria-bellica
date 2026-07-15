@@ -100,11 +100,11 @@ describe('migrateStats', () => {
 		expect(raw.armor).toBe('');
 	});
 
-	it('clamps lifePoints to at least 1', () => {
-		for (const bad of [0, -5, undefined, 'abc']) {
+	it('turns invalid or sub-1 lifePoints into null (no HP)', () => {
+		for (const bad of [0, -5, undefined, null, 'abc']) {
 			const raw: Record<string, unknown> = { lifePoints: bad };
 			migrateStats(raw);
-			expect(raw.lifePoints).toBe(1);
+			expect(raw.lifePoints).toBeNull();
 		}
 	});
 
@@ -152,7 +152,7 @@ describe('migrateHiddenStats via migrateCard', () => {
 	it('derives hiddenStats from empty text stats on cards without the field', () => {
 		const card = migrateCard({ id: 'a', name: 'Wolf', armor: '2', speed: '8' });
 		expect(card.hiddenStats.sort()).toEqual(
-			['initiative', 'defense', 'soulPower', 'toughness', 'actionCount'].sort()
+			['initiative', 'defense', 'soulPower', 'toughness', 'sizeCategory', 'actionCount'].sort()
 		);
 		expect(card.hiddenStats).not.toContain('lifePoints');
 	});
@@ -164,12 +164,24 @@ describe('migrateHiddenStats via migrateCard', () => {
 
 	it('keeps a stored hiddenStats list, even with empty stats visible', () => {
 		const card = migrateCard({ id: 'a', name: 'Wolf', hiddenStats: ['lifePoints'] });
-		expect(card.hiddenStats).toEqual(['lifePoints']);
+		expect(card.hiddenStats).toEqual(['lifePoints', 'sizeCategory']);
 	});
 
 	it('drops unknown keys from a stored hiddenStats list', () => {
 		const card = migrateCard({ id: 'a', name: 'Wolf', hiddenStats: ['armor', 'garbage', 42] });
-		expect(card.hiddenStats).toEqual(['armor']);
+		expect(card.hiddenStats).toEqual(['armor', 'sizeCategory']);
+	});
+
+	it('hides sizeCategory on cards saved before the GK badge existed', () => {
+		const card = migrateCard({ id: 'a', name: 'Wolf', hiddenStats: [] });
+		expect(card.hiddenStats).toContain('sizeCategory');
+		expect(card.sizeCategory).toBe('');
+	});
+
+	it('respects stored visibility on cards that already have sizeCategory', () => {
+		const card = migrateCard({ id: 'a', name: 'Wolf', sizeCategory: 'mittel', hiddenStats: [] });
+		expect(card.hiddenStats).not.toContain('sizeCategory');
+		expect(card.sizeCategory).toBe('mittel');
 	});
 
 	it('defaults talentsHidden to false and keeps a stored true', () => {
@@ -183,7 +195,7 @@ describe('migrateCard', () => {
 	it('migrates stats too', () => {
 		const card = migrateCard({ id: 'a', name: 'Wolf', armor: 2, lifePoints: 0 });
 		expect(card.armor).toBe('2');
-		expect(card.lifePoints).toBe(1);
+		expect(card.lifePoints).toBeNull();
 	});
 
 	it('adds an empty customMoves list to cards without one', () => {
@@ -225,7 +237,7 @@ describe('migrateCard', () => {
 		expect(card.actions).toEqual([]);
 		expect(card.specialMoves.death).toEqual({ name: '', effect: '', color: null });
 		expect(card.customMoves).toEqual([]);
-		expect(card.lifePoints).toBe(1);
+		expect(card.lifePoints).toBeNull();
 		expect(card.armor).toBe('');
 		expect(card.fit).toEqual({ scale: 1, fits: true, imageHidden: false });
 	});

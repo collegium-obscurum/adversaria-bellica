@@ -62,13 +62,15 @@ export interface MonsterCard {
 	notes: string;
 	/** data URL of the circle cutout, or null */
 	image: string | null;
-	lifePoints: number;
+	/** null = no HP; hides pain thresholds and wound triggers */
+	lifePoints: number | null;
 	armor: string;
 	initiative: string;
 	speed: string;
 	defense: string;
 	soulPower: string;
 	toughness: string;
+	sizeCategory: string;
 	actionCount: string;
 	attributes: Record<AttributeKey, number | null>;
 	talents: Record<TalentKey, TalentEntry>;
@@ -99,6 +101,7 @@ export function createEmptyCard(): MonsterCard {
 		defense: '6',
 		soulPower: '0',
 		toughness: '0',
+		sizeCategory: '',
 		actionCount: '1',
 		attributes: {
 			courage: null,

@@ -6,6 +6,7 @@ export type StatKey =
 	| 'defense'
 	| 'soulPower'
 	| 'toughness'
+	| 'sizeCategory'
 	| 'actionCount';
 
 export type TextStatKey = Exclude<StatKey, 'lifePoints'>;
@@ -23,10 +24,11 @@ export function badgeLabel(badge: StatBadgeInfo): string {
 export const STAT_BADGES: StatBadgeInfo[] = [
 	{ key: 'lifePoints', abbr: 'LeP', label: 'Lebenspunkte' },
 	{ key: 'armor', abbr: 'RS', label: 'Rüstungsschutz' },
-	{ key: 'initiative', abbr: 'INI', label: 'Initiative' },
-	{ key: 'speed', abbr: 'GS', label: 'Geschwindigkeit' },
 	{ key: 'defense', abbr: 'VW', label: 'Verteidigung' },
+	{ key: 'speed', abbr: 'GS', label: 'Geschwindigkeit' },
 	{ key: 'soulPower', abbr: 'SK', label: 'Seelenkraft' },
 	{ key: 'toughness', abbr: 'ZK', label: 'Zähigkeit' },
+	{ key: 'sizeCategory', abbr: 'GK', label: 'Größenkategorie' },
+	{ key: 'initiative', abbr: 'INI', label: 'Initiative' },
 	{ key: 'actionCount', abbr: 'AKT', label: 'Aktionen pro Runde' }
 ];

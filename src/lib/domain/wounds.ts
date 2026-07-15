@@ -18,8 +18,8 @@ export function woundThresholds(maxHp: number): WoundThreshold[] {
 }
 
 /** Slot labels for the special-move triggers; HP slots show cumulative damage. */
-export function triggerLabels(maxHp: number): Record<WoundTrigger, string> {
-	const thresholds = woundThresholds(maxHp);
+export function triggerLabels(maxHp: number | null): Record<WoundTrigger, string> {
+	const thresholds = woundThresholds(maxHp ?? 1);
 	return {
 		combatStart: 'Kampfbeginn',
 		hp75: `ab ${thresholds[0].damage} Schaden`,

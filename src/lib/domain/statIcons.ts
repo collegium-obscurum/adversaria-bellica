@@ -37,6 +37,10 @@ const ICONS: Record<StatKey, (cutColor: string) => string> = {
 	toughness: () =>
 		'<path fill="currentColor" d="M2.5 6.5 H13 C16.5 6.5 19.5 5.5 21.5 3.8 C21.5 7.6 18.8 10.2 15 10.6 L14.4 13.6 H16.2 V16.4 H7.8 V13.6 H9.6 L9 10.6 H7 C4.2 10.6 2.5 8.8 2.5 6.5 Z"/>' +
 		'<path fill="currentColor" d="M6.5 18 H17.5 V20.5 H6.5 Z"/>',
+	sizeCategory: () =>
+		'<path fill="currentColor" d="M12.6 3 H21 V11.4 Z"/>' +
+		'<path fill="currentColor" d="M11.4 21 H3 V12.6 Z"/>' +
+		line('M8.6 15.4 L15.4 8.6', 3),
 	actionCount: (cutColor) =>
 		'<path fill="currentColor" d="M12 1.6 L21 6.8 V17.2 L12 22.4 L3 17.2 V6.8 Z"/>' +
 		cut(

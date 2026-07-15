@@ -23,7 +23,7 @@
 		onFit?: (fit: FitResult) => void;
 	} = $props();
 
-	const thresholds = $derived(woundThresholds(card.lifePoints));
+	const thresholds = $derived(card.lifePoints === null ? null : woundThresholds(card.lifePoints));
 	const ornate = $derived(prefs.cardStyle === 'ornate');
 	// the banner strip replaces the top brand mark and top corner ornaments
 	const hasBanner = $derived(editable || card.banner.trim() !== '');
@@ -117,15 +117,17 @@
 
 			<ActionTable bind:card {editable} />
 
-			<div class="wounds">
-				<b>Schmerz bei Schaden:</b>
-				{thresholds
-					.slice(0, 3)
-					.map((threshold) => threshold.damage)
-					.join(' / ')}
-				· <b>Tod:</b>
-				{thresholds[3].damage}
-			</div>
+			{#if thresholds}
+				<div class="wounds">
+					<b>Schmerz bei Schaden:</b>
+					{thresholds
+						.slice(0, 3)
+						.map((threshold) => threshold.damage)
+						.join(' / ')}
+					· <b>Tod:</b>
+					{thresholds[3].damage}
+				</div>
+			{/if}
 
 			<SpecialMoves bind:card {editable} />
 

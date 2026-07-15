@@ -11,6 +11,7 @@
 		store
 	} from '$lib/state/storage.svelte';
 	import { cardFitZoom } from '$lib/domain/cardZoom';
+	import { STAT_BADGES } from '$lib/domain/statBadges';
 	import type { MonsterCard } from '$lib/domain/types';
 
 	let search = $state('');
@@ -46,6 +47,19 @@
 
 	function hideBrokenImage(event: Event) {
 		(event.currentTarget as HTMLImageElement).style.display = 'none';
+	}
+
+	// tile mirrors the card: badges hidden there or without a value stay off the tile
+	function tileStats(card: MonsterCard): { abbr: string; label: string; value: string }[] {
+		const stats = [];
+		for (const badge of STAT_BADGES) {
+			if (card.hiddenStats.includes(badge.key)) continue;
+			const raw = badge.key === 'lifePoints' ? card.lifePoints : card[badge.key];
+			const value = raw === null ? '' : String(raw).trim();
+			if (value === '') continue;
+			stats.push({ abbr: badge.abbr, label: badge.label, value });
+		}
+		return stats;
 	}
 
 	function onDelete(card: MonsterCard) {
@@ -147,10 +161,9 @@
 						</span>
 					</a>
 					<div class="stats">
-						<span title="Lebenspunkte"><small>LeP</small>{card.lifePoints}</span>
-						<span title="Rüstungsschutz"><small>RS</small>{card.armor}</span>
-						<span title="Initiative"><small>INI</small>{card.initiative}</span>
-						<span title="Geschwindigkeit"><small>GS</small>{card.speed}</span>
+						{#each tileStats(card) as stat (stat.abbr)}
+							<span title={stat.label}><small>{stat.abbr}</small>{stat.value}</span>
+						{/each}
 					</div>
 					<div class="buttons">
 						<button

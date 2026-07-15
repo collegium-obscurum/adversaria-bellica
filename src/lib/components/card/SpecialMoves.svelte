@@ -12,15 +12,19 @@
 
 	let addedTriggers = $state<WoundTrigger[]>([]);
 
+	// without HP there are no wound thresholds; only Kampfbeginn remains meaningful
+	const availableTriggers = $derived(
+		card.lifePoints === null ? WOUND_TRIGGERS.filter((t) => t === 'combatStart') : WOUND_TRIGGERS
+	);
 	const visibleTriggers = $derived(
-		WOUND_TRIGGERS.filter((trigger) => {
+		availableTriggers.filter((trigger) => {
 			const move = card.specialMoves[trigger];
 			return (
 				move.name.trim() !== '' || move.effect.trim() !== '' || addedTriggers.includes(trigger)
 			);
 		})
 	);
-	const hiddenTriggers = $derived(WOUND_TRIGGERS.filter((t) => !visibleTriggers.includes(t)));
+	const hiddenTriggers = $derived(availableTriggers.filter((t) => !visibleTriggers.includes(t)));
 
 	function addTrigger(trigger: WoundTrigger) {
 		addedTriggers.push(trigger);

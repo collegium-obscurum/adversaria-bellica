@@ -21,8 +21,10 @@
 		return '5.5pt';
 	}
 
-	function clampLifePoints() {
-		if (!Number.isFinite(card.lifePoints) || card.lifePoints < 1) card.lifePoints = 1;
+	function normalizeLifePoints() {
+		if (card.lifePoints !== null && (!Number.isFinite(card.lifePoints) || card.lifePoints < 1)) {
+			card.lifePoints = null;
+		}
 	}
 
 	function isHidden(key: StatKey): boolean {
@@ -64,12 +66,12 @@
 					type="number"
 					min="1"
 					bind:value={card.lifePoints}
-					onblur={clampLifePoints}
-					style:font-size={valueFontSize(card.lifePoints)}
+					onblur={normalizeLifePoints}
+					style:font-size={valueFontSize(card.lifePoints ?? '')}
 				/>
 			{:else}
 				<BadgeFace badge={lifePointsBadge} cutColor={iconCutColor} />
-				<span class="badge-value" style:font-size={valueFontSize(card.lifePoints)}
+				<span class="badge-value" style:font-size={valueFontSize(card.lifePoints ?? '')}
 					>{card.lifePoints}</span
 				>
 			{/if}

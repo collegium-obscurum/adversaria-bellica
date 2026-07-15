@@ -139,10 +139,11 @@ const TEXT_STAT_KEYS = [
 	'defense',
 	'soulPower',
 	'toughness',
+	'sizeCategory',
 	'actionCount'
 ] as const;
 
-/** Convert pre-string numeric stats; lifePoints stays a number clamped to at least 1. */
+/** Convert pre-string numeric stats; lifePoints below 1 or invalid means "no HP" (null). */
 export function migrateStats(raw: Record<string, unknown>): void {
 	for (const key of TEXT_STAT_KEYS) {
 		const value = raw[key];
@@ -150,7 +151,7 @@ export function migrateStats(raw: Record<string, unknown>): void {
 		raw[key] = typeof value === 'number' ? String(value) : '';
 	}
 	const lifePoints = Number(raw.lifePoints);
-	raw.lifePoints = Number.isFinite(lifePoints) ? Math.max(1, lifePoints) : 1;
+	raw.lifePoints = Number.isFinite(lifePoints) && lifePoints >= 1 ? lifePoints : null;
 }
 
 /**
@@ -199,8 +200,14 @@ export function migrateCard(raw: Record<string, unknown>): MonsterCard {
 	raw.specialMoves = migrateSpecialMoves(raw.specialMoves);
 	raw.customMoves = migrateCustomMoves(raw.customMoves);
 	raw.fit = migrateFit(raw.fit);
+	// cards saved before the GK badge existed keep their print output unchanged
+	const hadSizeCategory = 'sizeCategory' in raw;
 	migrateStats(raw);
-	raw.hiddenStats = migrateHiddenStats(raw);
+	const hiddenStats = migrateHiddenStats(raw);
+	if (!hadSizeCategory && !hiddenStats.includes('sizeCategory')) {
+		hiddenStats.push('sizeCategory');
+	}
+	raw.hiddenStats = hiddenStats;
 	raw.talentsHidden = raw.talentsHidden === true;
 	return raw as unknown as MonsterCard;
 }
