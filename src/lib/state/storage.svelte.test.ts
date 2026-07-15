@@ -68,6 +68,23 @@ describe('duplicateCard', () => {
 	});
 });
 
+describe('exportJson', () => {
+	it('exports a single card as a one-element array that re-imports cleanly', async () => {
+		const storage = await loadStorageModule();
+		const card = { ...createEmptyCard(), name: 'Wolf' };
+		storage.upsertCard(card);
+
+		const json = storage.exportJson([card]);
+		expect(JSON.parse(json)).toHaveLength(1);
+
+		const count = storage.importJson(json);
+		expect(count).toBe(1);
+		const imported = storage.store.cards[1];
+		expect(imported.name).toBe('Wolf');
+		expect(imported.id).not.toBe(card.id);
+	});
+});
+
 describe('importJson', () => {
 	it('funnels imported cards through migrateCard so missing fields get defaults', async () => {
 		const storage = await loadStorageModule();

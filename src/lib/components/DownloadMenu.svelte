@@ -2,6 +2,7 @@
 	import { tick } from 'svelte';
 	import { cardFileName } from '$lib/domain/filename';
 	import type { MonsterCard } from '$lib/domain/types';
+	import { exportJson } from '$lib/state/storage.svelte';
 	import CardPreview from './card/CardPreview.svelte';
 
 	let { card }: { card: MonsterCard } = $props();
@@ -24,6 +25,17 @@
 		if (!node) throw new Error('Capture card not mounted');
 		const { toPng } = await import('html-to-image');
 		return toPng(node, { pixelRatio: PIXEL_RATIO });
+	}
+
+	function downloadJson() {
+		details.open = false;
+		const blob = new Blob([exportJson([card])], { type: 'application/json' });
+		const url = URL.createObjectURL(blob);
+		const link = document.createElement('a');
+		link.href = url;
+		link.download = cardFileName(card.name, 'json');
+		link.click();
+		URL.revokeObjectURL(url);
 	}
 
 	function closeOnOutsideClick(event: MouseEvent) {
@@ -65,6 +77,7 @@
 	<div class="menu">
 		<button type="button" disabled={busy} onclick={() => download('png')}>Als PNG</button>
 		<button type="button" disabled={busy} onclick={() => download('pdf')}>Als PDF</button>
+		<button type="button" disabled={busy} onclick={downloadJson}>Als JSON</button>
 	</div>
 </details>
 
