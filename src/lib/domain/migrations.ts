@@ -188,6 +188,8 @@ export function migrateCard(raw: Record<string, unknown>): MonsterCard {
 	raw.id = typeof raw.id === 'string' ? raw.id : crypto.randomUUID();
 	raw.name = textOrEmpty(raw.name);
 	raw.category = textOrEmpty(raw.category);
+	raw.banner = textOrEmpty(raw.banner);
+	raw.bannerColor = parseEntryColor(raw.bannerColor);
 	raw.flavorText = textOrEmpty(raw.flavorText);
 	raw.notes = textOrEmpty(raw.notes);
 	raw.image = typeof raw.image === 'string' ? raw.image : null;

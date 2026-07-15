@@ -203,11 +203,18 @@ describe('migrateCard', () => {
 		expect(card.customMoves).toEqual(moves);
 	});
 
+	it('keeps a valid bannerColor and nulls unknown values', () => {
+		expect(migrateCard({ id: 'a', bannerColor: 'purple' }).bannerColor).toBe('purple');
+		expect(migrateCard({ id: 'a', bannerColor: 'pink' }).bannerColor).toBeNull();
+	});
+
 	it('defaults every missing field so a bare object renders', () => {
 		const card = migrateCard({});
 		expect(typeof card.id).toBe('string');
 		expect(card.name).toBe('');
 		expect(card.category).toBe('');
+		expect(card.banner).toBe('');
+		expect(card.bannerColor).toBeNull();
 		expect(card.flavorText).toBe('');
 		expect(card.notes).toBe('');
 		expect(card.image).toBeNull();

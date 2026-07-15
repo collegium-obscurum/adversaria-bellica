@@ -6,6 +6,7 @@
 	import { woundThresholds } from '$lib/domain/wounds';
 	import ActionTable from './ActionTable.svelte';
 	import CardHeader from './CardHeader.svelte';
+	import ColorPicker from './ColorPicker.svelte';
 	import SpecialMoves from './SpecialMoves.svelte';
 	import StatBadges from './StatBadges.svelte';
 	import TalentRow from './TalentRow.svelte';
@@ -24,6 +25,9 @@
 
 	const thresholds = $derived(woundThresholds(card.lifePoints));
 	const ornate = $derived(prefs.cardStyle === 'ornate');
+	// the banner strip replaces the top brand mark and top corner ornaments
+	const hasBanner = $derived(editable || card.banner.trim() !== '');
+	const cornerPositions = $derived(hasBanner ? ['bl', 'br'] : ['tl', 'tr', 'bl', 'br']);
 	// when every badge is hidden the whole column disappears and the body takes its width
 	const allBadgesHidden = $derived(card.hiddenStats.length === STAT_BADGES.length);
 
@@ -58,12 +62,24 @@
 	class:editable
 	class:ornate
 	class:hide-portrait={hidePortrait}
+	style:--wash={card.bannerColor ? `var(--tint-${card.bannerColor})` : null}
 	bind:this={cardElement}
 >
-	<span class="brand-mark top">Collegium Obscurum</span>
+	{#if hasBanner}
+		<div class="banner" style:color={card.bannerColor ? `var(--tint-${card.bannerColor})` : null}>
+			{#if editable}
+				<input class="banner-input" bind:value={card.banner} placeholder="Banner" />
+				<ColorPicker bind:color={card.bannerColor} />
+			{:else}
+				<span class="banner-label">{card.banner}</span>
+			{/if}
+		</div>
+	{:else}
+		<span class="brand-mark top">Collegium Obscurum</span>
+	{/if}
 	<span class="brand-mark bottom">Adversaria Bellica</span>
 	{#if ornate}
-		{#each ['tl', 'tr', 'bl', 'br'] as position (position)}
+		{#each cornerPositions as position (position)}
 			<svg class="corner {position}" viewBox="0 0 20 20" aria-hidden="true">
 				<path d="M1.2 19 V6.5 Q1.2 1.2 6.5 1.2 H19" />
 				<path d="M4.4 19 V8.5 Q4.4 4.4 8.5 4.4 H19" />
@@ -197,7 +213,11 @@
 		--tint-purple: #5e3a5e;
 		--tint-brown: #6b4a2f;
 		color: var(--color-ink);
-		background: radial-gradient(ellipse at 30% 15%, #f7efdc 0%, #efe2c2 55%, #e2cfa4 100%);
+		/* wash of the card's banner color over the parchment; transparent without one */
+		--wash-layer: color-mix(in srgb, var(--wash, transparent) 16%, transparent);
+		background:
+			linear-gradient(var(--wash-layer), var(--wash-layer)),
+			radial-gradient(ellipse at 30% 15%, #f7efdc 0%, #efe2c2 55%, #e2cfa4 100%);
 		border: 0.6mm solid var(--color-brand);
 		box-shadow:
 			inset 0 0 0 0.5mm var(--color-cream),
@@ -236,6 +256,44 @@
 
 	.brand-mark.bottom {
 		bottom: 1mm;
+	}
+
+	/* full-bleed strip along the top edge, replacing the top brand mark */
+	.banner {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 1.5mm;
+		margin: -5mm -5mm 1mm;
+		padding: 1.2mm 5mm 1mm;
+		font-family: var(--font-serif);
+		font-variant: small-caps;
+		font-size: 10pt;
+		letter-spacing: 0.15em;
+		color: var(--line);
+		border-bottom: 0.4mm solid currentColor;
+	}
+
+	.card.ornate .banner {
+		color: var(--color-brand);
+		background: currentColor;
+		border-bottom: 0.35mm solid var(--color-gold);
+		box-shadow: inset 0 -0.8mm 0 -0.45mm var(--color-cream);
+	}
+
+	.card.ornate .banner .banner-label,
+	.card.ornate .banner .banner-input {
+		color: var(--color-cream);
+	}
+
+	.banner-input {
+		font-family: inherit;
+		font-variant: inherit;
+		font-size: inherit;
+		letter-spacing: inherit;
+		text-align: center;
+		color: inherit;
+		width: 60%;
 	}
 
 	.corner {

@@ -56,6 +56,8 @@ export interface MonsterCard {
 	id: string;
 	name: string;
 	category: string;
+	banner: string;
+	bannerColor: EntryColor | null;
 	flavorText: string;
 	notes: string;
 	/** data URL of the circle cutout, or null */
@@ -85,6 +87,8 @@ export function createEmptyCard(): MonsterCard {
 		id: crypto.randomUUID(),
 		name: '',
 		category: '',
+		banner: '',
+		bannerColor: null,
 		flavorText: '',
 		notes: '',
 		image: null,
