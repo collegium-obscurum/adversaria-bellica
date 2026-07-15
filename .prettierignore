@@ -2,3 +2,5 @@ build/
 .svelte-kit/
 .playwright-mcp/
 package-lock.json
+# dropped-in card downloads, formatted by the app
+src/lib/data/samples/*.json

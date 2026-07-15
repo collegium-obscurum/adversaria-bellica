@@ -1,0 +1,125 @@
+[
+	{
+		"id": "88237600-ac47-40b8-8cdd-f63e97df3500",
+		"name": "Goblin",
+		"category": "Kulturschaffender",
+		"banner": "",
+		"bannerColor": null,
+		"flavorText": "Die Goblins zählen zu den ersten kulturschaffenden Bewohnern Aventuriens.",
+		"notes": "Gutes Gehör. Sehen im Dunkeln. Greifen zufällige Gegner an.",
+		"image": null,
+		"lifePoints": 24,
+		"armor": "0",
+		"initiative": "13",
+		"speed": "8",
+		"defense": "8",
+		"soulPower": "-1",
+		"toughness": "0",
+		"sizeCategory": "",
+		"actionCount": "1",
+		"attributes": {
+			"courage": 10,
+			"sagacity": 10,
+			"intuition": 13,
+			"charisma": 13,
+			"dexterity": 14,
+			"agility": 15,
+			"constitution": 12,
+			"strength": 11
+		},
+		"talents": {
+			"body": {
+				"fw": 5,
+				"value": 11,
+				"maxQs": 2
+			},
+			"social": {
+				"fw": 3,
+				"value": 9,
+				"maxQs": 1
+			},
+			"nature": {
+				"fw": null,
+				"value": 6,
+				"maxQs": 1
+			},
+			"knowledge": {
+				"fw": null,
+				"value": 6,
+				"maxQs": 1
+			},
+			"craft": {
+				"fw": null,
+				"value": 6,
+				"maxQs": 1
+			}
+		},
+		"actions": [
+			{
+				"span": 1,
+				"name": "Messer in den Rücken",
+				"effect": "2W6+4 TP und liegend",
+				"color": null
+			},
+			{
+				"span": 7,
+				"name": "Bogenschuss",
+				"effect": "(50m) 1W6+4 TP",
+				"color": null
+			},
+			{
+				"span": 5,
+				"name": "Dolchangriff",
+				"effect": "1W6+2 TP, Verteidigung-2",
+				"color": null
+			},
+			{
+				"span": 4,
+				"name": "Streiten",
+				"effect": "Der Goblin streitet mit anderen oder sich selbst.",
+				"color": null
+			},
+			{
+				"span": 1,
+				"name": "Flucht",
+				"effect": "Erstes Mal: sucht einen Fluchtweg. Zweites Mal: entkommt.",
+				"color": null
+			}
+		],
+		"specialMoves": {
+			"combatStart": {
+				"name": "Hinterhalt",
+				"effect": "Wenn Helden überrascht sind. Held mit niedrigsten LeP erhält 1W6+4 TP.",
+				"color": null
+			},
+			"hp75": {
+				"name": "",
+				"effect": "",
+				"color": null
+			},
+			"hp50": {
+				"name": "",
+				"effect": "",
+				"color": null
+			},
+			"hp25": {
+				"name": "",
+				"effect": "",
+				"color": null
+			},
+			"death": {
+				"name": "",
+				"effect": "",
+				"color": null
+			}
+		},
+		"customMoves": [],
+		"hiddenStats": ["sizeCategory", "armor"],
+		"talentsHidden": false,
+		"fit": {
+			"scale": 1,
+			"fits": true,
+			"imageHidden": false
+		}
+	}
+]

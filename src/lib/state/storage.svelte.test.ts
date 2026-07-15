@@ -68,6 +68,23 @@ describe('duplicateCard', () => {
 	});
 });
 
+describe('copyToLibrary', () => {
+	it('adds an independent copy with a fresh id and persists it', async () => {
+		const storage = await loadStorageModule();
+		const sample = new Proxy({ ...createEmptyCard(), name: 'Höhlenspinne' }, {});
+
+		const copy = storage.copyToLibrary(sample);
+
+		expect(copy.id).not.toBe(sample.id);
+		expect(copy.name).toBe('Höhlenspinne');
+		expect(storage.store.cards).toHaveLength(1);
+		expect(JSON.parse(localStorage.getItem('adversaria-bellica.cards') ?? '[]')).toHaveLength(1);
+
+		storage.store.cards[0].name = 'Anders';
+		expect(sample.name).toBe('Höhlenspinne');
+	});
+});
+
 describe('exportJson', () => {
 	it('exports a single card as a one-element array that re-imports cleanly', async () => {
 		const storage = await loadStorageModule();

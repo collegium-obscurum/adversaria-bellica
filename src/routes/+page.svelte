@@ -5,22 +5,27 @@
 	import OptionsMenu from '$lib/components/OptionsMenu.svelte';
 	import StatIcon from '$lib/components/StatIcon.svelte';
 	import {
+		copyToLibrary,
 		deleteCard,
 		duplicateCard,
 		exportJson,
 		importJson,
 		store
 	} from '$lib/state/storage.svelte';
+	import { sampleCards } from '$lib/data/samples';
 	import { cardFitZoom } from '$lib/domain/cardZoom';
 	import { filterCards, WITHOUT } from '$lib/domain/libraryFilter';
 	import { prefs } from '$lib/state/preferences.svelte';
 	import { STAT_BADGES } from '$lib/domain/statBadges';
 	import type { MonsterCard } from '$lib/domain/types';
 
+	let view = $state<'own' | 'samples'>('own');
 	let search = $state('');
 	let categoryFilter = $state('');
 	let bannerFilter = $state('');
 	let sortAlpha = $state(false);
+	let copiedId = $state('');
+	let copiedTimer: ReturnType<typeof setTimeout>;
 	let viewCard = $state<MonsterCard | undefined>();
 	let viewDialog: HTMLDialogElement;
 	let viewportWidth = $state(0);
@@ -34,16 +39,18 @@
 		viewDialog.showModal();
 	}
 
+	const shownCards = $derived(view === 'samples' ? sampleCards : store.cards);
+
 	const categories = $derived(
-		[...new Set(store.cards.map((card) => card.category).filter(Boolean))].sort()
+		[...new Set(shownCards.map((card) => card.category).filter(Boolean))].sort()
 	);
 
 	const banners = $derived(
-		[...new Set(store.cards.map((card) => card.banner).filter((banner) => banner.trim()))].sort()
+		[...new Set(shownCards.map((card) => card.banner).filter((banner) => banner.trim()))].sort()
 	);
 
 	const filtered = $derived.by(() => {
-		const matching = filterCards(store.cards, {
+		const matching = filterCards(shownCards, {
 			search,
 			category: categoryFilter,
 			banner: bannerFilter
@@ -69,6 +76,13 @@
 			stats.push({ abbr: badge.abbr, label: badge.label, value });
 		}
 		return stats;
+	}
+
+	function onCopy(card: MonsterCard) {
+		copyToLibrary(card);
+		copiedId = card.id;
+		clearTimeout(copiedTimer);
+		copiedTimer = setTimeout(() => (copiedId = ''), 1500);
 	}
 
 	function onDelete(card: MonsterCard) {
@@ -109,14 +123,25 @@
 
 <h1>Bibliothek</h1>
 
-{#if store.cards.length === 0}
+{#if view === 'own' && store.cards.length === 0}
 	<div class="empty">
 		<span class="empty-sigil"><StatIcon name="actionCount" cutColor="#f4efe4" /></span>
 		<p>Noch keine Gegner in der Bibliothek.</p>
 		<a class="primary" href={resolve('/editor')}>Erste Karte anlegen</a>
+		<button type="button" class="secondary" onclick={() => (view = 'samples')}
+			>Vorlagen ansehen</button
+		>
 	</div>
 {:else}
 	<div class="toolbar">
+		<div class="switch" role="group" aria-label="Kartenquelle">
+			<button type="button" class:active={view === 'own'} onclick={() => (view = 'own')}
+				>Eigene</button
+			>
+			<button type="button" class:active={view === 'samples'} onclick={() => (view = 'samples')}
+				>Vorlagen</button
+			>
+		</div>
 		<input type="search" placeholder="Suche nach Name…" bind:value={search} />
 		<select bind:value={categoryFilter}>
 			<option value="">Alle Typen</option>
@@ -140,11 +165,13 @@
 			title="Alphabetisch sortieren"
 			onclick={() => (sortAlpha = !sortAlpha)}>A–Z</button
 		>
-		<button type="button" onclick={onExport}>Export (JSON)</button>
-		<label class="import">
-			Import (JSON)
-			<input type="file" accept="application/json,.json" onchange={onImport} />
-		</label>
+		{#if view === 'own'}
+			<button type="button" onclick={onExport}>Export (JSON)</button>
+			<label class="import">
+				Import (JSON)
+				<input type="file" accept="application/json,.json" onchange={onImport} />
+			</label>
+		{/if}
 	</div>
 
 	{#if filtered.length === 0}
@@ -177,17 +204,37 @@
 							{/if}
 						</span>
 					{/if}
-					<a class="tile-head" href="{resolve('/editor')}?id={card.id}">
-						{#if card.image}
-							<img src={card.image} alt="" onerror={hideBrokenImage} />
-						{:else}
-							<span class="placeholder">{(card.name || '?').slice(0, 1)}</span>
-						{/if}
-						<span class="naming">
-							<strong>{card.name}</strong>
-							<small>{card.category || 'ohne Typ'}</small>
-						</span>
-					</a>
+					{#if view === 'samples'}
+						<button
+							type="button"
+							class="tile-head"
+							onclick={() => {
+								openView(card);
+							}}
+						>
+							{#if card.image}
+								<img src={card.image} alt="" onerror={hideBrokenImage} />
+							{:else}
+								<span class="placeholder">{(card.name || '?').slice(0, 1)}</span>
+							{/if}
+							<span class="naming">
+								<strong>{card.name}</strong>
+								<small>{card.category || 'ohne Typ'}</small>
+							</span>
+						</button>
+					{:else}
+						<a class="tile-head" href="{resolve('/editor')}?id={card.id}">
+							{#if card.image}
+								<img src={card.image} alt="" onerror={hideBrokenImage} />
+							{:else}
+								<span class="placeholder">{(card.name || '?').slice(0, 1)}</span>
+							{/if}
+							<span class="naming">
+								<strong>{card.name}</strong>
+								<small>{card.category || 'ohne Typ'}</small>
+							</span>
+						</a>
+					{/if}
 					<div class="stats">
 						{#each tileStats(card) as stat (stat.abbr)}
 							<span title={stat.label}><small>{stat.abbr}</small>{stat.value}</span>
@@ -213,15 +260,26 @@
 								<circle cx="12" cy="12" r="3" fill="currentColor" />
 							</svg>
 						</button>
-						<a href="{resolve('/editor')}?id={card.id}">Bearbeiten</a>
-						<button type="button" onclick={() => duplicateCard(card.id)}>Duplizieren</button>
-						<button
-							type="button"
-							class="danger"
-							onclick={() => {
-								onDelete(card);
-							}}>Löschen</button
-						>
+						{#if view === 'samples'}
+							<button
+								type="button"
+								onclick={() => {
+									onCopy(card);
+								}}
+							>
+								{copiedId === card.id ? 'Kopiert ✓' : 'In Bibliothek kopieren'}
+							</button>
+						{:else}
+							<a href="{resolve('/editor')}?id={card.id}">Bearbeiten</a>
+							<button type="button" onclick={() => duplicateCard(card.id)}>Duplizieren</button>
+							<button
+								type="button"
+								class="danger"
+								onclick={() => {
+									onDelete(card);
+								}}>Löschen</button
+							>
+						{/if}
 					</div>
 				</li>
 			{/each}
@@ -305,6 +363,29 @@
 		box-shadow: 0 0 0 1px var(--color-brand);
 	}
 
+	.switch {
+		display: flex;
+	}
+
+	.switch button {
+		border-radius: 0;
+	}
+
+	.switch button:first-child {
+		border-radius: var(--radius) 0 0 var(--radius);
+	}
+
+	.switch button:last-child {
+		border-radius: 0 var(--radius) var(--radius) 0;
+		border-left: none;
+	}
+
+	.switch button.active {
+		background: var(--color-brand);
+		border-color: var(--color-brand);
+		color: var(--color-cream);
+	}
+
 	.import input {
 		display: none;
 	}
@@ -341,6 +422,13 @@
 		padding: 0.5rem 1.25rem;
 		border-radius: var(--radius);
 		font-weight: bold;
+	}
+
+	.empty .secondary {
+		padding: 0.5rem 1.25rem;
+		font-weight: bold;
+		color: var(--color-brand);
+		border-color: var(--color-brand);
 	}
 
 	.cards {
@@ -413,6 +501,15 @@
 		gap: 0.75rem;
 		text-decoration: none;
 		color: inherit;
+	}
+
+	button.tile-head {
+		background: none;
+		border: none;
+		padding: 0;
+		font: inherit;
+		text-align: left;
+		cursor: pointer;
 	}
 
 	.tile-head img,

@@ -62,6 +62,16 @@ export function duplicateCard(id: string): MonsterCard | undefined {
 	return copy;
 }
 
+/** Adds an independent copy of any card (own or sample) with a fresh id to the library. */
+export function copyToLibrary(card: MonsterCard): MonsterCard {
+	// JSON round-trip instead of structuredClone: $state proxies reject cloning
+	const copy = JSON.parse(JSON.stringify(card)) as MonsterCard;
+	copy.id = crypto.randomUUID();
+	store.cards.push(copy);
+	persist();
+	return copy;
+}
+
 export function exportJson(cards: MonsterCard[] = store.cards): string {
 	return JSON.stringify(cards, null, '\t');
 }
