@@ -68,6 +68,7 @@
 	class="card"
 	class:editable
 	class:ornate
+	class:ornate-tints={ornate}
 	class:hide-portrait={hidePortrait}
 	style:--wash={card.bannerColor ? `var(--tint-${card.bannerColor})` : null}
 	bind:this={cardElement}
@@ -190,12 +191,6 @@
 		--line: #1a1a1a;
 		--accent: #1a1a1a;
 		--muted: #444;
-		--tint-red: #c0392b;
-		--tint-orange: #d35400;
-		--tint-green: #1e8449;
-		--tint-blue: #1f618d;
-		--tint-purple: #7d3c98;
-		--tint-brown: #6e4a1f;
 		position: relative;
 		width: 105mm;
 		height: 148mm;
@@ -223,12 +218,6 @@
 		--line: #8a6b3f;
 		--accent: var(--color-brand);
 		--muted: var(--color-ink-soft);
-		--tint-red: #7a1e12;
-		--tint-orange: #a45a1c;
-		--tint-green: #4a6741;
-		--tint-blue: #3a5068;
-		--tint-purple: #5e3a5e;
-		--tint-brown: #6b4a2f;
 		color: var(--color-ink);
 		/* wash of the card's banner color over the parchment; transparent without one */
 		--wash-layer: color-mix(in srgb, var(--wash, transparent) 16%, transparent);

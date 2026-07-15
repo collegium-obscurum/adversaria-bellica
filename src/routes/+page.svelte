@@ -12,6 +12,7 @@
 		store
 	} from '$lib/state/storage.svelte';
 	import { cardFitZoom } from '$lib/domain/cardZoom';
+	import { prefs } from '$lib/state/preferences.svelte';
 	import { STAT_BADGES } from '$lib/domain/statBadges';
 	import type { MonsterCard } from '$lib/domain/types';
 
@@ -134,9 +135,20 @@
 	{#if filtered.length === 0}
 		<p>Keine Karte passt zu Suche/Filter.</p>
 	{:else}
-		<ul class="cards">
+		<ul class="cards" class:ornate-tints={prefs.cardStyle === 'ornate'}>
 			{#each filtered as card (card.id)}
-				<li>
+				<li
+					class:has-banner={card.banner.trim() !== ''}
+					style:--wash={card.bannerColor ? `var(--tint-${card.bannerColor})` : null}
+				>
+					{#if card.banner.trim() !== ''}
+						<div
+							class="tile-banner"
+							style:background={card.bannerColor ? `var(--tint-${card.bannerColor})` : null}
+						>
+							{card.banner}
+						</div>
+					{/if}
 					{#if !card.fit.fits || card.fit.imageHidden}
 						<span class="tile-flags">
 							{#if card.fit.imageHidden}
@@ -331,9 +343,27 @@
 		flex-direction: column;
 		gap: 0.6rem;
 		padding: 0.9rem 1rem;
-		background: var(--color-surface);
+		/* same wash formula as the card itself: banner tint at 16% over the surface */
+		--wash-layer: color-mix(in srgb, var(--wash, transparent) 16%, transparent);
+		background: linear-gradient(var(--wash-layer), var(--wash-layer)), var(--color-surface);
 		border: 1px solid var(--color-border-soft);
 		border-radius: var(--radius-lg);
+	}
+
+	.tile-banner {
+		margin: -0.9rem -1rem 0;
+		padding: 0.25rem 0.75rem;
+		border-radius: calc(var(--radius-lg) - 1px) calc(var(--radius-lg) - 1px) 0 0;
+		background: var(--color-brand);
+		color: var(--color-cream);
+		font-variant: small-caps;
+		letter-spacing: 0.04em;
+		font-size: 0.85rem;
+		font-weight: bold;
+		text-align: center;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
 	}
 
 	.tile-flags {
@@ -342,6 +372,10 @@
 		right: 0.5rem;
 		display: flex;
 		gap: 0.3rem;
+	}
+
+	.cards li.has-banner .tile-flags {
+		top: 2.1rem;
 	}
 
 	.flag {
@@ -431,7 +465,8 @@
 		margin-top: auto;
 		gap: 0.5rem;
 		align-items: center;
-		border-top: 1px solid #eee6d6;
+		/* darken the separator with the tint so it stays visible on washed tiles */
+		border-top: 1px solid color-mix(in srgb, var(--wash, transparent) 35%, #eee6d6);
 		padding-top: 0.6rem;
 		font-size: 0.9rem;
 	}
