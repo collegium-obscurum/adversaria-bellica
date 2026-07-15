@@ -1,14 +1,13 @@
 <script lang="ts">
 	import { tick } from 'svelte';
 	import { cardFileName } from '$lib/domain/filename';
+	import { CARD_HEIGHT_MM, CARD_WIDTH_MM } from '$lib/domain/printLayout';
 	import type { MonsterCard } from '$lib/domain/types';
 	import { exportJson } from '$lib/state/storage.svelte';
 	import CardPreview from './card/CardPreview.svelte';
 
 	let { card }: { card: MonsterCard } = $props();
 
-	const CARD_WIDTH_MM = 105;
-	const CARD_HEIGHT_MM = 148;
 	const PIXEL_RATIO = 300 / 96; // 300 DPI over the browser's 96 CSS px per inch
 
 	let details: HTMLDetailsElement;

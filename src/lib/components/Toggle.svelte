@@ -1,24 +1,28 @@
-<script lang="ts">
-	import { STAT_LABEL_MODES, type StatLabelMode } from '$lib/domain/statLabelMode';
-	import { prefs, setStatLabelMode } from '$lib/state/preferences.svelte';
-
-	const LABELS: Record<StatLabelMode, string> = {
-		icons: 'Symbole',
-		text: 'Text'
-	};
+<script lang="ts" generics="T">
+	let {
+		label,
+		options,
+		selected,
+		onselect
+	}: {
+		label: string;
+		options: readonly { value: T; label: string }[];
+		selected: T;
+		onselect: (value: T) => void;
+	} = $props();
 </script>
 
-<div class="toggle" role="group" aria-label="Wertebeschriftung">
-	{#each STAT_LABEL_MODES as mode (mode)}
+<div class="toggle" role="group" aria-label={label}>
+	{#each options as option (option.label)}
 		<button
 			type="button"
-			class:active={prefs.statLabelMode === mode}
-			aria-pressed={prefs.statLabelMode === mode}
+			class:active={selected === option.value}
+			aria-pressed={selected === option.value}
 			onclick={() => {
-				setStatLabelMode(mode);
+				onselect(option.value);
 			}}
 		>
-			{LABELS[mode]}
+			{option.label}
 		</button>
 	{/each}
 </div>

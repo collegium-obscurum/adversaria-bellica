@@ -1,5 +1,5 @@
-const CARD_WIDTH_MM = 105;
-const CARD_HEIGHT_MM = 148;
+import { CARD_HEIGHT_MM, CARD_WIDTH_MM } from './printLayout';
+
 const CSS_PX_PER_MM = 96 / 25.4;
 
 export const CARD_WIDTH_PX = CARD_WIDTH_MM * CSS_PX_PER_MM;

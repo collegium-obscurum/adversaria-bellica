@@ -1,8 +1,32 @@
 <script lang="ts">
-	import ColorModeToggle from './ColorModeToggle.svelte';
-	import ImageToggle from './ImageToggle.svelte';
-	import StatLabelToggle from './StatLabelToggle.svelte';
-	import StyleToggle from './StyleToggle.svelte';
+	import type { CardStyle } from '$lib/domain/cardStyle';
+	import type { ColorMode } from '$lib/domain/colorMode';
+	import type { StatLabelMode } from '$lib/domain/statLabelMode';
+	import {
+		prefs,
+		setCardStyle,
+		setColorMode,
+		setPrintImages,
+		setStatLabelMode
+	} from '$lib/state/preferences.svelte';
+	import Toggle from './Toggle.svelte';
+
+	const STYLE_OPTIONS: { value: CardStyle; label: string }[] = [
+		{ value: 'minimal', label: 'Druckfreundlich' },
+		{ value: 'ornate', label: 'Aventurisch' }
+	];
+	const STAT_LABEL_OPTIONS: { value: StatLabelMode; label: string }[] = [
+		{ value: 'icons', label: 'Symbole' },
+		{ value: 'text', label: 'Text' }
+	];
+	const COLOR_OPTIONS: { value: ColorMode; label: string }[] = [
+		{ value: 'text', label: 'Farbtext' },
+		{ value: 'dot', label: 'Farbpunkt' }
+	];
+	const IMAGE_OPTIONS: { value: boolean; label: string }[] = [
+		{ value: true, label: 'Mit Bild' },
+		{ value: false, label: 'Ohne Bild' }
+	];
 
 	let details = $state<HTMLDetailsElement>();
 
@@ -19,13 +43,33 @@
 	<summary>⚙ Optionen</summary>
 	<div class="panel">
 		<span class="row-label">Stil</span>
-		<StyleToggle />
+		<Toggle
+			label="Kartenstil"
+			options={STYLE_OPTIONS}
+			selected={prefs.cardStyle}
+			onselect={setCardStyle}
+		/>
 		<span class="row-label">Werte</span>
-		<StatLabelToggle />
+		<Toggle
+			label="Wertebeschriftung"
+			options={STAT_LABEL_OPTIONS}
+			selected={prefs.statLabelMode}
+			onselect={setStatLabelMode}
+		/>
 		<span class="row-label">Farben</span>
-		<ColorModeToggle />
+		<Toggle
+			label="Farbdarstellung"
+			options={COLOR_OPTIONS}
+			selected={prefs.colorMode}
+			onselect={setColorMode}
+		/>
 		<span class="row-label">Bilder</span>
-		<ImageToggle />
+		<Toggle
+			label="Kartenbilder"
+			options={IMAGE_OPTIONS}
+			selected={prefs.printImages}
+			onselect={setPrintImages}
+		/>
 	</div>
 </details>
 
