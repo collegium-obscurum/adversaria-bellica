@@ -409,7 +409,8 @@
 
 	.stats {
 		display: flex;
-		gap: 1rem;
+		flex-wrap: wrap;
+		gap: 0.35rem 0.75rem;
 		color: var(--color-ink-soft);
 		font-size: 0.9rem;
 	}
@@ -427,6 +428,7 @@
 
 	.buttons {
 		display: flex;
+		margin-top: auto;
 		gap: 0.5rem;
 		align-items: center;
 		border-top: 1px solid #eee6d6;
