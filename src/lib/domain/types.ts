@@ -140,7 +140,8 @@ export function createEmptyCard(): MonsterCard {
 			death: { name: '', effect: '', color: null }
 		},
 		customMoves: [],
-		hiddenStats: [],
+		// GK is rarely relevant; new cards start with the badge off, unhide per card
+		hiddenStats: ['sizeCategory'],
 		talentsHidden: false,
 		fit: { scale: 1, fits: true, imageHidden: false }
 	};
