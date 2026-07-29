@@ -1,0 +1,326 @@
+import { expect, test } from '@playwright/test';
+import { seedCards, storedCards } from './helpers';
+
+const nameInput = (page: import('@playwright/test').Page) =>
+	page.locator('.card.editable .name-input');
+
+test('saving without a name shows an error and stays on the editor', async ({ page }) => {
+	await page.goto('/editor');
+	await page.getByRole('button', { name: 'Speichern' }).click();
+	await expect(page.getByRole('alert')).toHaveText('Die Karte braucht einen Namen.');
+	await expect(page).toHaveURL(/\/editor$/);
+});
+
+test('a new card can be created and shows up in the library', async ({ page }) => {
+	await page.goto('/editor');
+	await nameInput(page).fill('Grimwolf');
+	await page.locator('.card.editable').getByLabel('Lebenspunkte', { exact: true }).fill('30');
+	await page.getByRole('button', { name: 'Speichern' }).click();
+
+	await expect(page).toHaveURL(/\/$/);
+	const tile = page.locator('.cards li', { hasText: 'Grimwolf' });
+	await expect(tile).toBeVisible();
+	await expect(tile.locator('.stats')).toContainText('30');
+
+	const cards = await storedCards(page);
+	expect(cards).toHaveLength(1);
+	expect(cards[0].name).toBe('Grimwolf');
+	expect(cards[0].lifePoints).toBe(30);
+});
+
+test('an existing card can be edited', async ({ page }) => {
+	await seedCards(page, [{ id: 'g1', name: 'Goblin' }]);
+	await page.getByRole('link', { name: 'Bearbeiten' }).click();
+	await expect(page).toHaveURL(/\/editor\?id=g1$/);
+	await expect(nameInput(page)).toHaveValue('Goblin');
+
+	await nameInput(page).fill('Hobgoblin');
+	await page.getByRole('button', { name: 'Speichern' }).click();
+	await expect(page.locator('.cards li', { hasText: 'Hobgoblin' })).toBeVisible();
+	expect(await storedCards(page)).toHaveLength(1);
+});
+
+test('an added action row is saved with the card', async ({ page }) => {
+	await page.goto('/editor');
+	const actionNames = page.getByLabel('Name der Aktion');
+	const rowsBefore = await actionNames.count();
+	await page.getByRole('button', { name: '+ Zeile' }).click();
+	await expect(actionNames).toHaveCount(rowsBefore + 1);
+
+	await actionNames.last().fill('Biss');
+	await page.getByLabel('Effekt der Aktion').last().fill('1W6+4 TP');
+	await nameInput(page).fill('Grimwolf');
+	await page.getByRole('button', { name: 'Speichern' }).click();
+
+	await expect(page).toHaveURL(/\/$/);
+	const cards = await storedCards(page);
+	expect(cards[0].actions).toContainEqual(
+		expect.objectContaining({ name: 'Biss', effect: '1W6+4 TP' })
+	);
+});
+
+test('unknown card id shows a notice', async ({ page }) => {
+	await page.goto('/editor?id=does-not-exist');
+	await expect(page.getByText('Karte nicht gefunden – neue Karte wird angelegt.')).toBeVisible();
+});
+
+test('unsaved changes guard blocks navigation until confirmed', async ({ page }) => {
+	await page.goto('/editor');
+	await nameInput(page).fill('Grimwolf');
+
+	// Playwright dismisses dialogs by default: the confirm is rejected, navigation cancelled
+	await page.getByRole('link', { name: 'Bibliothek' }).click();
+	await expect(page).toHaveURL(/\/editor$/);
+
+	page.once('dialog', (dialog) => void dialog.accept());
+	await page.getByRole('link', { name: 'Bibliothek' }).click();
+	await expect(page).toHaveURL(/\/$/);
+});
+
+test('action reorder keeps dice ranges in place', async ({ page }) => {
+	await page.goto('/editor');
+	const actionNames = page.getByLabel('Name der Aktion');
+	await expect(actionNames.nth(0)).toHaveValue('Kritischer Treffer');
+	await expect(actionNames.nth(1)).toHaveValue('Schwerer Angriff');
+
+	await page.getByRole('button', { name: 'Nach oben: Schwerer Angriff' }).click();
+
+	await expect(actionNames.nth(0)).toHaveValue('Schwerer Angriff');
+	await expect(actionNames.nth(1)).toHaveValue('Kritischer Treffer');
+	// spans stay with the row position: row 1 still ends at 1, row 2 still covers 2–6
+	await expect(page.getByLabel('Bereichsende').nth(0)).toHaveValue('1');
+	await expect(page.getByLabel('Bereichsanfang').nth(0)).toHaveValue('2');
+	await expect(page.getByLabel('Bereichsende').nth(1)).toHaveValue('6');
+});
+
+test('editing a dice range end reflows the next row', async ({ page }) => {
+	await page.goto('/editor');
+	// row 2 (Schwerer Angriff) covers 2–6; shrink it to 2–4
+	const rowTwoEnd = page.getByLabel('Bereichsende').nth(1);
+	await rowTwoEnd.fill('4');
+	await rowTwoEnd.blur();
+	await expect(rowTwoEnd).toHaveValue('4');
+	// row 3 now starts at 5
+	await expect(page.getByLabel('Bereichsanfang').nth(1)).toHaveValue('5');
+});
+
+test('action rows can be removed but not the last one', async ({ page }) => {
+	await page.goto('/editor');
+	const actionNames = page.getByLabel('Name der Aktion');
+	await expect(actionNames).toHaveCount(5);
+	await page.getByRole('button', { name: 'Aktion entfernen: Flucht' }).click();
+	await expect(actionNames).toHaveCount(4);
+
+	await seedCards(page, [
+		{ id: 'a1', name: 'Einzeln', actions: [{ span: 20, name: 'Hieb', effect: '' }] }
+	]);
+	await page.goto('/editor?id=a1');
+	await expect(page.getByRole('button', { name: 'Aktion entfernen: Hieb' })).toBeDisabled();
+});
+
+test('wound trigger special move can be added, removed, and saved', async ({ page }) => {
+	await page.goto('/editor');
+	await page.getByRole('button', { name: '+ Kampfbeginn' }).click();
+	await page.getByLabel('Name für Kampfbeginn').fill('Brüllen');
+	await page.getByLabel('Effekt für Kampfbeginn').fill('Alle Feinde: Furcht');
+
+	await page.getByRole('button', { name: '+ Tod', exact: true }).click();
+	await expect(page.getByLabel('Effekt für Tod')).toBeVisible();
+	await page.getByRole('button', { name: 'Spezialmanöver entfernen: Tod' }).click();
+	await expect(page.getByLabel('Effekt für Tod')).toBeHidden();
+
+	await nameInput(page).fill('Ork');
+	await page.getByRole('button', { name: 'Speichern' }).click();
+	await expect(page).toHaveURL(/\/$/);
+	const cards = await storedCards(page);
+	expect(cards[0].specialMoves.combatStart).toEqual(
+		expect.objectContaining({ name: 'Brüllen', effect: 'Alle Feinde: Furcht' })
+	);
+	expect(cards[0].specialMoves.death.effect).toBe('');
+});
+
+test('custom special move trigger is saved', async ({ page }) => {
+	await page.goto('/editor');
+	await page.getByRole('button', { name: '+ Eigener Auslöser' }).click();
+	await page.getByLabel('Auslöser').fill('Bei Feuer');
+	await page.locator('textarea[aria-label="Name"]').fill('Panik');
+	await page.locator('textarea[aria-label="Effekt"]').fill('Flieht sofort.');
+	await nameInput(page).fill('Troll');
+	await page.getByRole('button', { name: 'Speichern' }).click();
+
+	await expect(page).toHaveURL(/\/$/);
+	const cards = await storedCards(page);
+	expect(cards[0].customMoves).toEqual([
+		expect.objectContaining({ trigger: 'Bei Feuer', name: 'Panik', effect: 'Flieht sofort.' })
+	]);
+});
+
+test('talent values clamp and talents can be hidden', async ({ page }) => {
+	await page.goto('/editor');
+	const bodyValue = page.getByLabel('Körper Wert');
+	await bodyValue.fill('999');
+	await bodyValue.blur();
+	await expect(bodyValue).toHaveValue('99');
+	const bodyQs = page.getByLabel('Körper max. QS');
+	await bodyQs.fill('9');
+	await bodyQs.blur();
+	await expect(bodyQs).toHaveValue('6');
+
+	await page.getByRole('button', { name: 'Talente ausblenden' }).click();
+	await expect(bodyValue).toBeHidden();
+	await page.locator('button.talents-hidden').click();
+	await expect(bodyValue).toBeVisible();
+	await page.getByRole('button', { name: 'Talente ausblenden' }).click();
+
+	await nameInput(page).fill('Golem');
+	await page.getByRole('button', { name: 'Speichern' }).click();
+	const cards = await storedCards(page);
+	expect(cards[0].talentsHidden).toBe(true);
+	expect(cards[0].talents.body).toEqual(expect.objectContaining({ value: 99, maxQs: 6 }));
+});
+
+test('talent calculator applies derived values to the card', async ({ page }) => {
+	await page.goto('/editor');
+	const attributeInputs = page.locator('.talent-calc .attributes input');
+	await expect(attributeInputs).toHaveCount(8);
+	for (let index = 0; index < 8; index++) {
+		await attributeInputs.nth(index).fill('12');
+	}
+	const bodyGroup = page.locator('.talent-calc .groups li').filter({ hasText: 'Körper' });
+	await bodyGroup.locator('input').fill('4');
+	// (12+12+12-25)/2 aufgerundet = 6, +4 FW = 10; QS = 4/3 aufgerundet = 2
+	await expect(bodyGroup).toContainText('10');
+	await expect(bodyGroup).toContainText('QS 2');
+
+	await page.getByRole('button', { name: 'Auf Karte übernehmen' }).click();
+	await expect(page.getByLabel('Körper Wert')).toHaveValue('10');
+	await expect(page.getByLabel('Körper max. QS')).toHaveValue('2');
+	await expect(page.getByRole('button', { name: 'Auf Karte übernehmen' })).toBeDisabled();
+	await expect(page.getByText('Kartenwerte sind aktuell')).toBeVisible();
+});
+
+test('banner is saved and filterable in the library', async ({ page }) => {
+	await page.goto('/editor');
+	await page.getByRole('button', { name: '+ Banner' }).click();
+	await page.getByLabel('Banner', { exact: true }).fill('Anführer');
+	await nameInput(page).fill('Orkhäuptling');
+	await page.getByRole('button', { name: 'Speichern' }).click();
+
+	await expect(page.locator('.tile-banner')).toHaveText('Anführer');
+	await page.getByLabel('Nach Banner filtern').selectOption('Anführer');
+	await expect(page.locator('.cards li')).toHaveCount(1);
+	expect((await storedCards(page))[0].banner).toBe('Anführer');
+});
+
+test('flavour text and notes are saved and removable', async ({ page }) => {
+	await page.goto('/editor');
+	await page.getByRole('button', { name: '+ Flavourtext' }).click();
+	await page.getByLabel('Flavourtext', { exact: true }).fill('Alt und böse.');
+	await page.getByRole('button', { name: 'Flavourtext entfernen' }).click();
+	await expect(page.getByRole('button', { name: '+ Flavourtext' })).toBeVisible();
+	await page.getByRole('button', { name: '+ Flavourtext' }).click();
+	await page.getByLabel('Flavourtext', { exact: true }).fill('Uralt.');
+
+	await page.getByRole('button', { name: '+ Notizen' }).click();
+	await page.getByLabel('Notizen', { exact: true }).fill('Immun gegen Feuer.');
+
+	await nameInput(page).fill('Drache');
+	await page.getByRole('button', { name: 'Speichern' }).click();
+	const cards = await storedCards(page);
+	expect(cards[0].flavorText).toBe('Uralt.');
+	expect(cards[0].notes).toBe('Immun gegen Feuer.');
+});
+
+test('hidden stat badge is excluded from tile and persisted', async ({ page }) => {
+	await page.goto('/editor');
+	await nameInput(page).fill('Golem');
+	await page.getByRole('button', { name: 'Initiative ausblenden' }).click();
+	await page.getByRole('button', { name: 'Speichern' }).click();
+
+	const tile = page.locator('.cards li', { hasText: 'Golem' });
+	await expect(tile.locator('.stats')).not.toContainText('INI');
+	expect((await storedCards(page))[0].hiddenStats).toContain('initiative');
+});
+
+test('life points drive the wound threshold row and normalize on blur', async ({ page }) => {
+	await page.goto('/editor');
+	const card = page.locator('.card.editable');
+	// default 20 LeP: thresholds 5 / 10 / 15, death at 20
+	await expect(card).toContainText('Schmerz bei Schaden:');
+	await expect(card).toContainText('5 / 10 / 15');
+
+	const lifePoints = card.getByLabel('Lebenspunkte', { exact: true });
+	await lifePoints.fill('0');
+	await lifePoints.blur();
+	await expect(lifePoints).toHaveValue('');
+	await expect(card).not.toContainText('Schmerz bei Schaden:');
+});
+
+test('custom category can be entered', async ({ page }) => {
+	await page.goto('/editor');
+	await page.getByLabel('Typ', { exact: true }).selectOption({ label: 'Eigener Typ…' });
+	await page.getByLabel('Eigener Typ').fill('Dämon');
+	await page.getByLabel('Eigener Typ').press('Enter');
+	await nameInput(page).fill('Karmoth');
+	await page.getByRole('button', { name: 'Speichern' }).click();
+	expect((await storedCards(page))[0].category).toBe('Dämon');
+});
+
+test('cancel leaves a dirty editor without confirmation', async ({ page }) => {
+	await page.goto('/editor');
+	await nameInput(page).fill('Verworfen');
+	// auto-dismissed confirm would block navigation, so landing on / proves no dialog fired
+	await page.getByRole('link', { name: 'Abbrechen' }).click();
+	await expect(page).toHaveURL(/\/$/);
+	expect(await storedCards(page)).toHaveLength(0);
+});
+
+test('name error clears while typing', async ({ page }) => {
+	await page.goto('/editor');
+	await page.getByRole('button', { name: 'Speichern' }).click();
+	await expect(page.getByRole('alert')).toBeVisible();
+	await nameInput(page).pressSequentially('G');
+	await expect(page.getByRole('alert')).toBeHidden();
+});
+
+test('overfull card shows fit warnings in editor and library', async ({ page }) => {
+	const longActions = Array.from({ length: 20 }, (_, index) => ({
+		span: 1,
+		name: `Aktion ${index + 1}`,
+		effect: 'Ein sehr langer Effekt mit vielen Worten und Details. '.repeat(6)
+	}));
+	await seedCards(page, [{ id: 'big1', name: 'Riese', actions: longActions }]);
+	await page.goto('/editor?id=big1');
+	await expect(page.getByText('Inhalt passt nicht auf die Karte.')).toBeVisible();
+
+	await page.getByRole('button', { name: 'Speichern' }).click();
+	await expect(page.locator('.cards li .flag', { hasText: 'Passt nicht' })).toBeVisible();
+});
+
+test('card image can be cropped in and removed', async ({ page }) => {
+	await page.goto('/editor');
+	await page.getByLabel('Bild wählen').click();
+	await page.getByLabel('Bilddatei wählen').setInputFiles('tests/fixtures/portrait.png');
+	await page.getByRole('button', { name: 'Ausschnitt übernehmen' }).click();
+
+	const portraitImage = page.locator('.card.editable .portrait img');
+	await expect(portraitImage).toBeVisible();
+	await expect(portraitImage).toHaveAttribute('src', /^data:image\/jpeg/);
+
+	await page.getByLabel('Bild wählen').click();
+	await page.getByRole('button', { name: 'Bild entfernen' }).click();
+	await expect(portraitImage).toHaveCount(0);
+});
+
+test('card style preference switches the card and persists', async ({ page }) => {
+	await page.goto('/editor');
+	const card = page.locator('.card.editable');
+	await expect(card).not.toHaveClass(/ornate/);
+
+	await page.getByText('⚙ Optionen').click();
+	await page.getByRole('button', { name: 'Aventurisch' }).click();
+	await expect(card).toHaveClass(/ornate/);
+
+	await page.reload();
+	await expect(page.locator('.card.editable')).toHaveClass(/ornate/);
+});

@@ -17,7 +17,7 @@ export default defineConfig(
 			globals: { ...globals.browser, ...globals.node },
 			parserOptions: {
 				projectService: {
-					allowDefaultProject: ['eslint.config.js']
+					allowDefaultProject: ['eslint.config.js', 'playwright.config.ts']
 				},
 				tsconfigRootDir: import.meta.dirname,
 				extraFileExtensions: ['.svelte']
