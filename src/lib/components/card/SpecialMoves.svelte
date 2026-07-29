@@ -136,10 +136,12 @@
 						class="color-dot tint-{move.color}"
 						role="img"
 						aria-label={ENTRY_COLOR_LABELS[move.color]}
-						title={ENTRY_COLOR_LABELS[move.color]}></span>&nbsp;{/if}<b
+						title={ENTRY_COLOR_LABELS[move.color]}
+					></span>&nbsp;{/if}<b
 					class={move.color && prefs.colorMode === 'text' ? `tint-${move.color}` : ''}
-					title={move.color && prefs.colorMode === 'text' ? ENTRY_COLOR_LABELS[move.color] : undefined}
-					>{labels[trigger]}{move.name ? ` = ${move.name}` : ''}</b
+					title={move.color && prefs.colorMode === 'text'
+						? ENTRY_COLOR_LABELS[move.color]
+						: undefined}>{labels[trigger]}{move.name ? ` = ${move.name}` : ''}</b
 				>{#if move.effect}:
 					{move.effect}{/if}
 			</p>
@@ -150,10 +152,12 @@
 						class="color-dot tint-{move.color}"
 						role="img"
 						aria-label={ENTRY_COLOR_LABELS[move.color]}
-						title={ENTRY_COLOR_LABELS[move.color]}></span>&nbsp;{/if}<b
+						title={ENTRY_COLOR_LABELS[move.color]}
+					></span>&nbsp;{/if}<b
 					class={move.color && prefs.colorMode === 'text' ? `tint-${move.color}` : ''}
-					title={move.color && prefs.colorMode === 'text' ? ENTRY_COLOR_LABELS[move.color] : undefined}
-					>{move.trigger}{move.name ? ` = ${move.name}` : ''}</b
+					title={move.color && prefs.colorMode === 'text'
+						? ENTRY_COLOR_LABELS[move.color]
+						: undefined}>{move.trigger}{move.name ? ` = ${move.name}` : ''}</b
 				>{#if move.effect}:
 					{move.effect}{/if}
 			</p>

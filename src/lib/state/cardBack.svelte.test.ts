@@ -44,7 +44,7 @@ describe('cardBack state', () => {
 		});
 	});
 
-	it('keeps working in memory when localStorage rejects the image', async () => {
+	it('keeps working in memory and warns when localStorage rejects the image', async () => {
 		vi.stubGlobal('localStorage', {
 			getItem: () => null,
 			setItem: () => {
@@ -52,8 +52,11 @@ describe('cardBack state', () => {
 			},
 			removeItem: () => undefined
 		});
+		const alertSpy = vi.fn();
+		vi.stubGlobal('alert', alertSpy);
 		const state = await loadModule();
 		state.setCardBackImage('data:image/jpeg;base64,huge');
 		expect(state.cardBack.customImage).toBe('data:image/jpeg;base64,huge');
+		expect(alertSpy).toHaveBeenCalledOnce();
 	});
 });

@@ -78,7 +78,12 @@
 	{#if hasBanner}
 		<div class="banner" style:color={card.bannerColor ? `var(--tint-${card.bannerColor})` : null}>
 			{#if editable}
-				<input class="banner-input" bind:value={card.banner} placeholder="Banner" aria-label="Banner" />
+				<input
+					class="banner-input"
+					bind:value={card.banner}
+					placeholder="Banner"
+					aria-label="Banner"
+				/>
 				<ColorPicker bind:color={card.bannerColor} />
 				<button
 					type="button"

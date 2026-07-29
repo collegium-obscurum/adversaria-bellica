@@ -57,11 +57,11 @@
 	};
 
 	function onKeyDown(event: KeyboardEvent) {
-		const offset = KEY_OFFSETS[event.key];
-		if (!offset) return;
+		if (!(event.key in KEY_OFFSETS)) return;
 		event.preventDefault();
-		offsetX += offset[0];
-		offsetY += offset[1];
+		const [deltaX, deltaY] = KEY_OFFSETS[event.key];
+		offsetX += deltaX;
+		offsetY += deltaY;
 	}
 
 	function onZoomInput(event: Event) {

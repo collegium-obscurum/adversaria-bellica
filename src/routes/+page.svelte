@@ -139,7 +139,12 @@
 				>Vorlagen</button
 			>
 		</div>
-		<input type="search" placeholder="Suche nach Name…" aria-label="Suche nach Name" bind:value={search} />
+		<input
+			type="search"
+			placeholder="Suche nach Name…"
+			aria-label="Suche nach Name"
+			bind:value={search}
+		/>
 		<select aria-label="Nach Typ filtern" bind:value={categoryFilter}>
 			<option value="">Alle Typen</option>
 			<option value={WITHOUT}>ohne Typ</option>

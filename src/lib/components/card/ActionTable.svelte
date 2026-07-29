@@ -99,7 +99,9 @@
 						removeAction(index);
 					}}
 					disabled={card.actions.length <= 1}
-					title={card.actions.length <= 1 ? 'Die letzte Aktion kann nicht entfernt werden' : 'Zeile entfernen'}
+					title={card.actions.length <= 1
+						? 'Die letzte Aktion kann nicht entfernt werden'
+						: 'Zeile entfernen'}
 					aria-label="Aktion entfernen{action.name ? `: ${action.name}` : ''}">✕</button
 				>
 			</div>
@@ -109,7 +111,8 @@
 						class="color-dot tint-{action.color}"
 						role="img"
 						aria-label={ENTRY_COLOR_LABELS[action.color]}
-						title={ENTRY_COLOR_LABELS[action.color]}></span>&nbsp;{/if}<b
+						title={ENTRY_COLOR_LABELS[action.color]}
+					></span>&nbsp;{/if}<b
 					class={action.color && prefs.colorMode === 'text' ? `tint-${action.color}` : ''}
 					title={action.color && prefs.colorMode === 'text'
 						? ENTRY_COLOR_LABELS[action.color]
