@@ -66,8 +66,13 @@ export function setRangeStart(entries: ActionEntry[], index: number, from: numbe
 	entries[index].span = to - clamped + 1;
 }
 
+// spans stay with the row position: reordering swaps the content, not the dice ranges
 export function moveAction(entries: ActionEntry[], fromIndex: number, toIndex: number) {
 	if (fromIndex === toIndex) return;
+	const spans = entries.map((entry) => entry.span);
 	const [moved] = entries.splice(fromIndex, 1);
 	entries.splice(toIndex, 0, moved);
+	for (const [index, entry] of entries.entries()) {
+		entry.span = spans[index];
+	}
 }

@@ -132,10 +132,17 @@ describe('setRangeStart', () => {
 });
 
 describe('moveAction', () => {
-	it('moves a row with its span', () => {
+	it('moves the row content but keeps spans in place', () => {
 		const entries = [entry(5, 'a'), entry(14, 'b'), entry(1, 'c')];
 		moveAction(entries, 2, 0);
 		expect(entries.map((e) => e.name)).toEqual(['c', 'a', 'b']);
-		expect(entries.map((e) => e.span)).toEqual([1, 5, 14]);
+		expect(entries.map((e) => e.span)).toEqual([5, 14, 1]);
+	});
+
+	it('keeps spans in place on an adjacent swap', () => {
+		const entries = [entry(5, 'a'), entry(14, 'b'), entry(1, 'c')];
+		moveAction(entries, 0, 1);
+		expect(entries.map((e) => e.name)).toEqual(['b', 'a', 'c']);
+		expect(entries.map((e) => e.span)).toEqual([5, 14, 1]);
 	});
 });
