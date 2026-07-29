@@ -129,7 +129,7 @@
 		opacity: 0.7;
 	}
 
-	.hide-toggle {
+	.talents .hide-toggle {
 		position: absolute;
 		top: -1mm;
 		right: -1mm;

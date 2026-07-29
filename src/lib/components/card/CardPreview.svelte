@@ -513,7 +513,6 @@
 
 	.card :global(.remove),
 	.card :global(.add) {
-		position: relative;
 		font: inherit;
 		font-size: 7pt;
 		border: 0.2mm solid var(--color-border);
@@ -522,6 +521,11 @@
 		color: var(--color-muted);
 		cursor: pointer;
 		padding: 0.2mm 1mm;
+	}
+
+	/* zero specificity so buttons that position themselves (hide-toggle, add-banner) win */
+	.card :global(:where(.remove, .add)) {
+		position: relative;
 	}
 
 	/* invisible hit-area extension to roughly 24px; visual size must stay WYSIWYG */
