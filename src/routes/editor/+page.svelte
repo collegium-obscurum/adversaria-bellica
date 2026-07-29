@@ -246,6 +246,13 @@
 		align-items: flex-start;
 	}
 
+	/* wrapped below the card on narrow screens, sticky no longer makes sense there */
+	@media (max-width: 48rem) {
+		.side {
+			position: static;
+		}
+	}
+
 	.legend,
 	.calc-box {
 		background: var(--color-surface);

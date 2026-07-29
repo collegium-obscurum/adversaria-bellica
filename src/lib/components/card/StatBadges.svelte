@@ -165,6 +165,7 @@
 	}
 
 	.badge-toggle {
+		position: relative;
 		font: inherit;
 		color: inherit;
 		background: none;
@@ -172,6 +173,13 @@
 		padding: 0;
 		cursor: pointer;
 		line-height: 0;
+	}
+
+	/* invisible hit-area extension to roughly 24px; visual size must stay WYSIWYG */
+	.badge-toggle::after {
+		content: '';
+		position: absolute;
+		inset: -0.6mm;
 	}
 
 	.badge-value {

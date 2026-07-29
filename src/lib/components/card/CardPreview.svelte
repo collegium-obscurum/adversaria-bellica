@@ -508,6 +508,7 @@
 
 	.card :global(.remove),
 	.card :global(.add) {
+		position: relative;
 		font: inherit;
 		font-size: 7pt;
 		border: 0.2mm solid var(--color-border);
@@ -516,6 +517,14 @@
 		color: var(--color-muted);
 		cursor: pointer;
 		padding: 0.2mm 1mm;
+	}
+
+	/* invisible hit-area extension to roughly 24px; visual size must stay WYSIWYG */
+	.card :global(.remove:not(:disabled))::after,
+	.card :global(.add:not(:disabled))::after {
+		content: '';
+		position: absolute;
+		inset: -1.5mm;
 	}
 
 	.card :global(.remove:disabled),

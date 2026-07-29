@@ -311,6 +311,13 @@
 		margin-bottom: 1.5rem;
 	}
 
+	@media (max-width: 48rem) {
+		.toolbar input[type='search'],
+		.toolbar select {
+			flex: 1 1 100%;
+		}
+	}
+
 	.samples-note {
 		color: var(--color-ink-soft);
 		font-size: 0.9rem;
@@ -550,7 +557,9 @@
 	.buttons button {
 		border: none;
 		background: none;
-		padding: 0;
+		/* padding with compensating margin: bigger hit area, unchanged layout */
+		padding: 0.3rem 0.35rem;
+		margin: -0.3rem -0.35rem;
 		color: var(--color-ink-soft);
 		font-size: 0.9rem;
 	}
@@ -563,6 +572,7 @@
 		display: inline-flex;
 		width: 1.2rem;
 		height: 1.2rem;
+		box-sizing: content-box;
 		line-height: 0;
 	}
 
@@ -600,7 +610,8 @@
 	.view-close {
 		border: none;
 		background: none;
-		padding: 0;
+		padding: 0.3rem;
+		margin: -0.3rem;
 		font: inherit;
 		font-size: 1.1rem;
 		color: var(--color-ink-soft);
