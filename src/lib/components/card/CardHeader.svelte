@@ -6,10 +6,12 @@
 	let {
 		card = $bindable(),
 		editable = false,
+		nameError = $bindable(null),
 		onPortraitClick
 	}: {
 		card: MonsterCard;
 		editable?: boolean;
+		nameError?: string | null;
 		onPortraitClick?: () => void;
 	} = $props();
 
@@ -51,7 +53,19 @@
 	{/if}
 	<div class="title">
 		{#if editable}
-			<input class="name-input" bind:value={card.name} placeholder="Name" aria-label="Name" required />
+			<input
+				class="name-input"
+				bind:value={card.name}
+				placeholder="Name"
+				aria-label="Name"
+				aria-invalid={nameError !== null}
+				aria-describedby={nameError !== null ? 'card-name-error' : undefined}
+				oninput={() => (nameError = null)}
+				required
+			/>
+			{#if nameError !== null}
+				<span class="name-error" id="card-name-error" role="alert">{nameError}</span>
+			{/if}
 			{#if customCategory}
 				<input
 					class="category-input"
@@ -157,6 +171,16 @@
 		font-variant: small-caps;
 		letter-spacing: 0.05em;
 		color: var(--muted);
+	}
+
+	.name-error {
+		color: var(--color-danger);
+		font-size: 7pt;
+		font-weight: bold;
+	}
+
+	.name-input[aria-invalid='true'] {
+		border-color: var(--color-danger);
 	}
 
 	.name-input {

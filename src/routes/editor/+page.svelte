@@ -11,6 +11,7 @@
 	import { prefs } from '$lib/state/preferences.svelte';
 	import TalentCalculator from '$lib/components/TalentCalculator.svelte';
 	import { getCard, upsertCard } from '$lib/state/storage.svelte';
+	import { cardNameError } from '$lib/domain/cardValidation';
 	import { cardZoom } from '$lib/domain/cardZoom';
 	import type { FitResult } from '$lib/domain/cardFit';
 	import { resolveEditorCard } from '$lib/domain/editorCard';
@@ -23,6 +24,7 @@
 
 	let card = $state(resolved.card);
 	let cardMissing = $state(resolved.missing);
+	let nameError = $state<string | null>(null);
 	let cropperDialog: HTMLDialogElement;
 	let editorWidth = $state(0);
 	let skipGuard = false;
@@ -41,8 +43,9 @@
 	});
 
 	function save() {
-		if (!card.name.trim()) {
-			alert('Die Karte braucht einen Namen.');
+		nameError = cardNameError(card.name);
+		if (nameError !== null) {
+			document.querySelector<HTMLInputElement>('.card.editable .name-input')?.focus();
 			return;
 		}
 		card.fit = { ...fit };
@@ -92,6 +95,7 @@
 			<div class="card-zoom" style:zoom>
 				<CardPreview
 					bind:card
+					bind:nameError
 					editable
 					onPortraitClick={() => {
 						cropperDialog.showModal();

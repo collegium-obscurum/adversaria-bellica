@@ -14,11 +14,13 @@
 	let {
 		card = $bindable(),
 		editable = false,
+		nameError = $bindable(null),
 		onPortraitClick,
 		onFit
 	}: {
 		card: MonsterCard;
 		editable?: boolean;
+		nameError?: string | null;
 		onPortraitClick?: () => void;
 		onFit?: (fit: FitResult) => void;
 	} = $props();
@@ -109,7 +111,7 @@
 	{/if}
 	<div class="columns">
 		<div class="body" bind:this={bodyElement}>
-			<CardHeader bind:card {editable} {onPortraitClick} />
+			<CardHeader bind:card bind:nameError {editable} {onPortraitClick} />
 
 			{#if editable}
 				{#if showFlavor || card.flavorText.trim() !== ''}
