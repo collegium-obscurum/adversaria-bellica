@@ -48,6 +48,22 @@
 		dragging = false;
 	}
 
+	const KEY_STEP = 10;
+	const KEY_OFFSETS: Record<string, [number, number]> = {
+		ArrowLeft: [-KEY_STEP, 0],
+		ArrowRight: [KEY_STEP, 0],
+		ArrowUp: [0, -KEY_STEP],
+		ArrowDown: [0, KEY_STEP]
+	};
+
+	function onKeyDown(event: KeyboardEvent) {
+		const offset = KEY_OFFSETS[event.key];
+		if (!offset) return;
+		event.preventDefault();
+		offsetX += offset[0];
+		offsetY += offset[1];
+	}
+
 	function onZoomInput(event: Event) {
 		const newScale = Number((event.target as HTMLInputElement).value);
 		const center = VIEWPORT / 2;
@@ -89,12 +105,14 @@
 	{#if sourceUrl}
 		<div
 			class="viewport"
-			role="img"
-			aria-label="Bildausschnitt (ziehen zum Verschieben)"
+			role="application"
+			aria-label="Bildausschnitt (Ziehen oder Pfeiltasten zum Verschieben)"
+			tabindex="0"
 			style="width: {VIEWPORT}px; height: {VIEWPORT}px;"
 			onpointerdown={onPointerDown}
 			onpointermove={onPointerMove}
 			onpointerup={onPointerUp}
+			onkeydown={onKeyDown}
 		>
 			<img
 				bind:this={imageEl}

@@ -8,6 +8,7 @@
 		setRangeEnd,
 		setRangeStart
 	} from '$lib/domain/actions';
+	import { ENTRY_COLOR_LABELS } from '$lib/domain/entryColor';
 	import type { MonsterCard } from '$lib/domain/types';
 	import { prefs } from '$lib/state/preferences.svelte';
 	import ColorPicker from './ColorPicker.svelte';
@@ -98,15 +99,21 @@
 						removeAction(index);
 					}}
 					disabled={card.actions.length <= 1}
-					title="Zeile entfernen"
+					title={card.actions.length <= 1 ? 'Die letzte Aktion kann nicht entfernt werden' : 'Zeile entfernen'}
 					aria-label="Aktion entfernen{action.name ? `: ${action.name}` : ''}">✕</button
 				>
 			</div>
 		{:else}
 			<p class="entry">
-				{#if action.color && prefs.colorMode === 'dot'}<span class="color-dot tint-{action.color}"
-					></span>&nbsp;{/if}<b
+				{#if action.color && prefs.colorMode === 'dot'}<span
+						class="color-dot tint-{action.color}"
+						role="img"
+						aria-label={ENTRY_COLOR_LABELS[action.color]}
+						title={ENTRY_COLOR_LABELS[action.color]}></span>&nbsp;{/if}<b
 					class={action.color && prefs.colorMode === 'text' ? `tint-${action.color}` : ''}
+					title={action.color && prefs.colorMode === 'text'
+						? ENTRY_COLOR_LABELS[action.color]
+						: undefined}
 					>{rangeLabel(ranges[index], index === card.actions.length - 1)} = {action.name}</b
 				>{#if action.effect}:
 					{action.effect}{/if}
@@ -126,7 +133,9 @@
 			onclick={() => {
 				addAction(card.actions);
 			}}
-			disabled={card.actions.length >= D20_FACES}>+ Zeile</button
+			disabled={card.actions.length >= D20_FACES}
+			title={card.actions.length >= D20_FACES ? `Maximal ${D20_FACES} Zeilen` : undefined}
+			>+ Zeile</button
 		>
 	{/if}
 </div>

@@ -26,7 +26,11 @@
 	</a>
 	<div class="links">
 		{#each LINKS as link (link.path)}
-			<a href={resolve(link.path)} class:active={page.url.pathname === resolve(link.path)}>
+			<a
+				href={resolve(link.path)}
+				class:active={page.url.pathname === resolve(link.path)}
+				aria-current={page.url.pathname === resolve(link.path) ? 'page' : undefined}
+			>
 				{link.label}
 			</a>
 		{/each}
@@ -89,6 +93,18 @@
 	:global(:focus-visible) {
 		outline: 2px solid var(--color-brand);
 		outline-offset: 2px;
+	}
+
+	:global(.sr-only) {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		margin: -1px;
+		padding: 0;
+		overflow: hidden;
+		clip-path: inset(50%);
+		white-space: nowrap;
+		border: 0;
 	}
 
 	nav {

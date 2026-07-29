@@ -83,7 +83,7 @@
 	}
 
 	function onDelete(card: MonsterCard) {
-		if (confirm(`Karte „${card.name}" wirklich löschen?`)) {
+		if (confirm(`Karte „${card.name}“ wirklich löschen?`)) {
 			deleteCard(card.id);
 		}
 	}

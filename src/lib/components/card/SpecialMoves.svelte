@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { ENTRY_COLOR_LABELS } from '$lib/domain/entryColor';
 	import type { MonsterCard, WoundTrigger } from '$lib/domain/types';
 	import { WOUND_TRIGGERS } from '$lib/domain/types';
 	import { triggerLabels } from '$lib/domain/wounds';
@@ -131,9 +132,13 @@
 		{#each visibleTriggers as trigger (trigger)}
 			{@const move = card.specialMoves[trigger]}
 			<p class="entry">
-				{#if move.color && prefs.colorMode === 'dot'}<span class="color-dot tint-{move.color}"
-					></span>&nbsp;{/if}<b
+				{#if move.color && prefs.colorMode === 'dot'}<span
+						class="color-dot tint-{move.color}"
+						role="img"
+						aria-label={ENTRY_COLOR_LABELS[move.color]}
+						title={ENTRY_COLOR_LABELS[move.color]}></span>&nbsp;{/if}<b
 					class={move.color && prefs.colorMode === 'text' ? `tint-${move.color}` : ''}
+					title={move.color && prefs.colorMode === 'text' ? ENTRY_COLOR_LABELS[move.color] : undefined}
 					>{labels[trigger]}{move.name ? ` = ${move.name}` : ''}</b
 				>{#if move.effect}:
 					{move.effect}{/if}
@@ -141,9 +146,13 @@
 		{/each}
 		{#each visibleCustomMoves as move (move)}
 			<p class="entry">
-				{#if move.color && prefs.colorMode === 'dot'}<span class="color-dot tint-{move.color}"
-					></span>&nbsp;{/if}<b
+				{#if move.color && prefs.colorMode === 'dot'}<span
+						class="color-dot tint-{move.color}"
+						role="img"
+						aria-label={ENTRY_COLOR_LABELS[move.color]}
+						title={ENTRY_COLOR_LABELS[move.color]}></span>&nbsp;{/if}<b
 					class={move.color && prefs.colorMode === 'text' ? `tint-${move.color}` : ''}
+					title={move.color && prefs.colorMode === 'text' ? ENTRY_COLOR_LABELS[move.color] : undefined}
 					>{move.trigger}{move.name ? ` = ${move.name}` : ''}</b
 				>{#if move.effect}:
 					{move.effect}{/if}

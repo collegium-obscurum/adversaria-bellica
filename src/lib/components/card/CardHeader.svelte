@@ -53,6 +53,7 @@
 	{/if}
 	<div class="title">
 		{#if editable}
+			<h2 class="sr-only">{card.name || 'Unbenannt'}</h2>
 			<input
 				class="name-input"
 				bind:value={card.name}
