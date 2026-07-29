@@ -105,7 +105,7 @@
 	{#if sourceUrl}
 		<div
 			class="viewport"
-			role="application"
+			role="button"
 			aria-label="Bildausschnitt (Ziehen oder Pfeiltasten zum Verschieben)"
 			tabindex="0"
 			style="width: {VIEWPORT}px; height: {VIEWPORT}px;"
