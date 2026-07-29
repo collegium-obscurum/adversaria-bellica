@@ -541,8 +541,14 @@
 	.card.editable :global(select:focus),
 	.card.editable :global(textarea:focus) {
 		border-color: var(--color-bronze);
-		outline: none;
 		background: #fdfcf8;
+	}
+
+	/* mouse focus stays subtle; keyboard focus keeps the global :focus-visible ring */
+	.card.editable :global(input:focus:not(:focus-visible)),
+	.card.editable :global(select:focus:not(:focus-visible)),
+	.card.editable :global(textarea:focus:not(:focus-visible)) {
+		outline: none;
 	}
 
 	.card.editable :global(textarea) {
