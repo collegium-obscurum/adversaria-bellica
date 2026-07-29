@@ -20,21 +20,16 @@
 	}
 
 	function closeOnEscape(event: KeyboardEvent) {
-		if (event.key === 'Escape' && open) {
-			event.stopPropagation();
-			open = false;
-			triggerButton?.focus();
-		}
+		if (!open || event.key !== 'Escape') return;
+		event.stopPropagation();
+		open = false;
+		triggerButton?.focus();
 	}
 </script>
 
-<span
-	class="picker"
-	role="group"
-	aria-label="Farbwahl"
-	onfocusout={closeOnFocusLoss}
-	onkeydown={closeOnEscape}
->
+<svelte:window onkeydown={closeOnEscape} />
+
+<span class="picker" onfocusout={closeOnFocusLoss}>
 	<button
 		type="button"
 		class="swatch current {color ? `tint-${color}` : ''}"
