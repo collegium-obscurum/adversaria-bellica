@@ -5,7 +5,12 @@ declare const process: { env: Record<string, string | undefined> };
 
 export default defineConfig({
 	testDir: 'tests',
-	use: { baseURL: 'http://localhost:4173' },
+	retries: process.env.CI ? 2 : 0,
+	reporter: [['list'], ['html', { open: 'never' }]],
+	use: {
+		baseURL: 'http://localhost:4173',
+		trace: 'on-first-retry'
+	},
 	webServer: {
 		command: 'npm run build && npm run preview',
 		port: 4173,
