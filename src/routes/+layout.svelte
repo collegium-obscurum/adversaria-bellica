@@ -58,7 +58,7 @@
 		--radius: 6px;
 		--radius-lg: 8px;
 		--tint-red: #c0392b;
-		--tint-orange: #d35400;
+		--tint-orange: #c04a00;
 		--tint-green: #1e8449;
 		--tint-blue: #1f618d;
 		--tint-purple: #7d3c98;
@@ -67,7 +67,7 @@
 
 	:global(.ornate-tints) {
 		--tint-red: #7a1e12;
-		--tint-orange: #a45a1c;
+		--tint-orange: #8a4a12;
 		--tint-green: #4a6741;
 		--tint-blue: #3a5068;
 		--tint-purple: #5e3a5e;

@@ -143,7 +143,7 @@
 	}
 
 	.portrait-hint {
-		color: #888;
+		color: var(--color-muted);
 		font-size: 7pt;
 	}
 

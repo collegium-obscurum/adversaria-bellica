@@ -522,7 +522,8 @@
 
 	.stats small {
 		font-size: 0.7rem;
-		color: var(--color-gold);
+		/* darker than --color-gold: small text needs 4.5:1 on the tile surface */
+		color: #8a6a2f;
 	}
 
 	.buttons {
