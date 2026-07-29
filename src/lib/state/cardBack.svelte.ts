@@ -26,11 +26,13 @@ export const cardBack = $state({
 	customImage: loadCustomImage()
 });
 
-function persist(key: string, value: string) {
+function persist(key: string, value: string): boolean {
 	try {
 		localStorage.setItem(key, value);
+		return true;
 	} catch {
 		// preference just won't survive the reload
+		return false;
 	}
 }
 
@@ -46,5 +48,13 @@ export function setCardBackMode(mode: CardBackMode) {
 
 export function setCardBackImage(dataUrl: string) {
 	cardBack.customImage = dataUrl;
-	persist(IMAGE_KEY, dataUrl);
+	// the image is by far the largest localStorage entry; a silent quota failure
+	// would show a preview that vanishes on reload
+	if (!persist(IMAGE_KEY, dataUrl)) {
+		alert(
+			'Das Rückseitenbild konnte nicht gespeichert werden (Speicher voll). ' +
+				'Es geht beim Neuladen der Seite verloren. Tipp: ein kleineres Bild wählen ' +
+				'oder nicht mehr benötigte Karten löschen.'
+		);
+	}
 }
