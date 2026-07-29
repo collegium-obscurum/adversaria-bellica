@@ -17,20 +17,6 @@
 
 	const ranges = $derived(actionRanges(card.actions));
 
-	let dragIndex = $state<number | null>(null);
-
-	function onDragStart(event: DragEvent, index: number) {
-		dragIndex = index;
-		event.dataTransfer?.setData('text/plain', String(index));
-	}
-
-	function onDrop(index: number) {
-		if (dragIndex !== null) {
-			moveAction(card.actions, dragIndex, index);
-		}
-		dragIndex = null;
-	}
-
 	function removeAction(index: number) {
 		card.actions.splice(index, 1);
 	}
@@ -44,28 +30,29 @@
 	</p>
 	{#each card.actions as action, index (action)}
 		{#if editable}
-			<div
-				class="entry-row"
-				class:drop-target={dragIndex !== null && dragIndex !== index}
-				role="listitem"
-				ondragover={(event) => {
-					event.preventDefault();
-				}}
-				ondrop={() => {
-					onDrop(index);
-				}}
-			>
-				<span
-					class="handle"
-					draggable="true"
-					role="button"
-					tabindex="-1"
-					title="Ziehen zum Umsortieren"
-					ondragstart={(event) => {
-						onDragStart(event, index);
-					}}
-					ondragend={() => (dragIndex = null)}>⠿</span
-				>
+			<div class="entry-row">
+				<span class="movers">
+					<button
+						type="button"
+						class="move"
+						disabled={index === 0}
+						title="Nach oben"
+						aria-label="Nach oben{action.name ? `: ${action.name}` : ''}"
+						onclick={() => {
+							moveAction(card.actions, index, index - 1);
+						}}>▲</button
+					>
+					<button
+						type="button"
+						class="move"
+						disabled={index === card.actions.length - 1}
+						title="Nach unten"
+						aria-label="Nach unten{action.name ? `: ${action.name}` : ''}"
+						onclick={() => {
+							moveAction(card.actions, index, index + 1);
+						}}>▼</button
+					>
+				</span>
 				<ColorPicker bind:color={action.color} />
 				<span class="range">
 					{#if index === 0}<span class="bound start">1</span>{:else}<input
@@ -151,14 +138,26 @@
 		gap: 0.333em;
 	}
 
-	.entry-row.drop-target {
-		outline: 0.3mm dashed var(--color-bronze);
+	.movers {
+		display: flex;
+		flex-direction: column;
+		flex-shrink: 0;
 	}
 
-	.handle {
-		cursor: grab;
-		color: #999;
-		user-select: none;
+	.move {
+		font: inherit;
+		font-size: 5pt;
+		line-height: 1.2;
+		padding: 0 0.5mm;
+		border: none;
+		background: none;
+		color: var(--color-muted);
+		cursor: pointer;
+	}
+
+	.move:disabled {
+		opacity: 0.35;
+		cursor: default;
 	}
 
 	.range .bound {
