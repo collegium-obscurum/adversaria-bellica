@@ -78,6 +78,12 @@
 		--tint-brown: #6b4a2f;
 	}
 
+	:global(html) {
+		/* iOS Safari inflates text in wide/transformed blocks without this */
+		-webkit-text-size-adjust: 100%;
+		text-size-adjust: 100%;
+	}
+
 	:global(body) {
 		margin: 0;
 		font-family: system-ui, sans-serif;
