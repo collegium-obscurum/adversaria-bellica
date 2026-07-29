@@ -44,6 +44,10 @@
 			? 'Wird nicht gedruckt – klicken zum Einblenden'
 			: 'Klicken zum Ausblenden';
 	}
+
+	function toggleLabel(key: StatKey, label: string): string {
+		return isHidden(key) ? `${label} einblenden` : `${label} ausblenden`;
+	}
 </script>
 
 <aside class="badges">
@@ -58,6 +62,7 @@
 					type="button"
 					class="badge-toggle"
 					title={toggleTitle('lifePoints')}
+					aria-label={toggleLabel('lifePoints', lifePointsBadge.label)}
 					onclick={() => {
 						toggleHidden('lifePoints');
 					}}><BadgeFace badge={lifePointsBadge} cutColor={iconCutColor} /></button
@@ -65,6 +70,7 @@
 				<input
 					type="number"
 					min="1"
+					aria-label={lifePointsBadge.label}
 					bind:value={card.lifePoints}
 					onblur={normalizeLifePoints}
 					style:font-size={valueFontSize(card.lifePoints ?? '')}
@@ -89,12 +95,14 @@
 						type="button"
 						class="badge-toggle"
 						title={toggleTitle(badge.key)}
+						aria-label={toggleLabel(badge.key, badge.label)}
 						onclick={() => {
 							toggleHidden(badge.key);
 						}}><BadgeFace {badge} cutColor={iconCutColor} /></button
 					>
 					<input
 						type="text"
+						aria-label={badge.label}
 						bind:value={card[badge.key]}
 						style:font-size={valueFontSize(card[badge.key])}
 					/>

@@ -57,19 +57,24 @@
 			<div class="entry-row">
 				<ColorPicker bind:color={card.specialMoves[trigger].color} />
 				<span class="range">{labels[trigger]} =</span>
-				<textarea class="entry-name" bind:value={card.specialMoves[trigger].name} placeholder="Name"
-				></textarea>
+				<textarea
+					class="entry-name"
+					bind:value={card.specialMoves[trigger].name}
+					placeholder="Name"
+					aria-label="Name für {labels[trigger]}"></textarea>
 				<textarea
 					class="entry-effect"
 					bind:value={card.specialMoves[trigger].effect}
-					placeholder="Effekt"></textarea>
+					placeholder="Effekt"
+					aria-label="Effekt für {labels[trigger]}"></textarea>
 				<button
 					type="button"
 					class="remove"
 					onclick={() => {
 						removeTrigger(trigger);
 					}}
-					title="Entfernen">✕</button
+					title="Entfernen"
+					aria-label="Spezialmanöver entfernen: {labels[trigger]}">✕</button
 				>
 			</div>
 		{/each}
@@ -81,6 +86,7 @@
 						class="trigger-input"
 						bind:value={move.trigger}
 						placeholder="Auslöser"
+						aria-label="Auslöser"
 						{@attach (node: HTMLTextAreaElement) => {
 							if (index === focusCustomIndex) {
 								node.focus();
@@ -88,15 +94,21 @@
 							}
 						}}></textarea> =</span
 				>
-				<textarea class="entry-name" bind:value={move.name} placeholder="Name"></textarea>
-				<textarea class="entry-effect" bind:value={move.effect} placeholder="Effekt"></textarea>
+				<textarea class="entry-name" bind:value={move.name} placeholder="Name" aria-label="Name"
+				></textarea>
+				<textarea
+					class="entry-effect"
+					bind:value={move.effect}
+					placeholder="Effekt"
+					aria-label="Effekt"></textarea>
 				<button
 					type="button"
 					class="remove"
 					onclick={() => {
 						removeCustomMove(index);
 					}}
-					title="Entfernen">✕</button
+					title="Entfernen"
+					aria-label="Spezialmanöver entfernen{move.trigger ? `: ${move.trigger}` : ''}">✕</button
 				>
 			</div>
 		{/each}

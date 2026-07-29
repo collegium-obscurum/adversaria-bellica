@@ -50,6 +50,7 @@
 				type="button"
 				class="remove hide-toggle"
 				title="Talente ausblenden (Werte bleiben erhalten)"
+				aria-label="Talente ausblenden"
 				onclick={() => {
 					card.talentsHidden = true;
 				}}>✕</button
@@ -71,6 +72,7 @@
 									setValue(key, event.currentTarget);
 								}}
 								title="Wert"
+								aria-label="{TALENT_LABELS[key]} Wert"
 							/>
 							(QS
 							<input
@@ -83,6 +85,7 @@
 									setMaxQs(key, event.currentTarget);
 								}}
 								title="max. QS"
+								aria-label="{TALENT_LABELS[key]} max. QS"
 							/>)
 						{:else}
 							{talent.value} (QS {talent.maxQs})

@@ -78,6 +78,7 @@
 								setRangeStart(card.actions, index, Number(event.currentTarget.value));
 							}}
 							title="Bereichsanfang"
+							aria-label="Bereichsanfang"
 						/>{/if}&nbsp;–&nbsp;{#if index === card.actions.length - 1}<span class="bound end"
 							>{D20_FACES}+</span
 						>{:else}<input
@@ -90,13 +91,19 @@
 								setRangeEnd(card.actions, index, Number(event.currentTarget.value));
 							}}
 							title="Bereichsende"
+							aria-label="Bereichsende"
 						/>{/if} =
 				</span>
-				<textarea class="entry-name" bind:value={action.name} placeholder="Name"></textarea>
+				<textarea
+					class="entry-name"
+					bind:value={action.name}
+					placeholder="Name"
+					aria-label="Name der Aktion"></textarea>
 				<textarea
 					class="entry-effect"
 					bind:value={action.effect}
-					placeholder="Effekt, z.B. 1W6+4 TP"></textarea>
+					placeholder="Effekt, z.B. 1W6+4 TP"
+					aria-label="Effekt der Aktion"></textarea>
 				<button
 					type="button"
 					class="remove"
@@ -104,7 +111,8 @@
 						removeAction(index);
 					}}
 					disabled={card.actions.length <= 1}
-					title="Zeile entfernen">✕</button
+					title="Zeile entfernen"
+					aria-label="Aktion entfernen{action.name ? `: ${action.name}` : ''}">✕</button
 				>
 			</div>
 		{:else}

@@ -33,7 +33,13 @@
 
 <header>
 	{#if editable}
-		<button type="button" class="portrait" onclick={onPortraitClick} title="Bild wählen">
+		<button
+			type="button"
+			class="portrait"
+			onclick={onPortraitClick}
+			title="Bild wählen"
+			aria-label="Bild wählen"
+		>
 			{#if card.image}
 				<img src={card.image} alt="" onerror={hideBrokenImage} />
 			{:else}
@@ -45,12 +51,13 @@
 	{/if}
 	<div class="title">
 		{#if editable}
-			<input class="name-input" bind:value={card.name} placeholder="Name" required />
+			<input class="name-input" bind:value={card.name} placeholder="Name" aria-label="Name" required />
 			{#if customCategory}
 				<input
 					class="category-input"
 					bind:value={card.category}
 					placeholder="Eigener Typ"
+					aria-label="Eigener Typ"
 					onblur={() => (customCategory = false)}
 					onkeydown={(event) => {
 						if (event.key === 'Enter') event.currentTarget.blur();
@@ -60,7 +67,12 @@
 					}}
 				/>
 			{:else}
-				<select class="category-input" value={card.category} onchange={onCategoryChange}>
+				<select
+					class="category-input"
+					value={card.category}
+					aria-label="Typ"
+					onchange={onCategoryChange}
+				>
 					<option value="">– kein Typ –</option>
 					{#each typeOptions as type (type)}
 						<option value={type}>{type}</option>

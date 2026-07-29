@@ -1,22 +1,15 @@
 <script lang="ts">
-	import { ENTRY_COLORS, type EntryColor } from '$lib/domain/entryColor';
+	import { ENTRY_COLORS, ENTRY_COLOR_LABELS, type EntryColor } from '$lib/domain/entryColor';
 
 	let { color = $bindable() }: { color: EntryColor | null } = $props();
 
-	const COLOR_LABELS: Record<EntryColor, string> = {
-		red: 'Rot',
-		orange: 'Orange',
-		green: 'Grün',
-		blue: 'Blau',
-		purple: 'Violett',
-		brown: 'Braun'
-	};
-
 	let open = $state(false);
+	let triggerButton = $state<HTMLButtonElement>();
 
 	function pick(value: EntryColor | null) {
 		color = value;
 		open = false;
+		triggerButton?.focus();
 	}
 
 	function closeOnFocusLoss(event: FocusEvent) {
@@ -25,14 +18,31 @@
 			open = false;
 		}
 	}
+
+	function closeOnEscape(event: KeyboardEvent) {
+		if (event.key === 'Escape' && open) {
+			event.stopPropagation();
+			open = false;
+			triggerButton?.focus();
+		}
+	}
 </script>
 
-<span class="picker" onfocusout={closeOnFocusLoss}>
+<span
+	class="picker"
+	role="group"
+	aria-label="Farbwahl"
+	onfocusout={closeOnFocusLoss}
+	onkeydown={closeOnEscape}
+>
 	<button
 		type="button"
 		class="swatch current {color ? `tint-${color}` : ''}"
 		class:none={color === null}
 		title="Farbe wählen"
+		aria-label="Farbe wählen (aktuell: {color ? ENTRY_COLOR_LABELS[color] : 'keine'})"
+		aria-expanded={open}
+		bind:this={triggerButton}
 		onclick={() => (open = !open)}
 	></button>
 	{#if open}
@@ -42,6 +52,8 @@
 				class="swatch none"
 				class:selected={color === null}
 				title="Keine Farbe"
+				aria-label="Keine Farbe"
+				aria-pressed={color === null}
 				onclick={() => {
 					pick(null);
 				}}
@@ -51,7 +63,9 @@
 					type="button"
 					class="swatch tint-{value}"
 					class:selected={color === value}
-					title={COLOR_LABELS[value]}
+					title={ENTRY_COLOR_LABELS[value]}
+					aria-label={ENTRY_COLOR_LABELS[value]}
+					aria-pressed={color === value}
 					onclick={() => {
 						pick(value);
 					}}
@@ -69,6 +83,7 @@
 	}
 
 	.swatch {
+		position: relative;
 		width: 3.2mm;
 		height: 3.2mm;
 		flex-shrink: 0;
@@ -77,6 +92,14 @@
 		border-radius: 50%;
 		background: currentColor;
 		cursor: pointer;
+	}
+
+	/* invisible hit-area extension to roughly 24px without changing the visual size */
+	.swatch::after {
+		content: '';
+		position: absolute;
+		inset: -1.6mm;
+		border-radius: 50%;
 	}
 
 	.swatch.none {
@@ -110,7 +133,7 @@
 		left: 0;
 		z-index: 10;
 		display: flex;
-		gap: 1mm;
+		gap: 2mm;
 		padding: 1mm;
 		background: #fff;
 		border: 0.2mm solid var(--color-border);

@@ -84,7 +84,7 @@
 </script>
 
 <div class="cropper">
-	<input type="file" accept="image/*" onchange={onFileChange} />
+	<input type="file" accept="image/*" aria-label="Bilddatei wählen" onchange={onFileChange} />
 
 	{#if sourceUrl}
 		<div

@@ -139,15 +139,15 @@
 				>Vorlagen</button
 			>
 		</div>
-		<input type="search" placeholder="Suche nach Name…" bind:value={search} />
-		<select bind:value={categoryFilter}>
+		<input type="search" placeholder="Suche nach Name…" aria-label="Suche nach Name" bind:value={search} />
+		<select aria-label="Nach Typ filtern" bind:value={categoryFilter}>
 			<option value="">Alle Typen</option>
 			<option value={WITHOUT}>ohne Typ</option>
 			{#each categories as category (category)}
 				<option value={category}>{category}</option>
 			{/each}
 		</select>
-		<select bind:value={bannerFilter}>
+		<select aria-label="Nach Banner filtern" bind:value={bannerFilter}>
 			<option value="">Alle Banner</option>
 			<option value={WITHOUT}>ohne Banner</option>
 			{#each banners as banner (banner)}

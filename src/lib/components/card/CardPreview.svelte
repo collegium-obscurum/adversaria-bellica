@@ -76,10 +76,14 @@
 	{#if hasBanner}
 		<div class="banner" style:color={card.bannerColor ? `var(--tint-${card.bannerColor})` : null}>
 			{#if editable}
-				<input class="banner-input" bind:value={card.banner} placeholder="Banner" />
+				<input class="banner-input" bind:value={card.banner} placeholder="Banner" aria-label="Banner" />
 				<ColorPicker bind:color={card.bannerColor} />
-				<button type="button" class="remove" onclick={removeBanner} title="Banner entfernen"
-					>✕</button
+				<button
+					type="button"
+					class="remove"
+					onclick={removeBanner}
+					title="Banner entfernen"
+					aria-label="Banner entfernen">✕</button
 				>
 			{:else}
 				<span class="banner-label">{card.banner}</span>
@@ -110,8 +114,11 @@
 			{#if editable}
 				{#if showFlavor || card.flavorText.trim() !== ''}
 					<div class="removable">
-						<textarea class="flavor-input" bind:value={card.flavorText} placeholder="Flavourtext"
-						></textarea>
+						<textarea
+							class="flavor-input"
+							bind:value={card.flavorText}
+							placeholder="Flavourtext"
+							aria-label="Flavourtext"></textarea>
 						<button
 							type="button"
 							class="remove"
@@ -119,7 +126,8 @@
 								card.flavorText = '';
 								showFlavor = false;
 							}}
-							title="Flavourtext entfernen">✕</button
+							title="Flavourtext entfernen"
+							aria-label="Flavourtext entfernen">✕</button
 						>
 					</div>
 				{:else}
@@ -155,7 +163,8 @@
 							<textarea
 								class="notes-input"
 								bind:value={card.notes}
-								placeholder="Notizen (Immunitäten, Schwächen, Taktik)"></textarea>
+								placeholder="Notizen (Immunitäten, Schwächen, Taktik)"
+								aria-label="Notizen"></textarea>
 							<button
 								type="button"
 								class="remove"
@@ -163,7 +172,8 @@
 									card.notes = '';
 									showNotes = false;
 								}}
-								title="Notizen entfernen">✕</button
+								title="Notizen entfernen"
+								aria-label="Notizen entfernen">✕</button
 							>
 						</div>
 					{:else}
