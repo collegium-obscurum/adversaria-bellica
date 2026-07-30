@@ -14,7 +14,7 @@ export default defineConfig(
 	svelte.configs.prettier,
 	{
 		languageOptions: {
-			globals: { ...globals.browser, ...globals.node },
+			globals: globals.browser,
 			parserOptions: {
 				projectService: {
 					allowDefaultProject: ['eslint.config.js', 'playwright.config.ts']

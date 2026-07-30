@@ -201,14 +201,6 @@
 		font: inherit;
 		font-weight: bold;
 		padding: 0;
-		-moz-appearance: textfield;
-		appearance: textfield;
-	}
-
-	.badge input::-webkit-inner-spin-button,
-	.badge input::-webkit-outer-spin-button {
-		appearance: none;
-		margin: 0;
 	}
 
 	/* wax seals hold light text; the default bright focus box would swallow it */

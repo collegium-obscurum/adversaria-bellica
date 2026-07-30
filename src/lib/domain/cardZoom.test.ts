@@ -1,23 +1,23 @@
 import { describe, expect, it } from 'vitest';
-import { CARD_HEIGHT_PX, CARD_WIDTH_PX, cardFitZoom, cardZoom } from './cardZoom';
+import { CARD_HEIGHT_PX, CARD_WIDTH_PX, cardFitZoom } from './cardZoom';
 
-describe('cardZoom', () => {
+describe('cardFitZoom without a height', () => {
 	it('caps at 1.7 on wide screens', () => {
-		expect(cardZoom(2000)).toBe(1.7);
+		expect(cardFitZoom(2000)).toBe(1.7);
 	});
 
 	it('shrinks below 1 when the card is wider than the available space', () => {
-		const zoom = cardZoom(350);
+		const zoom = cardFitZoom(350);
 		expect(zoom).toBeLessThan(1);
 		expect(zoom * CARD_WIDTH_PX).toBeLessThanOrEqual(350);
 	});
 
 	it('fills the available width between card size and the cap', () => {
-		expect(cardZoom(CARD_WIDTH_PX * 1.5)).toBeCloseTo(1.5);
+		expect(cardFitZoom(CARD_WIDTH_PX * 1.5)).toBeCloseTo(1.5);
 	});
 
 	it('falls back to 1 before the container is measured', () => {
-		expect(cardZoom(0)).toBe(1);
+		expect(cardFitZoom(0)).toBe(1);
 	});
 });
 

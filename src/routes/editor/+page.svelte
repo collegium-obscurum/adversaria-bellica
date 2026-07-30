@@ -11,25 +11,24 @@
 	import { prefs } from '$lib/state/preferences.svelte';
 	import TalentCalculator from '$lib/components/TalentCalculator.svelte';
 	import { getCard, upsertCard } from '$lib/state/storage.svelte';
-	import { cardNameError } from '$lib/domain/cardValidation';
-	import { cardZoom } from '$lib/domain/cardZoom';
+	import { cardFitZoom } from '$lib/domain/cardZoom';
 	import type { FitResult } from '$lib/domain/cardFit';
-	import { resolveEditorCard } from '$lib/domain/editorCard';
+	import { createEmptyCard } from '$lib/domain/types';
 
 	const editId = page.url.searchParams.get('id');
 	const existing = editId ? getCard(editId) : undefined;
-	const resolved = resolveEditorCard(editId, existing ? $state.snapshot(existing) : undefined);
+	const initialCard = existing ? $state.snapshot(existing) : createEmptyCard();
 
-	const baseline = JSON.stringify(resolved.card);
+	const baseline = JSON.stringify(initialCard);
 
-	let card = $state(resolved.card);
-	let cardMissing = $state(resolved.missing);
+	let card = $state(initialCard);
+	let cardMissing = $state(!existing && editId !== null);
 	let nameError = $state<string | null>(null);
 	let cropperDialog: HTMLDialogElement;
 	let editorWidth = $state(0);
 	let skipGuard = false;
 	let fit = $state<FitResult>({ scale: 1, fits: true, imageHidden: false });
-	const zoom = $derived(cardZoom(editorWidth));
+	const zoom = $derived(cardFitZoom(editorWidth));
 
 	beforeNavigate((navigation) => {
 		if (skipGuard || JSON.stringify($state.snapshot(card)) === baseline) return;
@@ -43,7 +42,7 @@
 	});
 
 	function save() {
-		nameError = cardNameError(card.name);
+		nameError = card.name.trim() === '' ? 'Die Karte braucht einen Namen.' : null;
 		if (nameError !== null) {
 			document.querySelector<HTMLInputElement>('.card.editable .name-input')?.focus();
 			return;
@@ -107,7 +106,7 @@
 		<!-- offscreen display-mode copy: measures the print fit while editing -->
 		<div class="fit-measure" aria-hidden="true">
 			<CardPreview
-				bind:card
+				{card}
 				onFit={(result: FitResult) => {
 					fit = result;
 				}}

@@ -14,6 +14,7 @@
 		store
 	} from '$lib/state/storage.svelte';
 	import { sampleCards } from '$lib/data/samples';
+	import { downloadJson } from '$lib/download';
 	import { cardFitZoom } from '$lib/domain/cardZoom';
 	import { filterCards, WITHOUT } from '$lib/domain/libraryFilter';
 	import { prefs } from '$lib/state/preferences.svelte';
@@ -67,7 +68,7 @@
 		const stats = [];
 		for (const badge of STAT_BADGES) {
 			if (card.hiddenStats.includes(badge.key)) continue;
-			const raw = badge.key === 'lifePoints' ? card.lifePoints : card[badge.key];
+			const raw = card[badge.key];
 			const value = raw === null ? '' : String(raw).trim();
 			if (value === '') continue;
 			stats.push({ abbr: badge.abbr, label: badge.label, value });
@@ -89,13 +90,7 @@
 	}
 
 	function onExport() {
-		const blob = new Blob([exportJson()], { type: 'application/json' });
-		const url = URL.createObjectURL(blob);
-		const link = document.createElement('a');
-		link.href = url;
-		link.download = 'adversaria-bellica-karten.json';
-		link.click();
-		URL.revokeObjectURL(url);
+		downloadJson(exportJson(), 'adversaria-bellica-karten.json');
 	}
 
 	async function onImport(event: Event) {

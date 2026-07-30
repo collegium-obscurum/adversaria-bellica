@@ -49,19 +49,6 @@ export function deleteCard(id: string) {
 	persist();
 }
 
-export function duplicateCard(id: string): MonsterCard | undefined {
-	const original = getCard(id);
-	if (!original) return undefined;
-	// structuredClone rejects $state proxies; JSON round-trip matches the
-	// localStorage persistence shape and reads through the proxy
-	const copy = JSON.parse(JSON.stringify(original)) as MonsterCard;
-	copy.id = crypto.randomUUID();
-	copy.name = `${copy.name} (Kopie)`;
-	store.cards.push(copy);
-	persist();
-	return copy;
-}
-
 /** Adds an independent copy of any card (own or sample) with a fresh id to the library. */
 export function copyToLibrary(card: MonsterCard): MonsterCard {
 	// JSON round-trip instead of structuredClone: $state proxies reject cloning
@@ -70,6 +57,12 @@ export function copyToLibrary(card: MonsterCard): MonsterCard {
 	store.cards.push(copy);
 	persist();
 	return copy;
+}
+
+export function duplicateCard(id: string): MonsterCard | undefined {
+	const original = getCard(id);
+	if (!original) return undefined;
+	return copyToLibrary({ ...original, name: `${original.name} (Kopie)` });
 }
 
 export function exportJson(cards: MonsterCard[] = store.cards): string {

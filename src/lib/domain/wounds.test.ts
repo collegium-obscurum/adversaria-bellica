@@ -3,21 +3,11 @@ import { triggerLabels, woundThresholds } from './wounds';
 
 describe('woundThresholds', () => {
 	it('computes cumulative damage for a max HP divisible by 4', () => {
-		expect(woundThresholds(40)).toEqual([
-			{ label: '75%', damage: 10 },
-			{ label: '50%', damage: 20 },
-			{ label: '25%', damage: 30 },
-			{ label: 'Tod', damage: 40 }
-		]);
+		expect(woundThresholds(40)).toEqual({ hp75: 10, hp50: 20, hp25: 30, death: 40 });
 	});
 
 	it('rounds up so the threshold triggers at or below the percentage', () => {
-		expect(woundThresholds(30)).toEqual([
-			{ label: '75%', damage: 8 },
-			{ label: '50%', damage: 15 },
-			{ label: '25%', damage: 23 },
-			{ label: 'Tod', damage: 30 }
-		]);
+		expect(woundThresholds(30)).toEqual({ hp75: 8, hp50: 15, hp25: 23, death: 30 });
 	});
 
 	it('treats invalid max HP as 1 while the editor input is empty', () => {

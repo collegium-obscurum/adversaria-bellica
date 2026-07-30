@@ -28,7 +28,6 @@
 		{#each LINKS as link (link.path)}
 			<a
 				href={resolve(link.path)}
-				class:active={page.url.pathname === resolve(link.path)}
 				aria-current={page.url.pathname === resolve(link.path) ? 'page' : undefined}
 			>
 				{link.label}
@@ -168,7 +167,7 @@
 		background: rgb(255 255 255 / 8%);
 	}
 
-	.links a.active {
+	.links a[aria-current='page'] {
 		color: var(--color-cream);
 		background: var(--color-brand);
 	}

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { tick } from 'svelte';
+	import { downloadJson, downloadUrl } from '$lib/download';
 	import { cardFileName } from '$lib/domain/filename';
 	import { CARD_HEIGHT_MM, CARD_WIDTH_MM } from '$lib/domain/printLayout';
 	import type { MonsterCard } from '$lib/domain/types';
@@ -26,15 +27,9 @@
 		return toPng(node, { pixelRatio: PIXEL_RATIO });
 	}
 
-	function downloadJson() {
+	function saveJson() {
 		details.open = false;
-		const blob = new Blob([exportJson([card])], { type: 'application/json' });
-		const url = URL.createObjectURL(blob);
-		const link = document.createElement('a');
-		link.href = url;
-		link.download = cardFileName(card.name, 'json');
-		link.click();
-		URL.revokeObjectURL(url);
+		downloadJson(exportJson([card]), cardFileName(card.name, 'json'));
 	}
 
 	function closeOnOutsideClick(event: MouseEvent) {
@@ -49,10 +44,7 @@
 		try {
 			const dataUrl = await captureCard();
 			if (format === 'png') {
-				const link = document.createElement('a');
-				link.href = dataUrl;
-				link.download = cardFileName(card.name, 'png');
-				link.click();
+				downloadUrl(dataUrl, cardFileName(card.name, 'png'));
 			} else {
 				const { jsPDF } = await import('jspdf');
 				const pdf = new jsPDF({ unit: 'mm', format: [CARD_WIDTH_MM, CARD_HEIGHT_MM] });
@@ -76,7 +68,7 @@
 	<div class="menu">
 		<button type="button" disabled={busy} onclick={() => download('png')}>Als PNG</button>
 		<button type="button" disabled={busy} onclick={() => download('pdf')}>Als PDF</button>
-		<button type="button" disabled={busy} onclick={downloadJson}>Als JSON</button>
+		<button type="button" disabled={busy} onclick={saveJson}>Als JSON</button>
 	</div>
 </details>
 

@@ -40,6 +40,38 @@ describe('colorMode preference', () => {
 	});
 });
 
+describe('cardStyle preference', () => {
+	it('defaults to the printer-friendly style', async () => {
+		const state = await loadModule();
+		expect(state.prefs.cardStyle).toBe('minimal');
+	});
+
+	it('persists the style across module reloads', async () => {
+		const first = await loadModule();
+		first.setCardStyle('ornate');
+		expect(first.prefs.cardStyle).toBe('ornate');
+
+		const second = await loadModule();
+		expect(second.prefs.cardStyle).toBe('ornate');
+	});
+});
+
+describe('statLabelMode preference', () => {
+	it('defaults to icons', async () => {
+		const state = await loadModule();
+		expect(state.prefs.statLabelMode).toBe('icons');
+	});
+
+	it('persists the mode across module reloads', async () => {
+		const first = await loadModule();
+		first.setStatLabelMode('text');
+		expect(first.prefs.statLabelMode).toBe('text');
+
+		const second = await loadModule();
+		expect(second.prefs.statLabelMode).toBe('text');
+	});
+});
+
 describe('printImages preference', () => {
 	it('defaults to printing images', async () => {
 		const state = await loadModule();

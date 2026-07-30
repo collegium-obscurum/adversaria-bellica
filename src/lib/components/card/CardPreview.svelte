@@ -45,14 +45,13 @@
 
 	let cardElement = $state<HTMLElement>();
 	let bodyElement = $state<HTMLElement>();
-	let hidePortrait = $state(false);
 
 	$effect(() => {
 		if (editable || !cardElement || !bodyElement) return;
 		const cardNode = cardElement;
 		const bodyNode = bodyElement;
-		// re-run whenever any card content or the card style changes
-		JSON.stringify($state.snapshot(card));
+		// deep-read both so the effect re-runs on any card content or card style change
+		void $state.snapshot(card);
 		void prefs.cardStyle;
 		const imagesEnabled = prefs.printImages;
 		const fit = computeCardFit(imagesEnabled && card.image !== null, (scale, imageHidden) => {
@@ -61,7 +60,6 @@
 			cardNode.classList.toggle('hide-portrait', imageHidden || !imagesEnabled);
 			return bodyNode.scrollHeight - bodyNode.clientHeight > 1;
 		});
-		hidePortrait = fit.imageHidden || !imagesEnabled;
 		onFit?.(fit);
 	});
 </script>
@@ -71,7 +69,6 @@
 	class:editable
 	class:ornate
 	class:ornate-tints={ornate}
-	class:hide-portrait={hidePortrait}
 	style:--wash={card.bannerColor ? `var(--tint-${card.bannerColor})` : null}
 	bind:this={cardElement}
 >
@@ -151,12 +148,9 @@
 			{#if thresholds}
 				<div class="wounds">
 					<b>Schmerz bei Schaden:</b>
-					{thresholds
-						.slice(0, 3)
-						.map((threshold) => threshold.damage)
-						.join(' / ')}
+					{thresholds.hp75} / {thresholds.hp50} / {thresholds.hp25}
 					· <b>Tod:</b>
-					{thresholds[3].damage}
+					{thresholds.death}
 				</div>
 			{/if}
 
@@ -500,11 +494,6 @@
 		white-space: nowrap;
 		display: inline-flex;
 		align-items: center;
-	}
-
-	.card :global(.entry-name) {
-		width: 22mm;
-		font-weight: bold;
 	}
 
 	.card :global(.entry-effect) {

@@ -1,7 +1,5 @@
 <script lang="ts">
-	import type { CardStyle } from '$lib/domain/cardStyle';
-	import type { ColorMode } from '$lib/domain/colorMode';
-	import type { StatLabelMode } from '$lib/domain/statLabelMode';
+	import type { CardStyle, ColorMode, StatLabelMode } from '$lib/domain/preferences';
 	import {
 		prefs,
 		setCardStyle,

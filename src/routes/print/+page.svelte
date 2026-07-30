@@ -41,23 +41,11 @@
 		selectedIds = store.cards.map((card) => card.id);
 	}
 
-	async function loadImage(src: string): Promise<HTMLImageElement> {
-		const image = new Image();
-		await new Promise<void>((resolve, reject) => {
-			image.onload = () => {
-				resolve();
-			};
-			image.onerror = () => {
-				reject(new Error(`Bild nicht ladbar: ${src.slice(0, 50)}`));
-			};
-			image.src = src;
-		});
-		return image;
-	}
-
 	/** Cover-crops and scales any image to the card's print resolution. */
 	async function toCardSizedJpeg(src: string): Promise<string> {
-		const image = await loadImage(src);
+		const image = new Image();
+		image.src = src;
+		await image.decode();
 		const canvas = document.createElement('canvas');
 		canvas.width = BACK_IMAGE_WIDTH_PX;
 		canvas.height = BACK_IMAGE_HEIGHT_PX;
@@ -105,10 +93,13 @@
 	async function downloadPdf() {
 		pdfBusy = true;
 		try {
-			const nodes = Array.from(document.querySelectorAll<HTMLElement>('.sheet .card'));
-			const backDataUrl = cardBack.enabled ? await resolveBackImage() : null;
-			const { toPng } = await import('html-to-image');
-			const { jsPDF } = await import('jspdf');
+			const nodes = document.querySelectorAll<HTMLElement>('.sheet .card');
+			// none of the three depend on each other; the two chunks are cold on the first click
+			const [backDataUrl, { toPng }, { jsPDF }] = await Promise.all([
+				cardBack.enabled ? resolveBackImage() : null,
+				import('html-to-image'),
+				import('jspdf')
+			]);
 			const pdf = new jsPDF({ unit: 'mm', format: 'a4' });
 			for (let pageStart = 0; pageStart < nodes.length; pageStart += CARDS_PER_PAGE) {
 				if (pageStart > 0) pdf.addPage();
@@ -122,6 +113,8 @@
 					pdf.addPage();
 					for (let slot = 0; slot < cardsOnPage; slot++) {
 						const { x, y } = backSlotPosition(slot);
+						// the alias lets jsPDF reuse the embedded copy instead of decoding and
+						// hashing the same base64 again for every slot
 						pdf.addImage(
 							backDataUrl,
 							'JPEG',
@@ -129,7 +122,7 @@
 							y,
 							CARD_WIDTH_MM,
 							CARD_HEIGHT_MM,
-							undefined,
+							'card-back',
 							'FAST'
 						);
 					}
@@ -165,7 +158,7 @@
 		</div>
 		<div class="picker">
 			{#each store.cards as card (card.id)}
-				<label class="chip" class:selected={selectedIds.includes(card.id)}>
+				<label class="chip">
 					<input
 						type="checkbox"
 						checked={selectedIds.includes(card.id)}
@@ -303,7 +296,7 @@
 		cursor: pointer;
 	}
 
-	.chip.selected {
+	.chip:has(input:checked) {
 		border-color: var(--color-brand);
 		box-shadow: 0 0 0 1px var(--color-brand);
 	}

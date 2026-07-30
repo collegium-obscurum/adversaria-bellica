@@ -32,7 +32,7 @@
 <span class="picker" onfocusout={closeOnFocusLoss}>
 	<button
 		type="button"
-		class="swatch current {color ? `tint-${color}` : ''}"
+		class="swatch {color ? `tint-${color}` : ''}"
 		class:none={color === null}
 		title="Farbe wählen"
 		aria-label="Farbe wählen (aktuell: {color ? ENTRY_COLOR_LABELS[color] : 'keine'})"
