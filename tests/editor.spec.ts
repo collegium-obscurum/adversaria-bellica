@@ -44,7 +44,7 @@ test('an added action row is saved with the card', async ({ page }) => {
 	await page.goto('/editor');
 	const actionNames = page.getByLabel('Name der Aktion');
 	const rowsBefore = await actionNames.count();
-	await page.getByRole('button', { name: '+ Zeile' }).click();
+	await page.getByRole('button', { name: '+ Aktion' }).click();
 	await expect(actionNames).toHaveCount(rowsBefore + 1);
 
 	await actionNames.last().fill('Biss');

@@ -101,7 +101,7 @@
 					disabled={card.actions.length <= 1}
 					title={card.actions.length <= 1
 						? 'Die letzte Aktion kann nicht entfernt werden'
-						: 'Zeile entfernen'}
+						: 'Aktion entfernen'}
 					aria-label="Aktion entfernen{action.name ? `: ${action.name}` : ''}">✕</button
 				>
 			</div>
@@ -123,12 +123,6 @@
 			</p>
 		{/if}
 	{/each}
-	{#if !card.hiddenStats.includes('speed')}
-		<p class="note">
-			Bewegung (GS) einmal pro Runde zusätzlich zu den Aktionen, oder eine Aktion für doppelte
-			Distanz.
-		</p>
-	{/if}
 	{#if editable}
 		<button
 			type="button"
@@ -137,9 +131,15 @@
 				addAction(card.actions);
 			}}
 			disabled={card.actions.length >= D20_FACES}
-			title={card.actions.length >= D20_FACES ? `Maximal ${D20_FACES} Zeilen` : undefined}
-			>+ Zeile</button
+			title={card.actions.length >= D20_FACES ? `Maximal ${D20_FACES} Aktionen` : undefined}
+			>+ Aktion</button
 		>
+	{/if}
+	{#if !card.hiddenStats.includes('speed')}
+		<p class="note">
+			Bewegung (GS) einmal pro Runde zusätzlich zu den Aktionen, oder eine Aktion für doppelte
+			Distanz.
+		</p>
 	{/if}
 </div>
 
