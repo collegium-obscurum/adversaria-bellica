@@ -24,6 +24,7 @@
 
 <dialog
 	bind:this={dialog}
+	class="view-dialog"
 	onclose={() => (card = undefined)}
 	onclick={(event) => {
 		if (event.target === dialog) dialog.close();
