@@ -100,7 +100,7 @@
 		{#if editable}
 			<button
 				type="button"
-				class="add add-banner"
+				class="add add-section add-banner"
 				onclick={() => {
 					card.banner.hidden = false;
 				}}>+ Banner</button
@@ -125,7 +125,7 @@
 				{#if card.flavorText.hidden}
 					<button
 						type="button"
-						class="add"
+						class="add add-section"
 						onclick={() => {
 							card.flavorText.hidden = false;
 						}}>+ Flavourtext</button
@@ -209,7 +209,7 @@
 			{:else if editable}
 				<button
 					type="button"
-					class="add"
+					class="add add-section"
 					onclick={() => {
 						card.wounds.hidden = false;
 					}}>+ Schmerzschwellen</button
@@ -222,7 +222,7 @@
 				{#if card.notes.hidden}
 					<button
 						type="button"
-						class="add"
+						class="add add-section"
 						onclick={() => {
 							card.notes.hidden = false;
 						}}>+ Notizen</button
@@ -385,6 +385,22 @@
 		color: var(--color-cream);
 	}
 
+	/* the strip is a dark color fill, so the browser's grey placeholder washes out */
+	.card.ornate .banner .banner-input::placeholder {
+		color: var(--color-cream);
+		opacity: 0.7;
+	}
+
+	/* the controls sit on the color fill, so they follow the label to cream */
+	.card.ornate .banner {
+		--swatch-line: color-mix(in srgb, var(--color-cream) 70%, transparent);
+	}
+
+	.card.ornate .banner :global(.banner-hide) {
+		color: var(--color-cream);
+		border-color: color-mix(in srgb, var(--color-cream) 55%, transparent);
+	}
+
 	/* focus swaps in a light background, so the light banner text must darken */
 	.banner-input:focus,
 	.card.ornate .banner .banner-input:focus {
@@ -405,7 +421,7 @@
 	   out of flow so it neither covers the mark nor pushes the card content */
 	.card .add-banner {
 		position: absolute;
-		top: 4.8mm;
+		top: 3.6mm;
 		left: 50%;
 		transform: translateX(-50%);
 	}
@@ -483,6 +499,7 @@
 
 	.wounds {
 		--block-border: 0.3mm;
+		--block-fill: #fff;
 		position: relative;
 		padding: 0.5em 0.667em;
 		border: 0.3mm solid var(--line);
@@ -490,6 +507,8 @@
 	}
 
 	.card.ornate .wounds {
+		/* the block's translucent tint flattened over the parchment, for the hide button */
+		--block-fill: #f8efd7;
 		background: rgb(255 250 232 / 55%);
 		border-color: var(--color-gold-soft);
 	}
@@ -631,7 +650,8 @@
 		font-size: 7pt;
 		border: 0.2mm solid var(--color-border);
 		border-radius: 0.8mm;
-		background: #f7f5ef;
+		/* transparent, not a fixed tone: the card fill changes with style and banner wash */
+		background: transparent;
 		color: var(--color-muted);
 		cursor: pointer;
 		padding: 0.2mm 1mm;
@@ -654,6 +674,9 @@
 		position: absolute;
 		top: -1mm;
 		right: calc(-1 * var(--block-border, 0mm));
+		/* on a bordered block the button straddles the border line, so it needs an opaque
+		   fill to break it; blocks without a border stay transparent like the other buttons */
+		background: var(--block-fill, transparent);
 	}
 
 	/* the banner strip centers its contents, so the button needs its own anchor or it
@@ -685,6 +708,15 @@
 
 	.card :global(.add) {
 		align-self: flex-start;
+	}
+
+	/* reveals a whole section, so it outweighs the row-level adds next to it */
+	.card :global(.add-section) {
+		font-size: 7.5pt;
+		padding: 0.6mm 2mm;
+		border: 0.3mm solid var(--color-brand);
+		border-radius: 1mm;
+		color: var(--color-brand);
 	}
 
 	/* edit controls */

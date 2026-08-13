@@ -83,7 +83,8 @@
 		height: 3.2mm;
 		flex-shrink: 0;
 		padding: 0;
-		border: 0.2mm solid var(--color-border);
+		/* --swatch-line lets a dark surface (the banner strip) lighten the outline */
+		border: 0.2mm solid var(--swatch-line, var(--color-border));
 		border-radius: 50%;
 		background: currentColor;
 		cursor: pointer;
@@ -110,8 +111,8 @@
 		background: linear-gradient(
 			135deg,
 			transparent 44%,
-			var(--color-border) 44%,
-			var(--color-border) 56%,
+			var(--swatch-line, var(--color-border)) 44%,
+			var(--swatch-line, var(--color-border)) 56%,
 			transparent 56%
 		);
 		border-radius: 50%;

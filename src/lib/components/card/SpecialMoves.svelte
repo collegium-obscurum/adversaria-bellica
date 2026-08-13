@@ -68,7 +68,7 @@
 	{#if editable}
 		<button
 			type="button"
-			class="add"
+			class="add add-section"
 			onclick={() => {
 				card.specialMoves.hidden = false;
 			}}>+ Spezialmanöver</button

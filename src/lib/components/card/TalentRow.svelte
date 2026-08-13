@@ -26,7 +26,7 @@
 	{#if editable}
 		<button
 			type="button"
-			class="add talents-add"
+			class="add add-section talents-add"
 			onclick={() => {
 				card.talents.hidden = false;
 			}}>+ Talente</button
@@ -89,6 +89,7 @@
 <style>
 	.talents {
 		--block-border: 0.3mm;
+		--block-fill: #fff;
 		position: relative;
 		display: flex;
 		flex-direction: column;
@@ -99,6 +100,8 @@
 	}
 
 	:global(.card.ornate) .talents {
+		/* the block's translucent tint flattened over the parchment, for the hide button */
+		--block-fill: #f8efd7;
 		background: rgb(255 250 232 / 55%);
 		border-color: var(--color-gold-soft);
 	}
