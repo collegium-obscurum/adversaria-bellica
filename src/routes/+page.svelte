@@ -1,8 +1,7 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
-	import CardPreview from '$lib/components/card/CardPreview.svelte';
-	import DownloadMenu from '$lib/components/DownloadMenu.svelte';
-	import OptionsMenu from '$lib/components/OptionsMenu.svelte';
+	import CardViewDialog from '$lib/components/CardViewDialog.svelte';
+	import EyeIcon from '$lib/components/EyeIcon.svelte';
 	import StatIcon from '$lib/components/StatIcon.svelte';
 	import TileHead from '$lib/components/TileHead.svelte';
 	import {
@@ -15,7 +14,6 @@
 	} from '$lib/state/storage.svelte';
 	import { sampleCards } from '$lib/data/samples';
 	import { downloadJson } from '$lib/download';
-	import { cardFitZoom } from '$lib/domain/cardZoom';
 	import { bannerLabel, filterCards, WITHOUT } from '$lib/domain/libraryFilter';
 	import { prefs } from '$lib/state/preferences.svelte';
 	import { STAT_BADGES } from '$lib/domain/statBadges';
@@ -29,17 +27,6 @@
 	let copiedId = $state('');
 	let copiedTimer: ReturnType<typeof setTimeout>;
 	let viewCard = $state<MonsterCard | undefined>();
-	let viewDialog: HTMLDialogElement;
-	let viewportWidth = $state(0);
-	let viewportHeight = $state(0);
-
-	// Reserve room for dialog padding, toolbar row, and backdrop margin.
-	const viewZoom = $derived(cardFitZoom(viewportWidth - 120, viewportHeight - 160));
-
-	function openView(card: MonsterCard) {
-		viewCard = card;
-		viewDialog.showModal();
-	}
 
 	const shownCards = $derived(view === 'samples' ? sampleCards : store.cards);
 
@@ -106,8 +93,6 @@
 		input.value = '';
 	}
 </script>
-
-<svelte:window bind:innerWidth={viewportWidth} bind:innerHeight={viewportHeight} />
 
 <svelte:head>
 	<title>Bibliothek – Adversaria Bellica</title>
@@ -215,7 +200,7 @@
 							type="button"
 							class="tile-head"
 							onclick={() => {
-								openView(card);
+								viewCard = card;
 							}}
 						>
 							<TileHead {card} />
@@ -237,18 +222,10 @@
 							title="Ansehen"
 							aria-label="{card.name} ansehen"
 							onclick={() => {
-								openView(card);
+								viewCard = card;
 							}}
 						>
-							<svg viewBox="0 0 24 24" aria-hidden="true">
-								<path
-									d="M12 5.5C7 5.5 3.3 9.3 1.8 12c1.5 2.7 5.2 6.5 10.2 6.5S20.7 14.7 22.2 12C20.7 9.3 17 5.5 12 5.5Z"
-									fill="none"
-									stroke="currentColor"
-									stroke-width="1.8"
-								/>
-								<circle cx="12" cy="12" r="3" fill="currentColor" />
-							</svg>
+							<EyeIcon />
 						</button>
 						{#if view === 'samples'}
 							<button
@@ -277,32 +254,7 @@
 	{/if}
 {/if}
 
-<dialog
-	bind:this={viewDialog}
-	class="view-dialog"
-	onclose={() => (viewCard = undefined)}
-	onclick={(event) => {
-		if (event.target === viewDialog) viewDialog.close();
-	}}
->
-	{#if viewCard}
-		<div class="view-toolbar">
-			<DownloadMenu card={viewCard} />
-			<OptionsMenu />
-			<button
-				type="button"
-				class="view-close"
-				aria-label="Schließen"
-				onclick={() => {
-					viewDialog.close();
-				}}>✕</button
-			>
-		</div>
-		<div style:zoom={viewZoom}>
-			<CardPreview card={viewCard} />
-		</div>
-	{/if}
-</dialog>
+<CardViewDialog bind:card={viewCard} />
 
 <style>
 	.toolbar {
@@ -581,47 +533,6 @@
 	.buttons .view:hover {
 		color: var(--color-brand);
 		text-decoration: none;
-	}
-
-	.buttons .view svg {
-		width: 100%;
-		height: 100%;
-	}
-
-	.view-dialog {
-		border: 1px solid var(--color-border);
-		border-radius: var(--radius-lg);
-		padding: 1rem 1.25rem 1.25rem;
-	}
-
-	.view-dialog::backdrop {
-		background: rgb(0 0 0 / 40%);
-	}
-
-	.view-toolbar {
-		display: flex;
-		align-items: center;
-		gap: 0.75rem;
-		margin-bottom: 0.75rem;
-	}
-
-	.view-toolbar .view-close {
-		margin-left: auto;
-	}
-
-	.view-close {
-		border: none;
-		background: none;
-		padding: 0.3rem;
-		margin: -0.3rem;
-		font: inherit;
-		font-size: 1.1rem;
-		color: var(--color-ink-soft);
-		cursor: pointer;
-	}
-
-	.view-close:hover {
-		color: var(--color-brand);
 	}
 
 	.danger {

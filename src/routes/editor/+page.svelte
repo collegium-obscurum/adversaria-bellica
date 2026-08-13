@@ -3,6 +3,8 @@
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import CardPreview from '$lib/components/card/CardPreview.svelte';
+	import CardViewDialog from '$lib/components/CardViewDialog.svelte';
+	import EyeIcon from '$lib/components/EyeIcon.svelte';
 	import ImageCropper from '$lib/components/ImageCropper.svelte';
 	import StatIcon from '$lib/components/StatIcon.svelte';
 	import DownloadMenu from '$lib/components/DownloadMenu.svelte';
@@ -13,7 +15,7 @@
 	import { getCard, upsertCard } from '$lib/state/storage.svelte';
 	import { cardFitZoom } from '$lib/domain/cardZoom';
 	import type { FitResult } from '$lib/domain/cardFit';
-	import { createEmptyCard } from '$lib/domain/types';
+	import { createEmptyCard, type MonsterCard } from '$lib/domain/types';
 
 	const editId = page.url.searchParams.get('id');
 	const existing = editId ? getCard(editId) : undefined;
@@ -25,6 +27,7 @@
 	let cardMissing = $state(!existing && editId !== null);
 	let nameError = $state<string | null>(null);
 	let cropperDialog: HTMLDialogElement;
+	let previewCard = $state<MonsterCard | undefined>();
 	let editorWidth = $state(0);
 	let skipGuard = false;
 	let fit = $state<FitResult>({ scale: 1, fits: true, imageHidden: false });
@@ -75,6 +78,16 @@
 	{/if}
 	<div class="toolbar">
 		<h1>{existing ? 'Karte bearbeiten' : 'Neue Karte'}</h1>
+		<button
+			type="button"
+			class="preview"
+			onclick={() => {
+				previewCard = card;
+			}}
+		>
+			<span class="preview-icon"><EyeIcon /></span>
+			Vorschau
+		</button>
 		<OptionsMenu />
 		<DownloadMenu {card} />
 		<a class="cancel" href={resolve('/')} onclick={() => (skipGuard = true)}>Abbrechen</a>
@@ -134,6 +147,8 @@
 		</div>
 	</div>
 </div>
+
+<CardViewDialog bind:card={previewCard} />
 
 <dialog bind:this={cropperDialog}>
 	<h2>Kartenbild</h2>
@@ -299,6 +314,28 @@
 	.legend-icon :global(svg) {
 		width: 100%;
 		height: 100%;
+	}
+
+	.preview {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.4rem;
+		font: inherit;
+		padding: 0.5rem 1rem;
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius);
+		background: var(--color-surface);
+		cursor: pointer;
+	}
+
+	.preview:hover {
+		border-color: var(--color-gold);
+	}
+
+	.preview-icon {
+		width: 1.1rem;
+		height: 1.1rem;
+		line-height: 0;
 	}
 
 	.save {
