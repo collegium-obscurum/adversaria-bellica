@@ -41,19 +41,17 @@ export interface ActionEntry {
 export const WOUND_TRIGGERS = ['combatStart', 'hp75', 'hp50', 'hp25', 'death'] as const;
 export type WoundTrigger = (typeof WOUND_TRIGGERS)[number];
 
-export interface SpecialMove {
+/** One Spezialmanöver row; the list order is the print order. */
+export interface MoveRow {
+	/** fixed wound trigger, or null for a free-text row */
+	trigger: WoundTrigger | null;
+	/** label of a free-text row; fixed rows take theirs from the life points */
+	label: string;
 	name: string;
 	effect: string;
 	color: EntryColor | null;
-}
-
-export interface TriggerMove extends SpecialMove {
+	/** only fixed rows are hidden; free-text rows are removed outright */
 	hidden: boolean;
-}
-
-export interface CustomMove extends SpecialMove {
-	/** free-text trigger label, printed like the fixed wound triggers */
-	trigger: string;
 }
 
 /** Every hideable part of the card carries its own flag; hiding never clears the value. */
@@ -93,11 +91,7 @@ export interface MonsterCard {
 	actions: ActionEntry[];
 	/** the pain threshold row has no data of its own, only visibility */
 	wounds: { hidden: boolean };
-	specialMoves: {
-		hidden: boolean;
-		triggers: Record<WoundTrigger, TriggerMove>;
-		custom: CustomMove[];
-	};
+	specialMoves: { hidden: boolean; rows: MoveRow[] };
 	/** print fit measured on last save; display recomputes live, the library badge reads this */
 	fit: FitResult;
 }
@@ -158,14 +152,14 @@ export function createEmptyCard(): MonsterCard {
 		wounds: { hidden: true },
 		specialMoves: {
 			hidden: true,
-			triggers: {
-				combatStart: { name: '', effect: '', color: null, hidden: true },
-				hp75: { name: '', effect: '', color: null, hidden: true },
-				hp50: { name: '', effect: '', color: null, hidden: true },
-				hp25: { name: '', effect: '', color: null, hidden: true },
-				death: { name: '', effect: '', color: null, hidden: true }
-			},
-			custom: []
+			rows: WOUND_TRIGGERS.map((trigger) => ({
+				trigger,
+				label: '',
+				name: '',
+				effect: '',
+				color: null,
+				hidden: true
+			}))
 		},
 		fit: { scale: 1, fits: true, imageHidden: false }
 	};

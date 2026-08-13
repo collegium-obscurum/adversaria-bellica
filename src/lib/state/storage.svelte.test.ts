@@ -110,7 +110,9 @@ describe('importJson', () => {
 		const card = storage.store.cards[0];
 		expect(card.flavorText).toEqual({ value: '', hidden: true });
 		expect(card.talents.entries.body).toEqual({ fw: null, value: 1, maxQs: 1 });
-		expect(card.specialMoves.triggers.death).toEqual({
+		expect(card.specialMoves.rows.at(-1)).toEqual({
+			trigger: 'death',
+			label: '',
 			name: '',
 			effect: '',
 			color: null,

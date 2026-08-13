@@ -3,12 +3,11 @@ import type {
 	AttributeKey,
 	Banner,
 	CardStats,
-	CustomMove,
 	MonsterCard,
+	MoveRow,
 	TalentEntry,
 	TalentKey,
 	TextBlock,
-	TriggerMove,
 	WoundTrigger
 } from './types';
 import { ATTRIBUTE_KEYS, TALENT_KEYS, WOUND_TRIGGERS } from './types';
@@ -76,39 +75,71 @@ function moveFields(value: unknown): {
 	};
 }
 
+function isWoundTrigger(value: unknown): value is WoundTrigger {
+	return WOUND_TRIGGERS.includes(value as WoundTrigger);
+}
+
+/** Rows saved in the current shape; the array order is the print order. */
+function migrateMoveRows(raw: unknown[]): MoveRow[] {
+	const rows: MoveRow[] = [];
+	const seen = new Set<WoundTrigger>();
+	for (const item of raw) {
+		if (!isRecord(item)) continue;
+		const trigger = isWoundTrigger(item.trigger) ? item.trigger : null;
+		// a duplicated fixed trigger would give the same row twice; the first one wins
+		if (trigger !== null && seen.has(trigger)) continue;
+		if (trigger !== null) seen.add(trigger);
+		rows.push({
+			trigger,
+			label: textOrEmpty(item.label),
+			...moveFields(item),
+			hidden: trigger !== null && item.hidden === true
+		});
+	}
+	for (const trigger of WOUND_TRIGGERS) {
+		if (seen.has(trigger)) continue;
+		rows.push({ trigger, label: '', name: '', effect: '', color: null, hidden: true });
+	}
+	return rows;
+}
+
 /**
- * Special moves gained a wrapper with its own visibility plus per-trigger `hidden`.
- * Legacy cards showed a trigger exactly when it had content; the section comes back
- * visible when anything was in it, so nothing a card used to print goes missing.
+ * Fixed triggers and free-text rows used to live in separate fields; they are one
+ * ordered list now. Older cards showed a trigger exactly when it had content, and the
+ * section comes back visible when anything was in it, so nothing they printed goes missing.
  */
 export function migrateSpecialMoves(
 	raw: unknown,
 	legacyCustom: unknown
 ): MonsterCard['specialMoves'] {
+	if (isRecord(raw) && Array.isArray(raw.rows)) {
+		return { hidden: raw.hidden === true, rows: migrateMoveRows(raw.rows) };
+	}
+
 	const wrapper = isRecord(raw) && 'triggers' in raw ? raw : null;
 	const source = wrapper ? wrapper.triggers : raw;
 	const record = isRecord(source) ? source : {};
-	const triggers = {} as Record<WoundTrigger, TriggerMove>;
+	const rows: MoveRow[] = [];
 	for (const trigger of WOUND_TRIGGERS) {
 		const move = moveFields(record[trigger]);
 		const hidden = wrapper
 			? isRecord(record[trigger]) && record[trigger].hidden === true
 			: move.name.trim() === '' && move.effect.trim() === '';
-		triggers[trigger] = { ...move, hidden };
+		rows.push({ trigger, label: '', ...move, hidden });
 	}
-	const custom = migrateCustomMoves(wrapper ? wrapper.custom : legacyCustom);
-	const empty = WOUND_TRIGGERS.every((trigger) => triggers[trigger].hidden) && custom.length === 0;
-	return { hidden: wrapper ? wrapper.hidden === true : empty, triggers, custom };
-}
-
-export function migrateCustomMoves(raw: unknown): CustomMove[] {
-	if (!Array.isArray(raw)) return [];
-	const result: CustomMove[] = [];
-	for (const item of raw) {
+	const custom = wrapper ? wrapper.custom : legacyCustom;
+	for (const item of Array.isArray(custom) ? (custom as unknown[]) : []) {
 		if (!isRecord(item)) continue;
-		result.push({ trigger: textOrEmpty(item.trigger), ...moveFields(item) });
+		// the old custom row kept its label in `trigger`
+		rows.push({
+			trigger: null,
+			label: textOrEmpty(item.label) || textOrEmpty(item.trigger),
+			...moveFields(item),
+			hidden: false
+		});
 	}
-	return result;
+	const empty = rows.every((row) => row.hidden);
+	return { hidden: wrapper ? wrapper.hidden === true : empty, rows };
 }
 
 function numberOrNull(value: unknown): number | null {

@@ -6,7 +6,7 @@ import {
 	migrateSpecialMoves,
 	migrateStats
 } from './migrations';
-import type { ActionEntry } from './types';
+import type { ActionEntry, MonsterCard, WoundTrigger } from './types';
 
 describe('migrateActions', () => {
 	it('converts legacy from/to rows ordered by from', () => {
@@ -48,8 +48,12 @@ describe('migrateActions', () => {
 	});
 });
 
+function row(moves: MonsterCard['specialMoves'], trigger: WoundTrigger) {
+	return moves.rows.find((entry) => entry.trigger === trigger);
+}
+
 describe('migrateSpecialMoves', () => {
-	it('turns legacy strings into effect-only moves', () => {
+	it('turns legacy strings into effect-only rows', () => {
 		const migrated = migrateSpecialMoves(
 			{
 				combatStart: 'Brüllt laut.',
@@ -60,28 +64,29 @@ describe('migrateSpecialMoves', () => {
 			},
 			undefined
 		);
-		expect(migrated.triggers.combatStart).toEqual({
+		expect(row(migrated, 'combatStart')).toEqual({
+			trigger: 'combatStart',
+			label: '',
 			name: '',
 			effect: 'Brüllt laut.',
 			color: null,
 			hidden: false
 		});
-		expect(migrated.triggers.hp50.effect).toBe('Netz');
-		expect(migrated.triggers.hp75).toEqual({ name: '', effect: '', color: null, hidden: true });
+		expect(row(migrated, 'hp50')?.effect).toBe('Netz');
+		expect(row(migrated, 'hp75')?.hidden).toBe(true);
 	});
 
-	it('hides legacy triggers without content and shows the filled ones', () => {
-		const migrated = migrateSpecialMoves(
-			{ combatStart: { name: 'Wutschrei', effect: '2W6', color: 'purple' } },
-			undefined
-		);
-		expect(migrated.triggers.combatStart).toEqual({
-			name: 'Wutschrei',
-			effect: '2W6',
-			color: 'purple',
-			hidden: false
-		});
-		expect(migrated.triggers.death.hidden).toBe(true);
+	it('keeps the wound triggers in threshold order, custom rows after them', () => {
+		const migrated = migrateSpecialMoves({ combatStart: 'Brüllt.' }, [{ trigger: 'Feuer' }]);
+		expect(migrated.rows.map((entry) => entry.trigger)).toEqual([
+			'combatStart',
+			'hp75',
+			'hp50',
+			'hp25',
+			'death',
+			null
+		]);
+		expect(migrated.rows[5].label).toBe('Feuer');
 	});
 
 	it('shows the section when a legacy card had anything in it', () => {
@@ -94,7 +99,7 @@ describe('migrateSpecialMoves', () => {
 		expect(migrateSpecialMoves(undefined, undefined).hidden).toBe(true);
 	});
 
-	it('keeps stored visibility of an already migrated section', () => {
+	it('converts the interim triggers/custom shape into rows', () => {
 		const stored = {
 			hidden: false,
 			triggers: {
@@ -106,19 +111,60 @@ describe('migrateSpecialMoves', () => {
 		const migrated = migrateSpecialMoves(stored, undefined);
 		expect(migrated.hidden).toBe(false);
 		// a filled but hidden trigger stays hidden, an empty but shown one stays shown
-		expect(migrated.triggers.combatStart.hidden).toBe(true);
-		expect(migrated.triggers.combatStart.name).toBe('Wutschrei');
-		expect(migrated.triggers.hp75.hidden).toBe(false);
-		expect(migrated.custom).toEqual(stored.custom);
+		expect(row(migrated, 'combatStart')).toEqual(
+			expect.objectContaining({ name: 'Wutschrei', hidden: true })
+		);
+		expect(row(migrated, 'hp75')?.hidden).toBe(false);
+		expect(migrated.rows.at(-1)).toEqual({
+			trigger: null,
+			label: 'Feuer',
+			name: 'Panik',
+			effect: '',
+			color: null,
+			hidden: false
+		});
 	});
 
-	it('folds legacy customMoves into the section', () => {
-		const migrated = migrateSpecialMoves({}, [{ trigger: 'Feuer', name: 'Panik', effect: '' }]);
-		expect(migrated.custom).toEqual([{ trigger: 'Feuer', name: 'Panik', effect: '', color: null }]);
+	it('keeps a stored row order', () => {
+		const stored = {
+			hidden: false,
+			rows: [
+				{ trigger: 'death', label: '', name: 'Zerfall', effect: '', color: null, hidden: false },
+				{ trigger: null, label: 'Feuer', name: 'Panik', effect: '', color: null, hidden: false },
+				{ trigger: 'combatStart', label: '', name: '', effect: '', color: null, hidden: true }
+			]
+		};
+		const migrated = migrateSpecialMoves(stored, undefined);
+		expect(migrated.rows.slice(0, 3).map((entry) => entry.trigger)).toEqual([
+			'death',
+			null,
+			'combatStart'
+		]);
+		// the triggers left out of the stored order come back hidden, at the end
+		expect(migrated.rows.slice(3).map((entry) => entry.trigger)).toEqual(['hp75', 'hp50', 'hp25']);
+		expect(migrated.rows.slice(3).every((entry) => entry.hidden)).toBe(true);
 	});
 
-	it('fills missing triggers with empty hidden moves', () => {
-		expect(migrateSpecialMoves({}, undefined).triggers.death).toEqual({
+	it('drops a duplicated fixed trigger and garbage rows', () => {
+		const migrated = migrateSpecialMoves(
+			{
+				rows: [
+					{ trigger: 'death', name: 'Erster', hidden: false },
+					{ trigger: 'death', name: 'Zweiter', hidden: false },
+					'garbage'
+				]
+			},
+			undefined
+		);
+		expect(migrated.rows.filter((entry) => entry.trigger === 'death')).toHaveLength(1);
+		expect(row(migrated, 'death')?.name).toBe('Erster');
+		expect(migrated.rows).toHaveLength(5);
+	});
+
+	it('fills missing triggers with empty hidden rows', () => {
+		expect(row(migrateSpecialMoves({}, undefined), 'death')).toEqual({
+			trigger: 'death',
+			label: '',
 			name: '',
 			effect: '',
 			color: null,
@@ -240,7 +286,7 @@ describe('migrateCard block visibility', () => {
 		expect(card.talents.hidden).toBe(false);
 		expect(card.talents.entries.body.value).toBe(8);
 		expect(card.specialMoves.hidden).toBe(false);
-		expect(card.specialMoves.triggers.combatStart.effect).toBe('Brüllt.');
+		expect(row(card.specialMoves, 'combatStart')?.effect).toBe('Brüllt.');
 		// the pain row printed on every legacy card that had HP
 		expect(card.wounds.hidden).toBe(false);
 	});
@@ -306,13 +352,20 @@ describe('migrateCard', () => {
 	it('keeps existing custom moves and adds a null color', () => {
 		const moves = [{ trigger: 'Bei Feuerschaden', name: 'Panik', effect: 'Flieht 1 Runde.' }];
 		const card = migrateCard({ id: 'a', name: 'Wolf', customMoves: moves });
-		expect(card.specialMoves.custom).toEqual([{ ...moves[0], color: null }]);
+		expect(card.specialMoves.rows.at(-1)).toEqual({
+			trigger: null,
+			label: 'Bei Feuerschaden',
+			name: 'Panik',
+			effect: 'Flieht 1 Runde.',
+			color: null,
+			hidden: false
+		});
 	});
 
 	it('keeps custom move colors', () => {
 		const moves = [{ trigger: 'Bei Feuerschaden', name: 'Panik', effect: '', color: 'orange' }];
 		const card = migrateCard({ id: 'a', name: 'Wolf', customMoves: moves });
-		expect(card.specialMoves.custom).toEqual(moves);
+		expect(card.specialMoves.rows.at(-1)?.color).toBe('orange');
 	});
 
 	it('nulls an unknown banner color', () => {
@@ -347,13 +400,15 @@ describe('migrateCard', () => {
 		expect(card.attributes.courage).toBeNull();
 		expect(card.attributes.strength).toBeNull();
 		expect(card.actions).toEqual([]);
-		expect(card.specialMoves.triggers.death).toEqual({
+		expect(row(card.specialMoves, 'death')).toEqual({
+			trigger: 'death',
+			label: '',
 			name: '',
 			effect: '',
 			color: null,
 			hidden: true
 		});
-		expect(card.specialMoves.custom).toEqual([]);
+		expect(card.specialMoves.rows).toHaveLength(5);
 		expect(card.stats.lifePoints.value).toBeNull();
 		expect(card.stats.armor.value).toBe('');
 		expect(card.fit).toEqual({ scale: 1, fits: true, imageHidden: false });
@@ -373,8 +428,8 @@ describe('migrateCard', () => {
 		expect(card.flavorText.value).toBe('');
 		expect(card.image).toBeNull();
 		expect(card.talents.entries.body).toEqual({ fw: null, value: 1, maxQs: 2 });
-		expect(card.specialMoves.custom).toEqual([
-			{ trigger: 'Feuer', name: '', effect: '', color: null }
+		expect(card.specialMoves.rows.filter((entry) => entry.trigger === null)).toEqual([
+			{ trigger: null, label: 'Feuer', name: '', effect: '', color: null, hidden: false }
 		]);
 	});
 

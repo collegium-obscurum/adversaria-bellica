@@ -229,8 +229,11 @@
 		--line: #1a1a1a;
 		--accent: #1a1a1a;
 		--muted: #444;
-		/* add buttons inside a section line up with the action rows' color picker */
+		/* add buttons inside a section line up with the entry rows' color picker */
 		--block-indent: 3.5mm;
+		/* movers, color, trigger/range, name, effect, remove: shared by both entry tables.
+		   25mm holds the longest wound trigger label ("ab 100 Schaden =") on one line */
+		--entry-grid: auto auto 25mm 22mm 1fr auto;
 		position: relative;
 		width: 105mm;
 		height: 148mm;
@@ -524,11 +527,36 @@
 		border-radius: 1mm;
 	}
 
+	/* right-aligned so the "=" stays next to the name column whatever the label's length */
 	.card :global(.range) {
 		font-weight: bold;
 		white-space: nowrap;
 		display: inline-flex;
 		align-items: center;
+		justify-content: flex-end;
+		text-align: right;
+	}
+
+	.card :global(.movers) {
+		display: flex;
+		flex-direction: column;
+		flex-shrink: 0;
+	}
+
+	.card :global(.move) {
+		font: inherit;
+		font-size: 5pt;
+		line-height: 1.2;
+		padding: 0 0.5mm;
+		border: none;
+		background: none;
+		color: var(--color-muted);
+		cursor: pointer;
+	}
+
+	.card :global(.move:disabled) {
+		opacity: 0.35;
+		cursor: default;
 	}
 
 	.card :global(.entry-effect) {

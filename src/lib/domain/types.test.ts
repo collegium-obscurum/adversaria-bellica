@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { createEmptyCard } from './types';
+import { createEmptyCard, WOUND_TRIGGERS } from './types';
 import { STAT_BADGES } from './statBadges';
 
 describe('createEmptyCard', () => {
@@ -19,6 +19,7 @@ describe('createEmptyCard', () => {
 		expect(card.banner).toEqual({ value: '', color: null, hidden: true });
 		expect(card.talents.hidden).toBe(true);
 		expect(card.specialMoves.hidden).toBe(true);
-		expect(card.specialMoves.triggers.combatStart.hidden).toBe(true);
+		expect(card.specialMoves.rows.every((row) => row.hidden)).toBe(true);
+		expect(card.specialMoves.rows.map((row) => row.trigger)).toEqual(WOUND_TRIGGERS);
 	});
 });

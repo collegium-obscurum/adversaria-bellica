@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { ENTRY_COLOR_LABELS } from '$lib/domain/entryColor';
-	import type { MonsterCard, WoundTrigger } from '$lib/domain/types';
-	import { WOUND_TRIGGERS } from '$lib/domain/types';
+	import type { MonsterCard, MoveRow } from '$lib/domain/types';
 	import { triggerLabels } from '$lib/domain/wounds';
 	import { prefs } from '$lib/state/preferences.svelte';
 	import ColorPicker from './ColorPicker.svelte';
@@ -11,42 +10,58 @@
 
 	const labels = $derived(triggerLabels(card.stats.lifePoints.value));
 
+	function rowLabel(row: MoveRow): string {
+		return row.trigger === null ? row.label : labels[row.trigger];
+	}
+
 	// without HP there are no wound thresholds; only Kampfbeginn remains meaningful
-	const availableTriggers = $derived(
-		card.stats.lifePoints.value === null
-			? WOUND_TRIGGERS.filter((t) => t === 'combatStart')
-			: WOUND_TRIGGERS
-	);
-	const visibleTriggers = $derived(
-		availableTriggers.filter((trigger) => !card.specialMoves.triggers[trigger].hidden)
-	);
-	const hiddenTriggers = $derived(
-		availableTriggers.filter((trigger) => card.specialMoves.triggers[trigger].hidden)
-	);
-	// hidden keeps the values; an added but still empty row prints nothing
-	const printedTriggers = $derived(
-		visibleTriggers.filter((trigger) => {
-			const move = card.specialMoves.triggers[trigger];
-			return move.name.trim() !== '' || move.effect.trim() !== '';
-		})
-	);
-
-	function setTriggerHidden(trigger: WoundTrigger, hidden: boolean) {
-		card.specialMoves.triggers[trigger].hidden = hidden;
+	function available(row: MoveRow): boolean {
+		if (card.stats.lifePoints.value !== null) return true;
+		return row.trigger === null || row.trigger === 'combatStart';
 	}
 
-	const visibleCustomMoves = $derived(
-		card.specialMoves.custom.filter((move) => move.name.trim() !== '' || move.effect.trim() !== '')
+	// the index travels with the row: the arrows reorder inside the full list
+	const rowEntries = $derived(
+		card.specialMoves.rows
+			.map((row, index) => ({ row, index }))
+			.filter((entry) => available(entry.row))
 	);
-	let focusCustomIndex = $state<number | null>(null);
+	const visibleRows = $derived(rowEntries.filter((entry) => !entry.row.hidden));
+	const hiddenRows = $derived(rowEntries.filter((entry) => entry.row.hidden));
+	// hiding keeps the values; a shown but still empty row prints nothing
+	const printedRows = $derived(
+		visibleRows.filter((entry) => entry.row.name.trim() !== '' || entry.row.effect.trim() !== '')
+	);
 
-	function addCustomMove() {
-		card.specialMoves.custom.push({ trigger: '', name: '', effect: '', color: null });
-		focusCustomIndex = card.specialMoves.custom.length - 1;
+	/** Swap two rows of the full list, addressed by their place in the visible list. */
+	function moveRow(position: number, offset: number) {
+		const from = visibleRows[position].index;
+		const to = visibleRows[position + offset].index;
+		const rows = card.specialMoves.rows;
+		[rows[from], rows[to]] = [rows[to], rows[from]];
 	}
 
-	function removeCustomMove(index: number) {
-		card.specialMoves.custom.splice(index, 1);
+	let focusRowIndex = $state<number | null>(null);
+
+	function addCustomRow() {
+		card.specialMoves.rows.push({
+			trigger: null,
+			label: '',
+			name: '',
+			effect: '',
+			color: null,
+			hidden: false
+		});
+		focusRowIndex = card.specialMoves.rows.length - 1;
+	}
+
+	function removeRow(index: number) {
+		// fixed triggers keep their values for when they come back; free rows are gone
+		if (card.specialMoves.rows[index].trigger === null) {
+			card.specialMoves.rows.splice(index, 1);
+		} else {
+			card.specialMoves.rows[index].hidden = true;
+		}
 	}
 </script>
 
@@ -72,83 +87,85 @@
 				card.specialMoves.hidden = true;
 			}}>✕</button
 		>
-		{#each visibleTriggers as trigger (trigger)}
+		{#each visibleRows as entry, position (entry.row)}
+			{@const label = rowLabel(entry.row)}
 			<div class="entry-row">
-				<ColorPicker bind:color={card.specialMoves.triggers[trigger].color} />
-				<span class="range">{labels[trigger]} =</span>
+				<span class="movers">
+					<button
+						type="button"
+						class="move"
+						disabled={position === 0}
+						title="Nach oben"
+						aria-label="Nach oben{label ? `: ${label}` : ''}"
+						onclick={() => {
+							moveRow(position, -1);
+						}}>▲</button
+					>
+					<button
+						type="button"
+						class="move"
+						disabled={position === visibleRows.length - 1}
+						title="Nach unten"
+						aria-label="Nach unten{label ? `: ${label}` : ''}"
+						onclick={() => {
+							moveRow(position, 1);
+						}}>▼</button
+					>
+				</span>
+				<ColorPicker bind:color={card.specialMoves.rows[entry.index].color} />
+				<span class="range">
+					{#if entry.row.trigger === null}<textarea
+							class="trigger-input"
+							bind:value={card.specialMoves.rows[entry.index].label}
+							placeholder="Auslöser"
+							aria-label="Auslöser"
+							{@attach (node: HTMLTextAreaElement) => {
+								if (entry.index === focusRowIndex) {
+									node.focus();
+									focusRowIndex = null;
+								}
+							}}></textarea>{:else}{label}{/if} =
+				</span>
 				<textarea
 					class="entry-name"
-					bind:value={card.specialMoves.triggers[trigger].name}
+					bind:value={card.specialMoves.rows[entry.index].name}
 					placeholder="Name"
-					aria-label="Name für {labels[trigger]}"></textarea>
+					aria-label={label ? `Name für ${label}` : 'Name'}></textarea>
 				<textarea
 					class="entry-effect"
-					bind:value={card.specialMoves.triggers[trigger].effect}
+					bind:value={card.specialMoves.rows[entry.index].effect}
 					placeholder="Effekt"
-					aria-label="Effekt für {labels[trigger]}"></textarea>
+					aria-label={label ? `Effekt für ${label}` : 'Effekt'}></textarea>
 				<button
 					type="button"
 					class="remove"
 					onclick={() => {
-						setTriggerHidden(trigger, true);
+						removeRow(entry.index);
 					}}
-					title="Ausblenden (Werte bleiben erhalten)"
-					aria-label="Spezialmanöver entfernen: {labels[trigger]}">✕</button
-				>
-			</div>
-		{/each}
-		{#each card.specialMoves.custom as move, index (move)}
-			<div class="entry-row">
-				<ColorPicker bind:color={move.color} />
-				<span class="range">
-					<textarea
-						class="trigger-input"
-						bind:value={move.trigger}
-						placeholder="Auslöser"
-						aria-label="Auslöser"
-						{@attach (node: HTMLTextAreaElement) => {
-							if (index === focusCustomIndex) {
-								node.focus();
-								focusCustomIndex = null;
-							}
-						}}></textarea> =</span
-				>
-				<textarea class="entry-name" bind:value={move.name} placeholder="Name" aria-label="Name"
-				></textarea>
-				<textarea
-					class="entry-effect"
-					bind:value={move.effect}
-					placeholder="Effekt"
-					aria-label="Effekt"></textarea>
-				<button
-					type="button"
-					class="remove"
-					onclick={() => {
-						removeCustomMove(index);
-					}}
-					title="Entfernen"
-					aria-label="Spezialmanöver entfernen{move.trigger ? `: ${move.trigger}` : ''}">✕</button
+					title={entry.row.trigger === null ? 'Entfernen' : 'Ausblenden (Werte bleiben erhalten)'}
+					aria-label="Spezialmanöver entfernen{label ? `: ${label}` : ''}">✕</button
 				>
 			</div>
 		{/each}
 		<div class="add-triggers">
-			{#each hiddenTriggers as trigger (trigger)}
+			{#each hiddenRows as entry (entry.row)}
 				<button
 					type="button"
 					class="add"
 					onclick={() => {
-						setTriggerHidden(trigger, false);
-					}}>+ {labels[trigger]}</button
+						card.specialMoves.rows[entry.index].hidden = false;
+					}}>+ {rowLabel(entry.row)}</button
 				>
 			{/each}
-			<button type="button" class="add" onclick={addCustomMove}>+ Eigener Auslöser</button>
+			<button type="button" class="add" onclick={addCustomRow}>+ Eigener Auslöser</button>
 		</div>
 	</div>
-{:else if printedTriggers.length > 0 || visibleCustomMoves.length > 0}
+{:else if printedRows.length > 0}
 	<div class="special-moves">
 		<h3>Spezialmanöver</h3>
-		{#each printedTriggers as trigger (trigger)}
-			{@const move = card.specialMoves.triggers[trigger]}
+		{#each printedRows as entry (entry.row)}
+			{@const move = entry.row}
+			{@const label = rowLabel(move)}
 			<p class="entry">
 				{#if move.color && prefs.colorMode === 'dot'}<span
 						class="color-dot tint-{move.color}"
@@ -159,23 +176,7 @@
 					class={move.color && prefs.colorMode === 'text' ? `tint-${move.color}` : ''}
 					title={move.color && prefs.colorMode === 'text'
 						? ENTRY_COLOR_LABELS[move.color]
-						: undefined}>{labels[trigger]}{move.name ? ` = ${move.name}` : ''}</b
-				>{#if move.effect}:
-					{move.effect}{/if}
-			</p>
-		{/each}
-		{#each visibleCustomMoves as move (move)}
-			<p class="entry">
-				{#if move.color && prefs.colorMode === 'dot'}<span
-						class="color-dot tint-{move.color}"
-						role="img"
-						aria-label={ENTRY_COLOR_LABELS[move.color]}
-						title={ENTRY_COLOR_LABELS[move.color]}
-					></span>&nbsp;{/if}<b
-					class={move.color && prefs.colorMode === 'text' ? `tint-${move.color}` : ''}
-					title={move.color && prefs.colorMode === 'text'
-						? ENTRY_COLOR_LABELS[move.color]
-						: undefined}>{move.trigger}{move.name ? ` = ${move.name}` : ''}</b
+						: undefined}>{label}{move.name ? ` = ${move.name}` : ''}</b
 				>{#if move.effect}:
 					{move.effect}{/if}
 			</p>
@@ -190,11 +191,11 @@
 		gap: 0.333em;
 	}
 
-	/* shared column tracks so trigger/name widths line up across rows */
+	/* same tracks as the action table so both read as one kind of table */
 	.special-moves.editor {
 		position: relative;
 		display: grid;
-		grid-template-columns: auto fit-content(30mm) 22mm 1fr auto;
+		grid-template-columns: var(--entry-grid);
 		gap: 0.333em 1mm;
 	}
 
@@ -209,17 +210,9 @@
 		grid-template-columns: subgrid;
 	}
 
-	/* :global(.card) outranks CardPreview's `.card :global(.range)` nowrap;
-	   left-aligned because right alignment reads oddly once the text wraps */
-	:global(.card) .special-moves .range {
-		justify-content: flex-start;
-		text-align: left;
-		white-space: normal;
-	}
-
 	/* .card.editable prefix outranks CardPreview's generic textarea width: 100% */
 	:global(.card.editable) .trigger-input {
-		width: 20mm;
+		width: 100%;
 		font-weight: bold;
 	}
 

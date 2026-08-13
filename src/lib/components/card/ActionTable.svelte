@@ -23,7 +23,7 @@
 	}
 </script>
 
-<div class="actions">
+<div class="actions" class:editor={editable}>
 	<h3>Aktionen (1w20)</h3>
 	<p class="note">
 		Erschwernisse (Schmerz, Zustände) erhöhen das Wurfergebnis. Eine 1 bleibt eine 1. Ist eine
@@ -150,26 +150,25 @@
 		gap: 0.333em;
 	}
 
-	.movers {
-		display: flex;
-		flex-direction: column;
-		flex-shrink: 0;
+	/* same tracks as the special moves table so both read as one kind of table */
+	.actions.editor {
+		display: grid;
+		grid-template-columns: var(--entry-grid);
+		gap: 0.333em 1mm;
 	}
 
-	.move {
-		font: inherit;
-		font-size: 5pt;
-		line-height: 1.2;
-		padding: 0 0.5mm;
-		border: none;
-		background: none;
-		color: var(--color-muted);
-		cursor: pointer;
+	.actions.editor > * {
+		grid-column: 1 / -1;
+		justify-self: stretch;
 	}
 
-	.move:disabled {
-		opacity: 0.35;
-		cursor: default;
+	.actions.editor > .add {
+		justify-self: start;
+	}
+
+	.actions.editor > .entry-row {
+		display: grid;
+		grid-template-columns: subgrid;
 	}
 
 	.range .bound {

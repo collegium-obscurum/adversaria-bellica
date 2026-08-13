@@ -134,14 +134,35 @@ test('wound trigger special move can be added, hidden, and saved', async ({ page
 	await page.getByRole('button', { name: 'Speichern' }).click();
 	await expect(page).toHaveURL(/\/$/);
 	const cards = await storedCards(page);
+	const rows = cards[0].specialMoves.rows;
 	expect(cards[0].specialMoves.hidden).toBe(false);
-	expect(cards[0].specialMoves.triggers.combatStart).toEqual(
+	expect(rows.find((row) => row.trigger === 'combatStart')).toEqual(
 		expect.objectContaining({ name: 'Brüllen', effect: 'Alle Feinde: Furcht', hidden: false })
 	);
 	// hiding a row keeps its text for when it comes back
-	expect(cards[0].specialMoves.triggers.death).toEqual(
+	expect(rows.find((row) => row.trigger === 'death')).toEqual(
 		expect.objectContaining({ effect: 'Zerfällt zu Staub.', hidden: true })
 	);
+});
+
+test('special move rows can be reordered', async ({ page }) => {
+	await page.goto('/editor');
+	await page.getByRole('button', { name: '+ Spezialmanöver' }).click();
+	await page.getByRole('button', { name: '+ Kampfbeginn' }).click();
+	await page.getByRole('button', { name: '+ Tod', exact: true }).click();
+	await page.getByLabel('Effekt für Tod').fill('Zerfällt zu Staub.');
+
+	// Tod sits below Kampfbeginn; move it up past it
+	await page.getByRole('button', { name: 'Nach oben: Tod' }).click();
+	const triggerCells = page.locator('.special-moves.editor .entry-row .range');
+	await expect(triggerCells.nth(0)).toContainText('Tod');
+	await expect(triggerCells.nth(1)).toContainText('Kampfbeginn');
+
+	await nameInput(page).fill('Ork');
+	await page.getByRole('button', { name: 'Speichern' }).click();
+	const rows = (await storedCards(page))[0].specialMoves.rows;
+	const shown = rows.filter((row) => !row.hidden).map((row) => row.trigger);
+	expect(shown).toEqual(['death', 'combatStart']);
 });
 
 test('custom special move trigger is saved', async ({ page }) => {
@@ -149,15 +170,15 @@ test('custom special move trigger is saved', async ({ page }) => {
 	await page.getByRole('button', { name: '+ Spezialmanöver' }).click();
 	await page.getByRole('button', { name: '+ Eigener Auslöser' }).click();
 	await page.getByLabel('Auslöser').fill('Bei Feuer');
-	await page.locator('textarea[aria-label="Name"]').fill('Panik');
-	await page.locator('textarea[aria-label="Effekt"]').fill('Flieht sofort.');
+	await page.getByLabel('Name für Bei Feuer').fill('Panik');
+	await page.getByLabel('Effekt für Bei Feuer').fill('Flieht sofort.');
 	await nameInput(page).fill('Troll');
 	await page.getByRole('button', { name: 'Speichern' }).click();
 
 	await expect(page).toHaveURL(/\/$/);
 	const cards = await storedCards(page);
-	expect(cards[0].specialMoves.custom).toEqual([
-		expect.objectContaining({ trigger: 'Bei Feuer', name: 'Panik', effect: 'Flieht sofort.' })
+	expect(cards[0].specialMoves.rows.filter((row) => row.trigger === null)).toEqual([
+		expect.objectContaining({ label: 'Bei Feuer', name: 'Panik', effect: 'Flieht sofort.' })
 	]);
 });
 

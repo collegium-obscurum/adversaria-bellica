@@ -8,7 +8,7 @@ describe('sampleCards', () => {
 			expect(card.name).not.toBe('');
 			expect(typeof card.stats.armor.hidden).toBe('boolean');
 			expect(card.talents.entries.body.maxQs).toBeGreaterThanOrEqual(1);
-			expect(card.specialMoves.triggers.death).toBeDefined();
+			expect(card.specialMoves.rows.some((row) => row.trigger === 'death')).toBe(true);
 		}
 	});
 
