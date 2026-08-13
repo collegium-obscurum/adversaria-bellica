@@ -11,13 +11,13 @@
 
 	let { card = $bindable() }: { card: MonsterCard } = $props();
 
-	const inSync = $derived(talentsInSync(card.attributes, card.talents));
+	const inSync = $derived(talentsInSync(card.attributes, card.talents.entries));
 
 	function applyAll() {
 		for (const key of TALENT_KEYS) {
-			const derived = derivedTalent(card.attributes, card.talents[key].fw, key);
-			card.talents[key].value = derived.value;
-			card.talents[key].maxQs = derived.maxQs;
+			const derived = derivedTalent(card.attributes, card.talents.entries[key].fw, key);
+			card.talents.entries[key].value = derived.value;
+			card.talents.entries[key].maxQs = derived.maxQs;
 		}
 	}
 </script>
@@ -62,9 +62,10 @@
 	<h3>Talentgruppen</h3>
 	<ul class="groups">
 		{#each TALENT_KEYS as key (key)}
-			{@const derived = derivedTalent(card.attributes, card.talents[key].fw, key)}
+			{@const derived = derivedTalent(card.attributes, card.talents.entries[key].fw, key)}
 			{@const stale =
-				derived.value !== card.talents[key].value || derived.maxQs !== card.talents[key].maxQs}
+				derived.value !== card.talents.entries[key].value ||
+				derived.maxQs !== card.talents.entries[key].maxQs}
 			<li>
 				<span class="group">
 					<b>{TALENT_LABELS[key]}</b>
@@ -73,7 +74,7 @@
 					>
 				</span>
 				<label class="fw">
-					FW <input type="number" min="0" bind:value={card.talents[key].fw} />
+					FW <input type="number" min="0" bind:value={card.talents.entries[key].fw} />
 				</label>
 				<span class="result" class:stale title={stale ? 'Weicht vom Kartenwert ab' : undefined}>
 					= <b>{derived.value}</b> (QS <b>{derived.maxQs}</b>)

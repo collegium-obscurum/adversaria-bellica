@@ -22,21 +22,18 @@
 	}
 
 	function normalizeLifePoints() {
-		if (card.lifePoints !== null && (!Number.isFinite(card.lifePoints) || card.lifePoints < 1)) {
-			card.lifePoints = null;
+		const lifePoints = card.stats.lifePoints.value;
+		if (lifePoints !== null && (!Number.isFinite(lifePoints) || lifePoints < 1)) {
+			card.stats.lifePoints.value = null;
 		}
 	}
 
 	function isHidden(key: StatKey): boolean {
-		return card.hiddenStats.includes(key);
+		return card.stats[key].hidden;
 	}
 
 	function toggleHidden(key: StatKey) {
-		if (isHidden(key)) {
-			card.hiddenStats = card.hiddenStats.filter((hiddenKey) => hiddenKey !== key);
-		} else {
-			card.hiddenStats = [...card.hiddenStats, key];
-		}
+		card.stats[key].hidden = !card.stats[key].hidden;
 	}
 
 	function toggleTitle(key: StatKey): string {
@@ -71,14 +68,14 @@
 					type="number"
 					min="1"
 					aria-label={lifePointsBadge.label}
-					bind:value={card.lifePoints}
+					bind:value={card.stats.lifePoints.value}
 					onblur={normalizeLifePoints}
-					style:font-size={valueFontSize(card.lifePoints ?? '')}
+					style:font-size={valueFontSize(card.stats.lifePoints.value ?? '')}
 				/>
 			{:else}
 				<BadgeFace badge={lifePointsBadge} cutColor={iconCutColor} />
-				<span class="badge-value" style:font-size={valueFontSize(card.lifePoints ?? '')}
-					>{card.lifePoints}</span
+				<span class="badge-value" style:font-size={valueFontSize(card.stats.lifePoints.value ?? '')}
+					>{card.stats.lifePoints.value}</span
 				>
 			{/if}
 		</div>
@@ -103,13 +100,13 @@
 					<input
 						type="text"
 						aria-label={badge.label}
-						bind:value={card[badge.key]}
-						style:font-size={valueFontSize(card[badge.key])}
+						bind:value={card.stats[badge.key].value}
+						style:font-size={valueFontSize(card.stats[badge.key].value)}
 					/>
 				{:else}
 					<BadgeFace {badge} cutColor={iconCutColor} />
-					<span class="badge-value" style:font-size={valueFontSize(card[badge.key])}
-						>{card[badge.key]}</span
+					<span class="badge-value" style:font-size={valueFontSize(card.stats[badge.key].value)}
+						>{card.stats[badge.key].value}</span
 					>
 				{/if}
 			</div>

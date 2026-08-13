@@ -25,7 +25,7 @@ test('a new card can be created and shows up in the library', async ({ page }) =
 	const cards = await storedCards(page);
 	expect(cards).toHaveLength(1);
 	expect(cards[0].name).toBe('Grimwolf');
-	expect(cards[0].lifePoints).toBe(30);
+	expect(cards[0].stats.lifePoints.value).toBe(30);
 });
 
 test('an existing card can be edited', async ({ page }) => {
@@ -118,14 +118,15 @@ test('action rows can be removed but not the last one', async ({ page }) => {
 	await expect(page.getByRole('button', { name: 'Aktion entfernen: Hieb' })).toBeDisabled();
 });
 
-test('wound trigger special move can be added, removed, and saved', async ({ page }) => {
+test('wound trigger special move can be added, hidden, and saved', async ({ page }) => {
 	await page.goto('/editor');
+	await page.getByRole('button', { name: '+ Spezialmanöver' }).click();
 	await page.getByRole('button', { name: '+ Kampfbeginn' }).click();
 	await page.getByLabel('Name für Kampfbeginn').fill('Brüllen');
 	await page.getByLabel('Effekt für Kampfbeginn').fill('Alle Feinde: Furcht');
 
 	await page.getByRole('button', { name: '+ Tod', exact: true }).click();
-	await expect(page.getByLabel('Effekt für Tod')).toBeVisible();
+	await page.getByLabel('Effekt für Tod').fill('Zerfällt zu Staub.');
 	await page.getByRole('button', { name: 'Spezialmanöver entfernen: Tod' }).click();
 	await expect(page.getByLabel('Effekt für Tod')).toBeHidden();
 
@@ -133,14 +134,19 @@ test('wound trigger special move can be added, removed, and saved', async ({ pag
 	await page.getByRole('button', { name: 'Speichern' }).click();
 	await expect(page).toHaveURL(/\/$/);
 	const cards = await storedCards(page);
-	expect(cards[0].specialMoves.combatStart).toEqual(
-		expect.objectContaining({ name: 'Brüllen', effect: 'Alle Feinde: Furcht' })
+	expect(cards[0].specialMoves.hidden).toBe(false);
+	expect(cards[0].specialMoves.triggers.combatStart).toEqual(
+		expect.objectContaining({ name: 'Brüllen', effect: 'Alle Feinde: Furcht', hidden: false })
 	);
-	expect(cards[0].specialMoves.death.effect).toBe('');
+	// hiding a row keeps its text for when it comes back
+	expect(cards[0].specialMoves.triggers.death).toEqual(
+		expect.objectContaining({ effect: 'Zerfällt zu Staub.', hidden: true })
+	);
 });
 
 test('custom special move trigger is saved', async ({ page }) => {
 	await page.goto('/editor');
+	await page.getByRole('button', { name: '+ Spezialmanöver' }).click();
 	await page.getByRole('button', { name: '+ Eigener Auslöser' }).click();
 	await page.getByLabel('Auslöser').fill('Bei Feuer');
 	await page.locator('textarea[aria-label="Name"]').fill('Panik');
@@ -150,13 +156,14 @@ test('custom special move trigger is saved', async ({ page }) => {
 
 	await expect(page).toHaveURL(/\/$/);
 	const cards = await storedCards(page);
-	expect(cards[0].customMoves).toEqual([
+	expect(cards[0].specialMoves.custom).toEqual([
 		expect.objectContaining({ trigger: 'Bei Feuer', name: 'Panik', effect: 'Flieht sofort.' })
 	]);
 });
 
 test('talent values clamp and talents can be hidden', async ({ page }) => {
 	await page.goto('/editor');
+	await page.getByRole('button', { name: '+ Talente' }).click();
 	const bodyValue = page.getByLabel('Körper Wert');
 	await bodyValue.fill('999');
 	await bodyValue.blur();
@@ -168,15 +175,15 @@ test('talent values clamp and talents can be hidden', async ({ page }) => {
 
 	await page.getByRole('button', { name: 'Talente ausblenden' }).click();
 	await expect(bodyValue).toBeHidden();
-	await page.locator('button.talents-hidden').click();
+	await page.getByRole('button', { name: '+ Talente' }).click();
 	await expect(bodyValue).toBeVisible();
 	await page.getByRole('button', { name: 'Talente ausblenden' }).click();
 
 	await nameInput(page).fill('Golem');
 	await page.getByRole('button', { name: 'Speichern' }).click();
 	const cards = await storedCards(page);
-	expect(cards[0].talentsHidden).toBe(true);
-	expect(cards[0].talents.body).toEqual(expect.objectContaining({ value: 99, maxQs: 6 }));
+	expect(cards[0].talents.hidden).toBe(true);
+	expect(cards[0].talents.entries.body).toEqual(expect.objectContaining({ value: 99, maxQs: 6 }));
 });
 
 test('talent calculator applies derived values to the card', async ({ page }) => {
@@ -193,6 +200,7 @@ test('talent calculator applies derived values to the card', async ({ page }) =>
 	await expect(bodyGroup).toContainText('QS 2');
 
 	await page.getByRole('button', { name: 'Auf Karte übernehmen' }).click();
+	await page.getByRole('button', { name: '+ Talente' }).click();
 	await expect(page.getByLabel('Körper Wert')).toHaveValue('10');
 	await expect(page.getByLabel('Körper max. QS')).toHaveValue('2');
 	await expect(page.getByRole('button', { name: 'Auf Karte übernehmen' })).toBeDisabled();
@@ -209,7 +217,22 @@ test('banner is saved and filterable in the library', async ({ page }) => {
 	await expect(page.locator('.tile-banner')).toHaveText('Anführer');
 	await page.getByLabel('Nach Banner filtern').selectOption('Anführer');
 	await expect(page.locator('.cards li')).toHaveCount(1);
-	expect((await storedCards(page))[0].banner).toBe('Anführer');
+	expect((await storedCards(page))[0].banner.value).toBe('Anführer');
+});
+
+test('a hidden banner keeps its text but leaves the library list', async ({ page }) => {
+	await page.goto('/editor');
+	await page.getByRole('button', { name: '+ Banner' }).click();
+	await page.getByLabel('Banner', { exact: true }).fill('Anführer');
+	await page.getByRole('button', { name: 'Banner entfernen' }).click();
+	await nameInput(page).fill('Orkhäuptling');
+	await page.getByRole('button', { name: 'Speichern' }).click();
+
+	await expect(page.locator('.tile-banner')).toHaveCount(0);
+	await expect(page.getByLabel('Nach Banner filtern').locator('option')).toHaveCount(2);
+	expect((await storedCards(page))[0].banner).toEqual(
+		expect.objectContaining({ value: 'Anführer', hidden: true })
+	);
 });
 
 test('flavour text and notes are saved and removable', async ({ page }) => {
@@ -227,8 +250,30 @@ test('flavour text and notes are saved and removable', async ({ page }) => {
 	await nameInput(page).fill('Drache');
 	await page.getByRole('button', { name: 'Speichern' }).click();
 	const cards = await storedCards(page);
-	expect(cards[0].flavorText).toBe('Uralt.');
-	expect(cards[0].notes).toBe('Immun gegen Feuer.');
+	expect(cards[0].flavorText).toEqual({ value: 'Uralt.', hidden: false });
+	expect(cards[0].notes).toEqual({ value: 'Immun gegen Feuer.', hidden: false });
+});
+
+test('a hidden block keeps its text across a reload and gives it back', async ({ page }) => {
+	await page.goto('/editor');
+	await page.getByRole('button', { name: '+ Notizen' }).click();
+	await page.getByLabel('Notizen', { exact: true }).fill('Immun gegen Feuer.');
+	await page.getByRole('button', { name: 'Notizen entfernen' }).click();
+	await nameInput(page).fill('Drache');
+	await page.getByRole('button', { name: 'Speichern' }).click();
+
+	expect((await storedCards(page))[0].notes).toEqual({
+		value: 'Immun gegen Feuer.',
+		hidden: true
+	});
+	// the card prints nothing for a hidden block
+	await page.getByRole('button', { name: 'Drache ansehen' }).click();
+	await expect(page.locator('dialog.view-dialog article.card')).not.toContainText('Notizen');
+	await page.locator('dialog.view-dialog').getByRole('button', { name: 'Schließen' }).click();
+
+	await page.getByRole('link', { name: 'Bearbeiten' }).click();
+	await page.getByRole('button', { name: '+ Notizen' }).click();
+	await expect(page.getByLabel('Notizen', { exact: true })).toHaveValue('Immun gegen Feuer.');
 });
 
 test('hidden stat badge is excluded from tile and persisted', async ({ page }) => {
@@ -239,12 +284,13 @@ test('hidden stat badge is excluded from tile and persisted', async ({ page }) =
 
 	const tile = page.locator('.cards li', { hasText: 'Golem' });
 	await expect(tile.locator('.stats')).not.toContainText('INI');
-	expect((await storedCards(page))[0].hiddenStats).toContain('initiative');
+	expect((await storedCards(page))[0].stats.initiative.hidden).toBe(true);
 });
 
 test('life points drive the wound threshold row and normalize on blur', async ({ page }) => {
 	await page.goto('/editor');
 	const card = page.locator('.card.editable');
+	await page.getByRole('button', { name: '+ Schmerzschwellen' }).click();
 	// default 20 LeP: thresholds 5 / 10 / 15, death at 20
 	await expect(card).toContainText('Schmerz bei Schaden:');
 	await expect(card).toContainText('5 / 10 / 15');
@@ -254,6 +300,8 @@ test('life points drive the wound threshold row and normalize on blur', async ({
 	await lifePoints.blur();
 	await expect(lifePoints).toHaveValue('');
 	await expect(card).not.toContainText('Schmerz bei Schaden:');
+	// no HP means nothing to show, so the block cannot be added back either
+	await expect(page.getByRole('button', { name: '+ Schmerzschwellen' })).toHaveCount(0);
 });
 
 test('custom category can be entered', async ({ page }) => {

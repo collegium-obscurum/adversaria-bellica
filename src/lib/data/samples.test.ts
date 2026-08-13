@@ -6,9 +6,9 @@ describe('sampleCards', () => {
 		expect(sampleCards.length).toBeGreaterThan(0);
 		for (const card of sampleCards) {
 			expect(card.name).not.toBe('');
-			expect(Array.isArray(card.hiddenStats)).toBe(true);
-			expect(card.talents.body.maxQs).toBeGreaterThanOrEqual(1);
-			expect(card.specialMoves.death).toBeDefined();
+			expect(typeof card.stats.armor.hidden).toBe('boolean');
+			expect(card.talents.entries.body.maxQs).toBeGreaterThanOrEqual(1);
+			expect(card.specialMoves.triggers.death).toBeDefined();
 		}
 	});
 

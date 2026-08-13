@@ -1,18 +1,21 @@
 import type {
 	ActionEntry,
 	AttributeKey,
+	Banner,
+	CardStats,
 	CustomMove,
 	MonsterCard,
-	SpecialMove,
 	TalentEntry,
 	TalentKey,
+	TextBlock,
+	TriggerMove,
 	WoundTrigger
 } from './types';
 import { ATTRIBUTE_KEYS, TALENT_KEYS, WOUND_TRIGGERS } from './types';
 import { clampQs, clampTalentValue, derivedTalent } from './talentCalc';
 import { parseEntryColor } from './entryColor';
 import { FIT_FLOOR, type FitResult } from './cardFit';
-import { STAT_BADGES, type StatKey } from './statBadges';
+import { STAT_BADGES, type StatKey, type TextStatKey } from './statBadges';
 
 interface LegacyActionEntry {
 	from: number;
@@ -23,6 +26,10 @@ interface LegacyActionEntry {
 
 function isLegacyAction(entry: unknown): entry is LegacyActionEntry {
 	return typeof entry === 'object' && entry !== null && 'from' in entry && 'to' in entry;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+	return typeof value === 'object' && value !== null;
 }
 
 function textOrEmpty(value: unknown): string {
@@ -42,54 +49,66 @@ export function migrateActions(actions: unknown[]): ActionEntry[] {
 	}
 	const result: ActionEntry[] = [];
 	for (const row of rows) {
-		if (typeof row !== 'object' || row === null) continue;
-		const record = row as Record<string, unknown>;
-		const span = Number(record.span);
+		if (!isRecord(row)) continue;
+		const span = Number(row.span);
 		result.push({
 			span: Number.isFinite(span) ? Math.max(1, Math.round(span)) : 1,
-			name: textOrEmpty(record.name),
-			effect: textOrEmpty(record.effect),
-			color: parseEntryColor(record.color)
+			name: textOrEmpty(row.name),
+			effect: textOrEmpty(row.effect),
+			color: parseEntryColor(row.color)
 		});
 	}
 	return result;
 }
 
-/** Convert pre-object moves (plain strings become the effect); malformed fields default to ''. */
-export function migrateSpecialMoves(moves: unknown): Record<WoundTrigger, SpecialMove> {
-	const record =
-		typeof moves === 'object' && moves !== null ? (moves as Record<string, unknown>) : {};
-	const result = {} as Record<WoundTrigger, SpecialMove>;
+function moveFields(value: unknown): {
+	name: string;
+	effect: string;
+	color: ReturnType<typeof parseEntryColor>;
+} {
+	// pre-object moves were plain strings holding just the effect
+	if (typeof value === 'string') return { name: '', effect: value, color: null };
+	if (!isRecord(value)) return { name: '', effect: '', color: null };
+	return {
+		name: textOrEmpty(value.name),
+		effect: textOrEmpty(value.effect),
+		color: parseEntryColor(value.color)
+	};
+}
+
+/**
+ * Special moves gained a wrapper with its own visibility plus per-trigger `hidden`.
+ * Legacy cards showed a trigger exactly when it had content, and the section itself
+ * starts hidden like every other optional block.
+ */
+export function migrateSpecialMoves(
+	raw: unknown,
+	legacyCustom: unknown
+): MonsterCard['specialMoves'] {
+	const wrapper = isRecord(raw) && 'triggers' in raw ? raw : null;
+	const source = wrapper ? wrapper.triggers : raw;
+	const record = isRecord(source) ? source : {};
+	const triggers = {} as Record<WoundTrigger, TriggerMove>;
 	for (const trigger of WOUND_TRIGGERS) {
-		const value = record[trigger];
-		if (typeof value === 'string') {
-			result[trigger] = { name: '', effect: value, color: null };
-		} else if (typeof value === 'object' && value !== null) {
-			const move = value as Record<string, unknown>;
-			result[trigger] = {
-				name: textOrEmpty(move.name),
-				effect: textOrEmpty(move.effect),
-				color: parseEntryColor(move.color)
-			};
-		} else {
-			result[trigger] = { name: '', effect: '', color: null };
-		}
+		const move = moveFields(record[trigger]);
+		const hidden = wrapper
+			? isRecord(record[trigger]) && record[trigger].hidden === true
+			: move.name.trim() === '' && move.effect.trim() === '';
+		triggers[trigger] = { ...move, hidden };
 	}
-	return result;
+	return {
+		hidden: wrapper ? wrapper.hidden === true : true,
+		triggers,
+		custom: migrateCustomMoves(wrapper ? wrapper.custom : legacyCustom)
+	};
 }
 
 export function migrateCustomMoves(raw: unknown): CustomMove[] {
 	if (!Array.isArray(raw)) return [];
 	const result: CustomMove[] = [];
 	for (const item of raw) {
-		if (typeof item !== 'object' || item === null) continue;
-		const record = item as Record<string, unknown>;
-		result.push({
-			trigger: textOrEmpty(record.trigger),
-			name: textOrEmpty(record.name),
-			effect: textOrEmpty(record.effect),
-			color: parseEntryColor(record.color)
-		});
+		if (!isRecord(item)) continue;
+		result.push({ trigger: textOrEmpty(item.trigger), ...moveFields(item) });
 	}
 	return result;
 }
@@ -106,35 +125,34 @@ function numberOrNull(value: unknown): number | null {
 export function migrateTalents(
 	raw: unknown,
 	attributes: Record<AttributeKey, number | null>
-): Record<TalentKey, TalentEntry> {
-	const record = typeof raw === 'object' && raw !== null ? (raw as Record<string, unknown>) : {};
-	const result = {} as Record<TalentKey, TalentEntry>;
+): MonsterCard['talents'] {
+	const wrapper = isRecord(raw) && 'entries' in raw ? raw : null;
+	const source = wrapper ? wrapper.entries : raw;
+	const record = isRecord(source) ? source : {};
+	const entries = {} as Record<TalentKey, TalentEntry>;
 	for (const key of TALENT_KEYS) {
-		const value =
-			typeof record[key] === 'object' && record[key] !== null
-				? (record[key] as Record<string, unknown>)
-				: {};
+		const value = isRecord(record[key]) ? record[key] : {};
 		const fw = numberOrNull(value.fw);
 		if ('valueOverride' in value || 'maxQsOverride' in value) {
 			const derived = derivedTalent(attributes, fw, key);
-			result[key] = {
+			entries[key] = {
 				fw,
 				value: numberOrNull(value.valueOverride) ?? derived.value,
 				maxQs: numberOrNull(value.maxQsOverride) ?? derived.maxQs
 			};
 		} else {
-			result[key] = {
+			entries[key] = {
 				fw,
 				value: clampTalentValue(numberOrNull(value.value) ?? 1),
 				maxQs: clampQs(numberOrNull(value.maxQs) ?? 1)
 			};
 		}
 	}
-	return result;
+	return { hidden: wrapper ? wrapper.hidden === true : true, entries };
 }
 
 export function migrateAttributes(raw: unknown): Record<AttributeKey, number | null> {
-	const record = typeof raw === 'object' && raw !== null ? (raw as Record<string, unknown>) : {};
+	const record = isRecord(raw) ? raw : {};
 	const result = {} as Record<AttributeKey, number | null>;
 	for (const key of ATTRIBUTE_KEYS) {
 		result[key] = numberOrNull(record[key]);
@@ -153,71 +171,118 @@ const TEXT_STAT_KEYS = [
 	'actionCount'
 ] as const;
 
-/** Convert pre-string numeric stats; lifePoints below 1 or invalid means "no HP" (null). */
-export function migrateStats(raw: Record<string, unknown>): void {
-	for (const key of TEXT_STAT_KEYS) {
-		const value = raw[key];
-		if (typeof value === 'string') continue;
-		raw[key] = typeof value === 'number' ? String(value) : '';
-	}
-	const lifePoints = Number(raw.lifePoints);
-	raw.lifePoints = Number.isFinite(lifePoints) && lifePoints >= 1 ? lifePoints : null;
+function legacyLifePoints(value: unknown): number | null {
+	const lifePoints = Number(value);
+	return Number.isFinite(lifePoints) && lifePoints >= 1 ? lifePoints : null;
 }
 
 /**
- * Cards saved before explicit visibility hid empty badges implicitly; deriving hiddenStats
- * from the empty fields keeps their print output unchanged. Expects stats already migrated.
+ * Stats moved from flat fields plus a `hiddenStats` list into one record of
+ * {value, hidden}. Legacy visibility came from that list, or, before it existed,
+ * from the field being empty.
  */
-export function migrateHiddenStats(raw: Record<string, unknown>): StatKey[] {
-	const validKeys = STAT_BADGES.map((badge) => badge.key);
-	if (Array.isArray(raw.hiddenStats)) {
-		return validKeys.filter((key) => (raw.hiddenStats as unknown[]).includes(key));
+export function migrateStats(raw: Record<string, unknown>): CardStats {
+	if (isRecord(raw.stats)) {
+		const source = raw.stats;
+		const lifePoints = isRecord(source.lifePoints) ? source.lifePoints : {};
+		const stats = {
+			lifePoints: {
+				value: legacyLifePoints(lifePoints.value),
+				hidden: lifePoints.hidden === true
+			}
+		} as CardStats;
+		for (const key of TEXT_STAT_KEYS) {
+			const stat = isRecord(source[key]) ? source[key] : {};
+			stats[key] = { value: textOrEmpty(stat.value), hidden: stat.hidden === true };
+		}
+		return stats;
 	}
-	const hidden: StatKey[] = [];
+
+	const values = {} as Record<TextStatKey, string>;
 	for (const key of TEXT_STAT_KEYS) {
-		if ((raw[key] as string).trim() === '') hidden.push(key);
+		const value = raw[key];
+		values[key] =
+			typeof value === 'string' ? value : typeof value === 'number' ? String(value) : '';
 	}
-	return hidden;
+	const hidden = legacyHiddenStats(raw, values);
+	const stats = {
+		lifePoints: { value: legacyLifePoints(raw.lifePoints), hidden: hidden.includes('lifePoints') }
+	} as CardStats;
+	for (const key of TEXT_STAT_KEYS) {
+		stats[key] = { value: values[key], hidden: hidden.includes(key) };
+	}
+	return stats;
+}
+
+function legacyHiddenStats(
+	raw: Record<string, unknown>,
+	values: Record<TextStatKey, string>
+): StatKey[] {
+	const validKeys = STAT_BADGES.map((badge) => badge.key);
+	// cards saved before the GK badge existed keep their print output unchanged
+	const hidden = Array.isArray(raw.hiddenStats)
+		? validKeys.filter((key) => (raw.hiddenStats as unknown[]).includes(key))
+		: TEXT_STAT_KEYS.filter((key) => values[key].trim() === '');
+	if (!('sizeCategory' in raw) && !hidden.includes('sizeCategory')) {
+		return [...hidden, 'sizeCategory'];
+	}
+	return [...hidden];
+}
+
+/** Optional text blocks; legacy cards showed them exactly when they had content. */
+function migrateTextBlock(raw: unknown): TextBlock {
+	if (isRecord(raw)) {
+		return { value: textOrEmpty(raw.value), hidden: raw.hidden === true };
+	}
+	const value = textOrEmpty(raw);
+	return { value, hidden: value.trim() === '' };
+}
+
+function migrateBanner(raw: unknown, legacyColor: unknown): Banner {
+	if (isRecord(raw)) {
+		return {
+			value: textOrEmpty(raw.value),
+			color: parseEntryColor(raw.color),
+			hidden: raw.hidden === true
+		};
+	}
+	const value = textOrEmpty(raw);
+	return { value, color: parseEntryColor(legacyColor), hidden: value.trim() === '' };
 }
 
 /** Cards saved before fit tracking count as fitting until their next save re-measures them. */
 export function migrateFit(raw: unknown): FitResult {
-	if (typeof raw !== 'object' || raw === null) {
+	if (!isRecord(raw)) {
 		return { scale: 1, fits: true, imageHidden: false };
 	}
-	const record = raw as Record<string, unknown>;
-	const scale = Number(record.scale);
+	const scale = Number(raw.scale);
 	return {
 		scale: Number.isFinite(scale) ? Math.min(1, Math.max(FIT_FLOOR, scale)) : 1,
-		fits: record.fits !== false,
-		imageHidden: record.imageHidden === true
+		fits: raw.fits !== false,
+		imageHidden: raw.imageHidden === true
 	};
 }
 
 /** Bring a card parsed from storage or import JSON up to the current schema; every field gets a sane default. */
 export function migrateCard(raw: Record<string, unknown>): MonsterCard {
-	raw.id = typeof raw.id === 'string' ? raw.id : crypto.randomUUID();
-	raw.name = textOrEmpty(raw.name);
-	raw.category = textOrEmpty(raw.category);
-	raw.banner = textOrEmpty(raw.banner);
-	raw.bannerColor = parseEntryColor(raw.bannerColor);
-	raw.flavorText = textOrEmpty(raw.flavorText);
-	raw.notes = textOrEmpty(raw.notes);
-	raw.image = typeof raw.image === 'string' ? raw.image : null;
-	raw.attributes = migrateAttributes(raw.attributes);
-	raw.talents = migrateTalents(raw.talents, raw.attributes as Record<AttributeKey, number | null>);
-	raw.actions = migrateActions(Array.isArray(raw.actions) ? raw.actions : []);
-	raw.specialMoves = migrateSpecialMoves(raw.specialMoves);
-	raw.customMoves = migrateCustomMoves(raw.customMoves);
-	raw.fit = migrateFit(raw.fit);
-	// cards saved before the GK badge existed keep their print output unchanged
-	const hadSizeCategory = 'sizeCategory' in raw;
-	migrateStats(raw);
-	const hiddenStats = migrateHiddenStats(raw);
-	if (!hadSizeCategory && !hiddenStats.includes('sizeCategory')) {
-		hiddenStats.push('sizeCategory');
-	}
-	raw.hiddenStats = hiddenStats;
-	raw.talentsHidden = raw.talentsHidden === true;
-	return raw as unknown as MonsterCard;
+	const attributes = migrateAttributes(raw.attributes);
+	return {
+		id: typeof raw.id === 'string' ? raw.id : crypto.randomUUID(),
+		name: textOrEmpty(raw.name),
+		category: textOrEmpty(raw.category),
+		banner: migrateBanner(raw.banner, raw.bannerColor),
+		flavorText: migrateTextBlock(raw.flavorText),
+		// legacy notes always printed when filled; the block is opt-in now, values stay
+		notes: isRecord(raw.notes)
+			? migrateTextBlock(raw.notes)
+			: { value: textOrEmpty(raw.notes), hidden: true },
+		image: typeof raw.image === 'string' ? raw.image : null,
+		stats: migrateStats(raw),
+		attributes,
+		talents: migrateTalents(raw.talents, attributes),
+		actions: migrateActions(Array.isArray(raw.actions) ? raw.actions : []),
+		wounds: { hidden: isRecord(raw.wounds) ? raw.wounds.hidden === true : true },
+		specialMoves: migrateSpecialMoves(raw.specialMoves, raw.customMoves),
+		fit: migrateFit(raw.fit)
+	};
 }

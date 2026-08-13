@@ -1,6 +1,6 @@
 import type { FitResult } from './cardFit';
 import type { EntryColor } from './entryColor';
-import type { StatKey } from './statBadges';
+import type { TextStatKey } from './statBadges';
 
 export interface TalentValue {
 	value: number;
@@ -47,39 +47,57 @@ export interface SpecialMove {
 	color: EntryColor | null;
 }
 
+export interface TriggerMove extends SpecialMove {
+	hidden: boolean;
+}
+
 export interface CustomMove extends SpecialMove {
 	/** free-text trigger label, printed like the fixed wound triggers */
 	trigger: string;
 }
 
+/** Every hideable part of the card carries its own flag; hiding never clears the value. */
+export interface TextBlock {
+	value: string;
+	hidden: boolean;
+}
+
+export interface Banner {
+	value: string;
+	color: EntryColor | null;
+	hidden: boolean;
+}
+
+export interface TextStat {
+	value: string;
+	hidden: boolean;
+}
+
+export type CardStats = {
+	/** value null = no HP; hides pain thresholds and wound triggers */
+	lifePoints: { value: number | null; hidden: boolean };
+} & Record<TextStatKey, TextStat>;
+
 export interface MonsterCard {
 	id: string;
 	name: string;
 	category: string;
-	banner: string;
-	bannerColor: EntryColor | null;
-	flavorText: string;
-	notes: string;
+	banner: Banner;
+	flavorText: TextBlock;
+	notes: TextBlock;
 	/** data URL of the circle cutout, or null */
 	image: string | null;
-	/** null = no HP; hides pain thresholds and wound triggers */
-	lifePoints: number | null;
-	armor: string;
-	initiative: string;
-	speed: string;
-	defense: string;
-	soulPower: string;
-	toughness: string;
-	sizeCategory: string;
-	actionCount: string;
+	stats: CardStats;
 	attributes: Record<AttributeKey, number | null>;
-	talents: Record<TalentKey, TalentEntry>;
+	talents: { hidden: boolean; entries: Record<TalentKey, TalentEntry> };
 	actions: ActionEntry[];
-	specialMoves: Record<WoundTrigger, SpecialMove>;
-	customMoves: CustomMove[];
-	/** badges excluded from print/preview; visibility is explicit, empty badges print as empty circles */
-	hiddenStats: StatKey[];
-	talentsHidden: boolean;
+	/** the pain threshold row has no data of its own, only visibility */
+	wounds: { hidden: boolean };
+	specialMoves: {
+		hidden: boolean;
+		triggers: Record<WoundTrigger, TriggerMove>;
+		custom: CustomMove[];
+	};
 	/** print fit measured on last save; display recomputes live, the library badge reads this */
 	fit: FitResult;
 }
@@ -89,20 +107,22 @@ export function createEmptyCard(): MonsterCard {
 		id: crypto.randomUUID(),
 		name: '',
 		category: '',
-		banner: '',
-		bannerColor: null,
-		flavorText: '',
-		notes: '',
+		banner: { value: '', color: null, hidden: true },
+		flavorText: { value: '', hidden: true },
+		notes: { value: '', hidden: true },
 		image: null,
-		lifePoints: 20,
-		armor: '0',
-		initiative: '10',
-		speed: '8',
-		defense: '6',
-		soulPower: '0',
-		toughness: '0',
-		sizeCategory: '',
-		actionCount: '1',
+		stats: {
+			lifePoints: { value: 20, hidden: false },
+			armor: { value: '0', hidden: false },
+			initiative: { value: '10', hidden: false },
+			speed: { value: '8', hidden: false },
+			defense: { value: '6', hidden: false },
+			soulPower: { value: '0', hidden: false },
+			toughness: { value: '0', hidden: false },
+			// GK is rarely relevant; new cards start with the badge off, unhide per card
+			sizeCategory: { value: '', hidden: true },
+			actionCount: { value: '1', hidden: false }
+		},
 		attributes: {
 			courage: null,
 			sagacity: null,
@@ -114,11 +134,14 @@ export function createEmptyCard(): MonsterCard {
 			strength: null
 		},
 		talents: {
-			body: { fw: null, value: 1, maxQs: 1 },
-			social: { fw: null, value: 1, maxQs: 1 },
-			nature: { fw: null, value: 1, maxQs: 1 },
-			knowledge: { fw: null, value: 1, maxQs: 1 },
-			craft: { fw: null, value: 1, maxQs: 1 }
+			hidden: true,
+			entries: {
+				body: { fw: null, value: 1, maxQs: 1 },
+				social: { fw: null, value: 1, maxQs: 1 },
+				nature: { fw: null, value: 1, maxQs: 1 },
+				knowledge: { fw: null, value: 1, maxQs: 1 },
+				craft: { fw: null, value: 1, maxQs: 1 }
+			}
 		},
 		actions: [
 			{ span: 1, name: 'Kritischer Treffer', effect: '2W6+4 TP', color: null },
@@ -132,17 +155,18 @@ export function createEmptyCard(): MonsterCard {
 				color: null
 			}
 		],
+		wounds: { hidden: true },
 		specialMoves: {
-			combatStart: { name: '', effect: '', color: null },
-			hp75: { name: '', effect: '', color: null },
-			hp50: { name: '', effect: '', color: null },
-			hp25: { name: '', effect: '', color: null },
-			death: { name: '', effect: '', color: null }
+			hidden: true,
+			triggers: {
+				combatStart: { name: '', effect: '', color: null, hidden: true },
+				hp75: { name: '', effect: '', color: null, hidden: true },
+				hp50: { name: '', effect: '', color: null, hidden: true },
+				hp25: { name: '', effect: '', color: null, hidden: true },
+				death: { name: '', effect: '', color: null, hidden: true }
+			},
+			custom: []
 		},
-		customMoves: [],
-		// GK is rarely relevant; new cards start with the badge off, unhide per card
-		hiddenStats: ['sizeCategory'],
-		talentsHidden: false,
 		fit: { scale: 1, fits: true, imageHidden: false }
 	};
 }

@@ -108,8 +108,13 @@ describe('importJson', () => {
 		const count = storage.importJson(JSON.stringify([{ name: 'Goblin' }]));
 		expect(count).toBe(1);
 		const card = storage.store.cards[0];
-		expect(card.flavorText).toBe('');
-		expect(card.talents.body).toEqual({ fw: null, value: 1, maxQs: 1 });
-		expect(card.specialMoves.death).toEqual({ name: '', effect: '', color: null });
+		expect(card.flavorText).toEqual({ value: '', hidden: true });
+		expect(card.talents.entries.body).toEqual({ fw: null, value: 1, maxQs: 1 });
+		expect(card.specialMoves.triggers.death).toEqual({
+			name: '',
+			effect: '',
+			color: null,
+			hidden: true
+		});
 	});
 });

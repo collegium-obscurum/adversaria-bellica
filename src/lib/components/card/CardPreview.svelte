@@ -25,23 +25,17 @@
 		onFit?: (fit: FitResult) => void;
 	} = $props();
 
-	const thresholds = $derived(card.lifePoints === null ? null : woundThresholds(card.lifePoints));
+	const lifePoints = $derived(card.stats.lifePoints.value);
+	const thresholds = $derived(lifePoints === null ? null : woundThresholds(lifePoints));
 	const ornate = $derived(prefs.cardStyle === 'ornate');
-	let showBanner = $state(false);
 	// the banner strip replaces the top brand mark and top corner ornaments
-	const hasBanner = $derived(card.banner.trim() !== '' || (editable && showBanner));
+	const hasBanner = $derived(!card.banner.hidden && (editable || card.banner.value.trim() !== ''));
 	const cornerPositions = $derived(hasBanner ? ['bl', 'br'] : ['tl', 'tr', 'bl', 'br']);
+	// a hidden banner tints nothing
+	const bannerColor = $derived(hasBanner ? card.banner.color : null);
 
-	function removeBanner() {
-		card.banner = '';
-		card.bannerColor = null;
-		showBanner = false;
-	}
 	// when every badge is hidden the whole column disappears and the body takes its width
-	const allBadgesHidden = $derived(card.hiddenStats.length === STAT_BADGES.length);
-
-	let showFlavor = $state(false);
-	let showNotes = $state(false);
+	const allBadgesHidden = $derived(STAT_BADGES.every((badge) => card.stats[badge.key].hidden));
 
 	let cardElement = $state<HTMLElement>();
 	let bodyElement = $state<HTMLElement>();
@@ -69,35 +63,41 @@
 	class:editable
 	class:ornate
 	class:ornate-tints={ornate}
-	style:--wash={card.bannerColor ? `var(--tint-${card.bannerColor})` : null}
+	style:--wash={bannerColor ? `var(--tint-${bannerColor})` : null}
 	bind:this={cardElement}
 >
 	{#if hasBanner}
-		<div class="banner" style:color={card.bannerColor ? `var(--tint-${card.bannerColor})` : null}>
+		<div class="banner" style:color={bannerColor ? `var(--tint-${bannerColor})` : null}>
 			{#if editable}
 				<input
 					class="banner-input"
-					bind:value={card.banner}
+					bind:value={card.banner.value}
 					placeholder="Banner"
 					aria-label="Banner"
 				/>
-				<ColorPicker bind:color={card.bannerColor} />
+				<ColorPicker bind:color={card.banner.color} />
 				<button
 					type="button"
 					class="remove"
-					onclick={removeBanner}
-					title="Banner entfernen"
+					onclick={() => {
+						card.banner.hidden = true;
+					}}
+					title="Banner ausblenden (Text bleibt erhalten)"
 					aria-label="Banner entfernen">✕</button
 				>
 			{:else}
-				<span class="banner-label">{card.banner}</span>
+				<span class="banner-label">{card.banner.value}</span>
 			{/if}
 		</div>
 	{:else}
 		<span class="brand-mark top">Collegium Obscurum</span>
 		{#if editable}
-			<button type="button" class="add add-banner" onclick={() => (showBanner = true)}
-				>+ Banner</button
+			<button
+				type="button"
+				class="add add-banner"
+				onclick={() => {
+					card.banner.hidden = false;
+				}}>+ Banner</button
 			>
 		{/if}
 	{/if}
@@ -116,75 +116,102 @@
 			<CardHeader bind:card bind:nameError {editable} {onPortraitClick} />
 
 			{#if editable}
-				{#if showFlavor || card.flavorText.trim() !== ''}
+				{#if card.flavorText.hidden}
+					<button
+						type="button"
+						class="add"
+						onclick={() => {
+							card.flavorText.hidden = false;
+						}}>+ Flavourtext</button
+					>
+				{:else}
 					<div class="removable">
 						<textarea
 							class="flavor-input"
-							bind:value={card.flavorText}
+							bind:value={card.flavorText.value}
 							placeholder="Flavourtext"
 							aria-label="Flavourtext"></textarea>
 						<button
 							type="button"
 							class="remove"
 							onclick={() => {
-								card.flavorText = '';
-								showFlavor = false;
+								card.flavorText.hidden = true;
 							}}
-							title="Flavourtext entfernen"
+							title="Flavourtext ausblenden (Text bleibt erhalten)"
 							aria-label="Flavourtext entfernen">✕</button
 						>
 					</div>
-				{:else}
-					<button type="button" class="add" onclick={() => (showFlavor = true)}
-						>+ Flavourtext</button
-					>
 				{/if}
-			{:else if card.flavorText}
-				<p class="flavor">{card.flavorText}</p>
+			{:else if !card.flavorText.hidden && card.flavorText.value.trim() !== ''}
+				<p class="flavor">{card.flavorText.value}</p>
 			{/if}
 
 			<ActionTable bind:card {editable} />
 
-			{#if thresholds}
+			{#if thresholds && !card.wounds.hidden}
 				<div class="wounds">
 					<b>Schmerz bei Schaden:</b>
 					{thresholds.hp75} / {thresholds.hp50} / {thresholds.hp25}
 					· <b>Tod:</b>
 					{thresholds.death}
+					{#if editable}
+						<button
+							type="button"
+							class="remove hide-toggle"
+							title="Schmerzschwellen ausblenden"
+							aria-label="Schmerzschwellen ausblenden"
+							onclick={() => {
+								card.wounds.hidden = true;
+							}}>✕</button
+						>
+					{/if}
 				</div>
+			{:else if thresholds && editable}
+				<button
+					type="button"
+					class="add"
+					onclick={() => {
+						card.wounds.hidden = false;
+					}}>+ Schmerzschwellen</button
+				>
 			{/if}
 
 			<SpecialMoves bind:card {editable} />
 
 			{#if editable}
-				<div class="notes-section">
-					<h3>Notizen</h3>
-					{#if showNotes || card.notes.trim() !== ''}
+				{#if card.notes.hidden}
+					<button
+						type="button"
+						class="add"
+						onclick={() => {
+							card.notes.hidden = false;
+						}}>+ Notizen</button
+					>
+				{:else}
+					<div class="notes-section">
+						<h3>Notizen</h3>
 						<div class="removable">
 							<textarea
 								class="notes-input"
-								bind:value={card.notes}
+								bind:value={card.notes.value}
 								placeholder="Notizen (Immunitäten, Schwächen, Taktik)"
 								aria-label="Notizen"></textarea>
 							<button
 								type="button"
 								class="remove"
 								onclick={() => {
-									card.notes = '';
-									showNotes = false;
+									card.notes.hidden = true;
 								}}
-								title="Notizen entfernen"
+								title="Notizen ausblenden (Text bleibt erhalten)"
 								aria-label="Notizen entfernen">✕</button
 							>
 						</div>
-					{:else}
-						<button type="button" class="add" onclick={() => (showNotes = true)}>+ Notizen</button>
-					{/if}
-				</div>
-			{:else if card.notes}
+					</div>
+				{/if}
+			{:else if !card.notes.hidden && card.notes.value.trim() !== ''}
 				<div class="notes-section">
 					<h3>Notizen</h3>
-					<p class="notes">{card.notes}</p>
+					<p class="notes">{card.notes.value}</p>
 				</div>
 			{/if}
 		</div>
@@ -395,6 +422,7 @@
 	}
 
 	.wounds {
+		position: relative;
 		padding: 0.5em 0.667em;
 		border: 0.3mm solid var(--line);
 		border-radius: 1mm;
@@ -515,6 +543,13 @@
 	/* zero specificity so buttons that position themselves (hide-toggle, add-banner) win */
 	.card :global(:where(.remove, .add)) {
 		position: relative;
+	}
+
+	/* block-level hide button, parked in the corner of the block it belongs to */
+	.card :global(.hide-toggle) {
+		position: absolute;
+		top: -1mm;
+		right: -1mm;
 	}
 
 	/* invisible hit-area extension to roughly 24px; visual size must stay WYSIWYG */

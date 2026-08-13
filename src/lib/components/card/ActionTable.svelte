@@ -135,7 +135,7 @@
 			>+ Aktion</button
 		>
 	{/if}
-	{#if !card.hiddenStats.includes('speed')}
+	{#if !card.stats.speed.hidden}
 		<p class="note">
 			Bewegung (GS) einmal pro Runde zusätzlich zu den Aktionen, oder eine Aktion für doppelte
 			Distanz.

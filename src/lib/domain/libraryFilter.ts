@@ -10,11 +10,16 @@ export interface LibraryFilter {
 	banner: string;
 }
 
+/** A hidden banner counts as no banner, in the list as on the card. */
+export function bannerLabel(card: MonsterCard): string {
+	return card.banner.hidden ? '' : card.banner.value;
+}
+
 export function filterCards(cards: MonsterCard[], filter: LibraryFilter): MonsterCard[] {
 	const query = filter.search.toLowerCase();
 	return cards.filter((card) => {
 		if (!matchesField(card.category, filter.category)) return false;
-		if (!matchesField(card.banner, filter.banner)) return false;
+		if (!matchesField(bannerLabel(card), filter.banner)) return false;
 		return card.name.toLowerCase().includes(query);
 	});
 }

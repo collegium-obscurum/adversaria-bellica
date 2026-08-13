@@ -16,7 +16,7 @@
 	import { sampleCards } from '$lib/data/samples';
 	import { downloadJson } from '$lib/download';
 	import { cardFitZoom } from '$lib/domain/cardZoom';
-	import { filterCards, WITHOUT } from '$lib/domain/libraryFilter';
+	import { bannerLabel, filterCards, WITHOUT } from '$lib/domain/libraryFilter';
 	import { prefs } from '$lib/state/preferences.svelte';
 	import { STAT_BADGES } from '$lib/domain/statBadges';
 	import type { MonsterCard } from '$lib/domain/types';
@@ -48,7 +48,7 @@
 	);
 
 	const banners = $derived(
-		[...new Set(shownCards.map((card) => card.banner).filter((banner) => banner.trim()))].sort()
+		[...new Set(shownCards.map(bannerLabel).filter((banner) => banner.trim()))].sort()
 	);
 
 	const filtered = $derived.by(() => {
@@ -67,9 +67,9 @@
 	function tileStats(card: MonsterCard): { abbr: string; label: string; value: string }[] {
 		const stats = [];
 		for (const badge of STAT_BADGES) {
-			if (card.hiddenStats.includes(badge.key)) continue;
-			const raw = card[badge.key];
-			const value = raw === null ? '' : String(raw).trim();
+			const stat = card.stats[badge.key];
+			if (stat.hidden) continue;
+			const value = stat.value === null ? '' : String(stat.value).trim();
 			if (value === '') continue;
 			stats.push({ abbr: badge.abbr, label: badge.label, value });
 		}
@@ -183,16 +183,18 @@
 	{:else}
 		<ul class="cards" class:ornate-tints={prefs.cardStyle === 'ornate'}>
 			{#each filtered as card (card.id)}
+				{@const banner = bannerLabel(card).trim()}
+				{@const bannerColor = banner === '' ? null : card.banner.color}
 				<li
-					class:has-banner={card.banner.trim() !== ''}
-					style:--wash={card.bannerColor ? `var(--tint-${card.bannerColor})` : null}
+					class:has-banner={banner !== ''}
+					style:--wash={bannerColor ? `var(--tint-${bannerColor})` : null}
 				>
-					{#if card.banner.trim() !== ''}
+					{#if banner !== ''}
 						<div
 							class="tile-banner"
-							style:background={card.bannerColor ? `var(--tint-${card.bannerColor})` : null}
+							style:background={bannerColor ? `var(--tint-${bannerColor})` : null}
 						>
-							{card.banner}
+							{banner}
 						</div>
 					{/if}
 					{#if !card.fit.fits || card.fit.imageHidden}

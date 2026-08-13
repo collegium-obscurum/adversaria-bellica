@@ -11,39 +11,27 @@
 	];
 
 	function setValue(key: TalentKey, input: HTMLInputElement) {
-		card.talents[key].value = clampTalentValue(Number(input.value));
-		input.value = String(card.talents[key].value);
+		card.talents.entries[key].value = clampTalentValue(Number(input.value));
+		input.value = String(card.talents.entries[key].value);
 	}
 
 	function setMaxQs(key: TalentKey, input: HTMLInputElement) {
-		card.talents[key].maxQs = clampQs(Number(input.value));
-		input.value = String(card.talents[key].maxQs);
-	}
-
-	function showTalents() {
-		card.talentsHidden = false;
+		card.talents.entries[key].maxQs = clampQs(Number(input.value));
+		input.value = String(card.talents.entries[key].maxQs);
 	}
 </script>
 
-{#if card.talentsHidden && editable}
-	<button
-		type="button"
-		class="talents talents-hidden"
-		title="Wird nicht gedruckt – klicken zum Einblenden"
-		onclick={showTalents}
-	>
-		{#each TALENT_ROWS as row (row[0])}
-			<span class="talent-row">
-				{#each row as key (key)}
-					<span class="talent">
-						<b>{TALENT_LABELS[key]}</b>
-						{card.talents[key].value} (QS {card.talents[key].maxQs})
-					</span>
-				{/each}
-			</span>
-		{/each}
-	</button>
-{:else if !card.talentsHidden}
+{#if card.talents.hidden}
+	{#if editable}
+		<button
+			type="button"
+			class="add"
+			onclick={() => {
+				card.talents.hidden = false;
+			}}>+ Talente</button
+		>
+	{/if}
+{:else}
 	<div class="talents">
 		{#if editable}
 			<button
@@ -52,14 +40,14 @@
 				title="Talente ausblenden (Werte bleiben erhalten)"
 				aria-label="Talente ausblenden"
 				onclick={() => {
-					card.talentsHidden = true;
+					card.talents.hidden = true;
 				}}>✕</button
 			>
 		{/if}
 		{#each TALENT_ROWS as row (row[0])}
 			<div class="talent-row">
 				{#each row as key (key)}
-					{@const talent = card.talents[key]}
+					{@const talent = card.talents.entries[key]}
 					<div class="talent">
 						<b>{TALENT_LABELS[key]}</b>
 						{#if editable}
@@ -111,28 +99,6 @@
 	:global(.card.ornate) .talents {
 		background: rgb(255 250 232 / 55%);
 		border-color: var(--color-gold-soft);
-	}
-
-	/* unstamped seal: the hidden block drops its fill and fades to a dashed sketch */
-	.talents.talents-hidden,
-	:global(.card.ornate) .talents.talents-hidden {
-		font: inherit;
-		color: inherit;
-		background: transparent;
-		border-style: dashed;
-		opacity: 0.45;
-		cursor: pointer;
-		transition: opacity 120ms;
-	}
-
-	.talents.talents-hidden:hover {
-		opacity: 0.7;
-	}
-
-	.talents .hide-toggle {
-		position: absolute;
-		top: -1mm;
-		right: -1mm;
 	}
 
 	.talent-row {

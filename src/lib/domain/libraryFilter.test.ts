@@ -6,9 +6,14 @@ function card(overrides: Partial<MonsterCard>): MonsterCard {
 	return { ...createEmptyCard(), ...overrides };
 }
 
-const wolf = card({ name: 'Wolf', category: 'Tier', banner: 'Wald' });
-const goblin = card({ name: 'Goblin', category: 'Humanoid', banner: '' });
-const ghoul = card({ name: 'Ghul', category: '', banner: 'Wald' });
+function banner(value: string, hidden = false) {
+	return { value, color: null, hidden };
+}
+
+const wolf = card({ name: 'Wolf', category: 'Tier', banner: banner('Wald') });
+const goblin = card({ name: 'Goblin', category: 'Humanoid', banner: banner('') });
+const ghoul = card({ name: 'Ghul', category: '', banner: banner('Wald') });
+const troll = card({ name: 'Troll', category: 'Tier', banner: banner('Wald', true) });
 const all = [wolf, goblin, ghoul];
 
 describe('filterCards', () => {
@@ -38,5 +43,17 @@ describe('filterCards', () => {
 
 	it('combines category and banner as AND', () => {
 		expect(filterCards(all, { search: '', category: WITHOUT, banner: 'Wald' })).toEqual([ghoul]);
+	});
+
+	it('treats a hidden banner as no banner', () => {
+		const withTroll = [...all, troll];
+		expect(filterCards(withTroll, { search: '', category: '', banner: 'Wald' })).toEqual([
+			wolf,
+			ghoul
+		]);
+		expect(filterCards(withTroll, { search: '', category: '', banner: WITHOUT })).toEqual([
+			goblin,
+			troll
+		]);
 	});
 });
