@@ -223,9 +223,11 @@
 		font-weight: bold;
 	}
 
+	/* indented so these read as part of the section, not as the next block's add button */
 	.add-triggers {
 		display: flex;
 		flex-wrap: wrap;
 		gap: 1mm;
+		padding-left: 4mm;
 	}
 </style>
