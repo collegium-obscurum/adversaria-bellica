@@ -556,8 +556,11 @@
 		cursor: default;
 	}
 
-	.card :global(.entry-effect) {
-		flex: 1;
+	/* name and effect share the leftover width; field-sizing lets the typed text
+	   drive each column, so a short name leaves its space to a long effect */
+	.card.editable :global(.entry-name),
+	.card.editable :global(.entry-effect) {
+		min-width: 10mm;
 	}
 
 	.card :global(.remove),
@@ -645,10 +648,7 @@
 		box-sizing: border-box;
 	}
 
-	/* name fields wrap instead of clipping; fixed width keeps rows aligned */
 	.card.editable :global(textarea.entry-name) {
-		width: 22mm;
-		flex-shrink: 0;
 		font-weight: bold;
 	}
 

@@ -23,106 +23,109 @@
 	}
 </script>
 
-<div class="actions" class:editor={editable}>
+<div class="actions">
 	<h3>Aktionen (1w20)</h3>
 	<p class="note">
 		Erschwernisse (Schmerz, Zustände) erhöhen das Wurfergebnis. Eine 1 bleibt eine 1. Ist eine
 		Aktion nicht möglich, gilt die nächste darunter.
 	</p>
-	{#each card.actions as action, index (action)}
-		{#if editable}
-			<div class="entry-row">
-				<span class="movers">
+	<!-- own grid so only the rows size the columns, not the heading or the note -->
+	<div class="rows" class:editor={editable}>
+		{#each card.actions as action, index (action)}
+			{#if editable}
+				<div class="entry-row">
+					<span class="movers">
+						<button
+							type="button"
+							class="move"
+							disabled={index === 0}
+							title="Nach oben"
+							aria-label="Nach oben{action.name ? `: ${action.name}` : ''}"
+							onclick={() => {
+								moveAction(card.actions, index, index - 1);
+							}}>▲</button
+						>
+						<button
+							type="button"
+							class="move"
+							disabled={index === card.actions.length - 1}
+							title="Nach unten"
+							aria-label="Nach unten{action.name ? `: ${action.name}` : ''}"
+							onclick={() => {
+								moveAction(card.actions, index, index + 1);
+							}}>▼</button
+						>
+					</span>
+					<ColorPicker bind:color={action.color} />
+					<span class="range">
+						{#if index === 0}<span class="bound start">1</span>{:else}<input
+								class="bound start"
+								type="number"
+								min={ranges[index - 1].from + 1}
+								max={ranges[index].to}
+								value={ranges[index].from}
+								onchange={(event) => {
+									setRangeStart(card.actions, index, Number(event.currentTarget.value));
+								}}
+								title="Bereichsanfang"
+								aria-label="Bereichsanfang"
+							/>{/if}&nbsp;–&nbsp;{#if index === card.actions.length - 1}<span class="bound end"
+								>{D20_FACES}+</span
+							>{:else}<input
+								class="bound end"
+								type="number"
+								min={ranges[index].from}
+								max={D20_FACES - (card.actions.length - 1 - index)}
+								value={ranges[index].to}
+								onchange={(event) => {
+									setRangeEnd(card.actions, index, Number(event.currentTarget.value));
+								}}
+								title="Bereichsende"
+								aria-label="Bereichsende"
+							/>{/if} =
+					</span>
+					<textarea
+						class="entry-name"
+						bind:value={action.name}
+						placeholder="Name"
+						aria-label="Name der Aktion"></textarea>
+					<textarea
+						class="entry-effect"
+						bind:value={action.effect}
+						placeholder="Effekt, z.B. 1W6+4 TP"
+						aria-label="Effekt der Aktion"></textarea>
 					<button
 						type="button"
-						class="move"
-						disabled={index === 0}
-						title="Nach oben"
-						aria-label="Nach oben{action.name ? `: ${action.name}` : ''}"
+						class="remove"
 						onclick={() => {
-							moveAction(card.actions, index, index - 1);
-						}}>▲</button
+							removeAction(index);
+						}}
+						disabled={card.actions.length <= 1}
+						title={card.actions.length <= 1
+							? 'Die letzte Aktion kann nicht entfernt werden'
+							: 'Aktion entfernen'}
+						aria-label="Aktion entfernen{action.name ? `: ${action.name}` : ''}">✕</button
 					>
-					<button
-						type="button"
-						class="move"
-						disabled={index === card.actions.length - 1}
-						title="Nach unten"
-						aria-label="Nach unten{action.name ? `: ${action.name}` : ''}"
-						onclick={() => {
-							moveAction(card.actions, index, index + 1);
-						}}>▼</button
-					>
-				</span>
-				<ColorPicker bind:color={action.color} />
-				<span class="range">
-					{#if index === 0}<span class="bound start">1</span>{:else}<input
-							class="bound start"
-							type="number"
-							min={ranges[index - 1].from + 1}
-							max={ranges[index].to}
-							value={ranges[index].from}
-							onchange={(event) => {
-								setRangeStart(card.actions, index, Number(event.currentTarget.value));
-							}}
-							title="Bereichsanfang"
-							aria-label="Bereichsanfang"
-						/>{/if}&nbsp;–&nbsp;{#if index === card.actions.length - 1}<span class="bound end"
-							>{D20_FACES}+</span
-						>{:else}<input
-							class="bound end"
-							type="number"
-							min={ranges[index].from}
-							max={D20_FACES - (card.actions.length - 1 - index)}
-							value={ranges[index].to}
-							onchange={(event) => {
-								setRangeEnd(card.actions, index, Number(event.currentTarget.value));
-							}}
-							title="Bereichsende"
-							aria-label="Bereichsende"
-						/>{/if} =
-				</span>
-				<textarea
-					class="entry-name"
-					bind:value={action.name}
-					placeholder="Name"
-					aria-label="Name der Aktion"></textarea>
-				<textarea
-					class="entry-effect"
-					bind:value={action.effect}
-					placeholder="Effekt, z.B. 1W6+4 TP"
-					aria-label="Effekt der Aktion"></textarea>
-				<button
-					type="button"
-					class="remove"
-					onclick={() => {
-						removeAction(index);
-					}}
-					disabled={card.actions.length <= 1}
-					title={card.actions.length <= 1
-						? 'Die letzte Aktion kann nicht entfernt werden'
-						: 'Aktion entfernen'}
-					aria-label="Aktion entfernen{action.name ? `: ${action.name}` : ''}">✕</button
-				>
-			</div>
-		{:else}
-			<p class="entry">
-				{#if action.color && prefs.colorMode === 'dot'}<span
-						class="color-dot tint-{action.color}"
-						role="img"
-						aria-label={ENTRY_COLOR_LABELS[action.color]}
-						title={ENTRY_COLOR_LABELS[action.color]}
-					></span>&nbsp;{/if}<b
-					class={action.color && prefs.colorMode === 'text' ? `tint-${action.color}` : ''}
-					title={action.color && prefs.colorMode === 'text'
-						? ENTRY_COLOR_LABELS[action.color]
-						: undefined}
-					>{rangeLabel(ranges[index], index === card.actions.length - 1)} = {action.name}</b
-				>{#if action.effect}:
-					{action.effect}{/if}
-			</p>
-		{/if}
-	{/each}
+				</div>
+			{:else}
+				<p class="entry">
+					{#if action.color && prefs.colorMode === 'dot'}<span
+							class="color-dot tint-{action.color}"
+							role="img"
+							aria-label={ENTRY_COLOR_LABELS[action.color]}
+							title={ENTRY_COLOR_LABELS[action.color]}
+						></span>&nbsp;{/if}<b
+						class={action.color && prefs.colorMode === 'text' ? `tint-${action.color}` : ''}
+						title={action.color && prefs.colorMode === 'text'
+							? ENTRY_COLOR_LABELS[action.color]
+							: undefined}
+						>{rangeLabel(ranges[index], index === card.actions.length - 1)} = {action.name}</b
+					>{#if action.effect}:
+						{action.effect}{/if}
+				</p>
+			{/if}
+		{/each}
+	</div>
 	{#if editable}
 		<button
 			type="button"
@@ -150,26 +153,25 @@
 		gap: 0.333em;
 	}
 
+	.rows {
+		display: flex;
+		flex-direction: column;
+		gap: 0.333em;
+	}
+
 	/* movers, color, range, name, effect, remove; widths follow this table's own content.
 	   The special moves table repeats the outer three tracks, so those stay in line. */
-	.actions.editor {
+	.rows.editor {
 		display: grid;
-		grid-template-columns: auto auto auto auto 1fr auto;
+		grid-template-columns: max-content max-content max-content auto auto max-content;
+		align-items: center;
 		gap: 0.333em 1mm;
 	}
 
-	.actions.editor > * {
-		grid-column: 1 / -1;
-		justify-self: stretch;
-	}
-
-	.actions.editor > .add {
-		justify-self: start;
-	}
-
-	.actions.editor > .entry-row {
-		display: grid;
-		grid-template-columns: subgrid;
+	/* the cells are the grid items, so the name and effect columns can size to their text;
+	   the .card prefix outranks CardPreview's generic .entry-row flex row */
+	:global(.card.editable) .rows.editor > .entry-row {
+		display: contents;
 	}
 
 	.range .bound {

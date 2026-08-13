@@ -87,66 +87,69 @@
 				card.specialMoves.hidden = true;
 			}}>✕</button
 		>
-		{#each visibleRows as entry, position (entry.row)}
-			{@const label = rowLabel(entry.row)}
-			<div class="entry-row">
-				<span class="movers">
+		<!-- own grid so only the rows size the columns, not the heading or the add buttons -->
+		<div class="rows">
+			{#each visibleRows as entry, position (entry.row)}
+				{@const label = rowLabel(entry.row)}
+				<div class="entry-row">
+					<span class="movers">
+						<button
+							type="button"
+							class="move"
+							disabled={position === 0}
+							title="Nach oben"
+							aria-label="Nach oben{label ? `: ${label}` : ''}"
+							onclick={() => {
+								moveRow(position, -1);
+							}}>▲</button
+						>
+						<button
+							type="button"
+							class="move"
+							disabled={position === visibleRows.length - 1}
+							title="Nach unten"
+							aria-label="Nach unten{label ? `: ${label}` : ''}"
+							onclick={() => {
+								moveRow(position, 1);
+							}}>▼</button
+						>
+					</span>
+					<ColorPicker bind:color={card.specialMoves.rows[entry.index].color} />
+					<span class="range">
+						{#if entry.row.trigger === null}<textarea
+								class="trigger-input"
+								bind:value={card.specialMoves.rows[entry.index].label}
+								placeholder="Auslöser"
+								aria-label="Auslöser"
+								{@attach (node: HTMLTextAreaElement) => {
+									if (entry.index === focusRowIndex) {
+										node.focus();
+										focusRowIndex = null;
+									}
+								}}></textarea>{:else}{label}{/if} =
+					</span>
+					<textarea
+						class="entry-name"
+						bind:value={card.specialMoves.rows[entry.index].name}
+						placeholder="Name"
+						aria-label={label ? `Name für ${label}` : 'Name'}></textarea>
+					<textarea
+						class="entry-effect"
+						bind:value={card.specialMoves.rows[entry.index].effect}
+						placeholder="Effekt"
+						aria-label={label ? `Effekt für ${label}` : 'Effekt'}></textarea>
 					<button
 						type="button"
-						class="move"
-						disabled={position === 0}
-						title="Nach oben"
-						aria-label="Nach oben{label ? `: ${label}` : ''}"
+						class="remove"
 						onclick={() => {
-							moveRow(position, -1);
-						}}>▲</button
+							removeRow(entry.index);
+						}}
+						title={entry.row.trigger === null ? 'Entfernen' : 'Ausblenden (Werte bleiben erhalten)'}
+						aria-label="Spezialmanöver entfernen{label ? `: ${label}` : ''}">✕</button
 					>
-					<button
-						type="button"
-						class="move"
-						disabled={position === visibleRows.length - 1}
-						title="Nach unten"
-						aria-label="Nach unten{label ? `: ${label}` : ''}"
-						onclick={() => {
-							moveRow(position, 1);
-						}}>▼</button
-					>
-				</span>
-				<ColorPicker bind:color={card.specialMoves.rows[entry.index].color} />
-				<span class="range">
-					{#if entry.row.trigger === null}<textarea
-							class="trigger-input"
-							bind:value={card.specialMoves.rows[entry.index].label}
-							placeholder="Auslöser"
-							aria-label="Auslöser"
-							{@attach (node: HTMLTextAreaElement) => {
-								if (entry.index === focusRowIndex) {
-									node.focus();
-									focusRowIndex = null;
-								}
-							}}></textarea>{:else}{label}{/if} =
-				</span>
-				<textarea
-					class="entry-name"
-					bind:value={card.specialMoves.rows[entry.index].name}
-					placeholder="Name"
-					aria-label={label ? `Name für ${label}` : 'Name'}></textarea>
-				<textarea
-					class="entry-effect"
-					bind:value={card.specialMoves.rows[entry.index].effect}
-					placeholder="Effekt"
-					aria-label={label ? `Effekt für ${label}` : 'Effekt'}></textarea>
-				<button
-					type="button"
-					class="remove"
-					onclick={() => {
-						removeRow(entry.index);
-					}}
-					title={entry.row.trigger === null ? 'Entfernen' : 'Ausblenden (Werte bleiben erhalten)'}
-					aria-label="Spezialmanöver entfernen{label ? `: ${label}` : ''}">✕</button
-				>
-			</div>
-		{/each}
+				</div>
+			{/each}
+		</div>
 		<div class="add-triggers">
 			{#each hiddenRows as entry (entry.row)}
 				<button
@@ -191,24 +194,23 @@
 		gap: 0.333em;
 	}
 
-	/* movers, color, trigger, name, effect, remove; widths follow this table's own content.
-	   The action table repeats the outer three tracks, so those stay in line. */
 	.special-moves.editor {
 		position: relative;
+	}
+
+	/* movers, color, trigger, name, effect, remove; widths follow this table's own content.
+	   The action table repeats the outer three tracks, so those stay in line. */
+	.rows {
 		display: grid;
-		grid-template-columns: auto auto auto auto 1fr auto;
+		grid-template-columns: max-content max-content max-content auto auto max-content;
+		align-items: center;
 		gap: 0.333em 1mm;
 	}
 
-	.special-moves.editor > h3,
-	.special-moves.editor > .add-triggers {
-		grid-column: 1 / -1;
-	}
-
-	.special-moves.editor > .entry-row {
-		grid-column: 1 / -1;
-		display: grid;
-		grid-template-columns: subgrid;
+	/* the cells are the grid items, so the name and effect columns can size to their text;
+	   the .card prefix outranks CardPreview's generic .entry-row flex row */
+	:global(.card.editable) .rows > .entry-row {
+		display: contents;
 	}
 
 	/* .card.editable prefix outranks CardPreview's generic textarea width: 100% */
