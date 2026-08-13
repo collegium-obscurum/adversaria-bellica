@@ -12,6 +12,7 @@
 	import type { MonsterCard } from '$lib/domain/types';
 	import { prefs } from '$lib/state/preferences.svelte';
 	import ColorPicker from './ColorPicker.svelte';
+	import SwordIcon from './SwordIcon.svelte';
 
 	let { card = $bindable(), editable = false }: { card: MonsterCard; editable?: boolean } =
 		$props();
@@ -57,6 +58,18 @@
 						>
 					</span>
 					<ColorPicker bind:color={action.color} />
+					<button
+						type="button"
+						class="sword-toggle"
+						class:on={action.opportunityAttack}
+						style:color={action.color ? `var(--tint-${action.color})` : null}
+						aria-pressed={action.opportunityAttack}
+						title="Passierschlag"
+						aria-label="Passierschlag{action.name ? `: ${action.name}` : ''}"
+						onclick={() => {
+							action.opportunityAttack = !action.opportunityAttack;
+						}}><SwordIcon /></button
+					>
 					<span class="range">
 						{#if index === 0}<span class="bound start">1</span>{:else}<input
 								class="bound start"
@@ -109,12 +122,18 @@
 				</div>
 			{:else}
 				<p class="entry">
-					{#if action.color && prefs.colorMode === 'dot'}<span
-							class="color-dot tint-{action.color}"
+					{#if prefs.colorMode === 'dot'}{#if action.color}<span
+								class="color-dot tint-{action.color}"
+								role="img"
+								aria-label={ENTRY_COLOR_LABELS[action.color]}
+								title={ENTRY_COLOR_LABELS[action.color]}
+							></span>{:else}<span class="color-dot blank"
+							></span>{/if}&nbsp;{/if}{#if action.opportunityAttack}<span
+							class="sword {action.color ? `tint-${action.color}` : ''}"
 							role="img"
-							aria-label={ENTRY_COLOR_LABELS[action.color]}
-							title={ENTRY_COLOR_LABELS[action.color]}
-						></span>&nbsp;{/if}<b
+							aria-label="Passierschlag"
+							title="Passierschlag"><SwordIcon /></span
+						>{:else}<span class="sword"></span>{/if}&nbsp;<b
 						class={action.color && prefs.colorMode === 'text' ? `tint-${action.color}` : ''}
 						title={action.color && prefs.colorMode === 'text'
 							? ENTRY_COLOR_LABELS[action.color]
@@ -159,11 +178,10 @@
 		gap: 0.333em;
 	}
 
-	/* movers, color, range, name, effect, remove; widths follow this table's own content.
-	   The special moves table repeats the outer three tracks, so those stay in line. */
+	/* movers, color, sword, range, name, effect, remove; widths follow this table's own content */
 	.rows.editor {
 		display: grid;
-		grid-template-columns: max-content max-content max-content auto auto max-content;
+		grid-template-columns: max-content max-content max-content max-content auto auto max-content;
 		align-items: center;
 		gap: 0.333em 1mm;
 	}
@@ -182,12 +200,63 @@
 		display: inline-block;
 	}
 
+	/* two digits at most, so it stays narrower than the end bound ("20+") and the
+	   right-aligned number keeps close to the sword next to it */
 	.range .start {
+		width: 5.2mm;
 		text-align: right;
 	}
 
 	.range .end {
 		text-align: left;
+	}
+
+	.sword-toggle {
+		position: relative;
+		width: 3.2mm;
+		height: 3.2mm;
+		padding: 0;
+		border: none;
+		background: none;
+		color: var(--color-muted);
+		opacity: 0.4;
+		line-height: 0;
+		cursor: pointer;
+	}
+
+	.sword-toggle.on {
+		color: inherit;
+		opacity: 1;
+	}
+
+	/* invisible hit-area extension to roughly 24px without changing the visual size */
+	.sword-toggle::after {
+		content: '';
+		position: absolute;
+		inset: -1.6mm;
+	}
+
+	/* colorless rows keep the dot's space so the ranges line up under each other */
+	.entry .color-dot.blank {
+		background: none;
+	}
+
+	/* print marker; sized off the text so it rides the line like the color dot.
+	   Unmarked rows render the empty span, so every row indents the same */
+	.entry .sword {
+		display: inline-block;
+		width: 0.8em;
+		height: 0.8em;
+		vertical-align: -0.06em;
+		line-height: 0;
+	}
+
+	/* the wrapper sizes the icon, like the stat badges do: html-to-image keeps the
+	   parent's rule but drops class-scoped styling that sits on the svg itself */
+	.sword-toggle :global(svg),
+	.entry .sword :global(svg) {
+		width: 100%;
+		height: 100%;
 	}
 
 	.actions .add {

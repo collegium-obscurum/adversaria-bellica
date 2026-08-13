@@ -37,6 +37,8 @@ export interface ActionEntry {
 	name: string;
 	effect: string;
 	color: EntryColor | null;
+	/** attack can also be used as a Passierschlag; the card marks it with a sword */
+	opportunityAttack: boolean;
 }
 
 export const WOUND_TRIGGERS = ['combatStart', 'hp75', 'hp50', 'hp25', 'death'] as const;
@@ -139,15 +141,34 @@ export function createEmptyCard(): MonsterCard {
 			}
 		},
 		actions: [
-			{ span: 1, name: 'Kritischer Treffer', effect: '2W6+4 TP', color: null },
-			{ span: 5, name: 'Schwerer Angriff', effect: '1W6+4 TP', color: null },
-			{ span: 9, name: 'Angriff', effect: '1W6+2 TP', color: null },
-			{ span: 4, name: 'Fehlschlag', effect: 'Der Angriff geht daneben.', color: null },
+			{
+				span: 1,
+				name: 'Kritischer Treffer',
+				effect: '2W6+4 TP',
+				color: null,
+				opportunityAttack: false
+			},
+			{
+				span: 5,
+				name: 'Schwerer Angriff',
+				effect: '1W6+4 TP',
+				color: null,
+				opportunityAttack: false
+			},
+			{ span: 9, name: 'Angriff', effect: '1W6+2 TP', color: null, opportunityAttack: false },
+			{
+				span: 4,
+				name: 'Fehlschlag',
+				effect: 'Der Angriff geht daneben.',
+				color: null,
+				opportunityAttack: false
+			},
 			{
 				span: 1,
 				name: 'Flucht',
 				effect: 'Erstes Mal: sucht einen Fluchtweg. Zweites Mal: entkommt.',
-				color: null
+				color: null,
+				opportunityAttack: false
 			}
 		],
 		wounds: { hidden: true, manual: false, hp75: '5', hp50: '10', hp25: '15', death: '20' },

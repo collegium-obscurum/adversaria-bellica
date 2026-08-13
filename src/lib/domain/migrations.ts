@@ -55,7 +55,8 @@ export function migrateActions(actions: unknown[]): ActionEntry[] {
 			span: Number.isFinite(span) ? Math.max(1, Math.round(span)) : 1,
 			name: textOrEmpty(row.name),
 			effect: textOrEmpty(row.effect),
-			color: parseEntryColor(row.color)
+			color: parseEntryColor(row.color),
+			opportunityAttack: row.opportunityAttack === true
 		});
 	}
 	return result;

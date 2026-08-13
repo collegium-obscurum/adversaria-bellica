@@ -8,6 +8,7 @@ export interface SeedAction {
 	name: string;
 	effect: string;
 	color?: string;
+	opportunityAttack?: boolean;
 }
 
 /** Minimal card shape for seeding; migrateCard fills every other field on load. */

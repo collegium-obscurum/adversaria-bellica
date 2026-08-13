@@ -59,6 +59,41 @@ test('an added action row is saved with the card', async ({ page }) => {
 	);
 });
 
+test('actions can be marked as Passierschlag and the sword prints', async ({ page }) => {
+	await seedCards(page, [
+		{
+			id: 'a1',
+			name: 'Grimwolf',
+			actions: [
+				{ span: 10, name: 'Biss', effect: '1W6', opportunityAttack: true },
+				{ span: 10, name: 'Hieb', effect: '1W6' }
+			]
+		}
+	]);
+	await page.goto('/editor?id=a1');
+	const bite = page.getByRole('button', { name: 'Passierschlag: Biss', exact: true });
+	const slash = page.getByRole('button', { name: 'Passierschlag: Hieb', exact: true });
+	await expect(bite).toHaveAttribute('aria-pressed', 'true');
+	await expect(slash).toHaveAttribute('aria-pressed', 'false');
+
+	await slash.click();
+	await expect(slash).toHaveAttribute('aria-pressed', 'true');
+	await bite.click();
+	await page.getByRole('button', { name: 'Speichern' }).click();
+	await expect(page).toHaveURL(/\/$/);
+
+	const cards = await storedCards(page);
+	expect(cards[0].actions.map((action) => action.opportunityAttack)).toEqual([false, true]);
+
+	await page.goto('/print');
+	await page.locator('label.chip', { hasText: 'Grimwolf' }).click();
+	const sheetCard = page.locator('.sheet article.card').first();
+	await expect(sheetCard.getByRole('img', { name: 'Passierschlag' })).toHaveCount(1);
+	await expect(sheetCard.locator('.entry', { hasText: 'Hieb' }).locator('.sword')).toBeVisible();
+	// the unmarked row keeps an empty slot so both ranges line up
+	await expect(sheetCard.locator('.entry', { hasText: 'Biss' }).locator('.sword')).toBeEmpty();
+});
+
 test('unknown card id shows a notice', async ({ page }) => {
 	await page.goto('/editor?id=does-not-exist');
 	await expect(page.getByText('Karte nicht gefunden – neue Karte wird angelegt.')).toBeVisible();

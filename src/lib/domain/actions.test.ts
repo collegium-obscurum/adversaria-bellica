@@ -10,7 +10,7 @@ import {
 import { createEmptyCard, type ActionEntry } from './types';
 
 function entry(span: number, name = ''): ActionEntry {
-	return { span, name, effect: '', color: null };
+	return { span, name, effect: '', color: null, opportunityAttack: false };
 }
 
 describe('actionRanges', () => {

@@ -17,14 +17,16 @@ describe('migrateActions', () => {
 			{ from: 20, to: 20, name: 'Krit', effect: '2W6' }
 		]);
 		expect(migrated).toEqual([
-			{ span: 5, name: 'Fehlschlag', effect: '', color: null },
-			{ span: 14, name: 'Angriff', effect: '1W6', color: null },
-			{ span: 1, name: 'Krit', effect: '2W6', color: null }
+			{ span: 5, name: 'Fehlschlag', effect: '', color: null, opportunityAttack: false },
+			{ span: 14, name: 'Angriff', effect: '1W6', color: null, opportunityAttack: false },
+			{ span: 1, name: 'Krit', effect: '2W6', color: null, opportunityAttack: false }
 		]);
 	});
 
 	it('passes span rows through unchanged', () => {
-		const entries: ActionEntry[] = [{ span: 20, name: 'x', effect: '', color: 'red' }];
+		const entries: ActionEntry[] = [
+			{ span: 20, name: 'x', effect: '', color: 'red', opportunityAttack: true }
+		];
 		expect(migrateActions(entries)).toEqual(entries);
 	});
 
@@ -34,9 +36,18 @@ describe('migrateActions', () => {
 
 	it('defaults malformed rows and drops non-objects', () => {
 		expect(migrateActions([{ span: 'abc' }, null, 'garbage', { span: 3.4, name: 'x' }])).toEqual([
-			{ span: 1, name: '', effect: '', color: null },
-			{ span: 3, name: 'x', effect: '', color: null }
+			{ span: 1, name: '', effect: '', color: null, opportunityAttack: false },
+			{ span: 3, name: 'x', effect: '', color: null, opportunityAttack: false }
 		]);
+	});
+
+	it('keeps the opportunity attack flag only when it was stored as true', () => {
+		const migrated = migrateActions([
+			{ span: 2, name: 'a', effect: '', opportunityAttack: true },
+			{ span: 2, name: 'b', effect: '', opportunityAttack: 'ja' },
+			{ span: 2, name: 'c', effect: '' }
+		]);
+		expect(migrated.map((entry) => entry.opportunityAttack)).toEqual([true, false, false]);
 	});
 
 	it('nulls unknown color values', () => {

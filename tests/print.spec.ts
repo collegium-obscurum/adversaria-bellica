@@ -83,7 +83,10 @@ test('stat label and color mode preferences change the display card', async ({ p
 			id: 'g1',
 			name: 'Goblin',
 			lifePoints: 30,
-			actions: [{ span: 20, name: 'Hieb', effect: '1W6', color: 'red' }]
+			actions: [
+				{ span: 10, name: 'Hieb', effect: '1W6', color: 'red' },
+				{ span: 10, name: 'Fehlschlag', effect: 'daneben' }
+			]
 		}
 	]);
 	await page.goto('/print');
@@ -97,8 +100,11 @@ test('stat label and color mode preferences change the display card', async ({ p
 	// default color mode is tinted text
 	await expect(sheetCard.locator('b.tint-red')).toBeVisible();
 	await page.getByRole('button', { name: 'Farbpunkt' }).click();
-	await expect(sheetCard.locator('.color-dot')).toBeVisible();
+	await expect(sheetCard.locator('.color-dot.tint-red')).toBeVisible();
 	await expect(sheetCard.locator('b.tint-red')).toHaveCount(0);
+	// the colorless row keeps an empty dot so both ranges start at the same place
+	await expect(sheetCard.locator('.entry .color-dot')).toHaveCount(2);
+	await expect(sheetCard.locator('.entry .color-dot.blank')).toHaveCount(1);
 });
 
 test('PDF download produces a file', async ({ page }) => {

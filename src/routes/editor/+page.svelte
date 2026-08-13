@@ -7,6 +7,7 @@
 	import EyeIcon from '$lib/components/EyeIcon.svelte';
 	import ImageCropper from '$lib/components/ImageCropper.svelte';
 	import StatIcon from '$lib/components/StatIcon.svelte';
+	import SwordIcon from '$lib/components/card/SwordIcon.svelte';
 	import DownloadMenu from '$lib/components/DownloadMenu.svelte';
 	import OptionsMenu from '$lib/components/OptionsMenu.svelte';
 	import { STAT_BADGES } from '$lib/domain/statBadges';
@@ -139,6 +140,11 @@
 							<span>{badge.label}</span>
 						</li>
 					{/each}
+					<!-- the sword prints in both label modes, so its icon shows in both too -->
+					<li>
+						<span class="legend-icon"><SwordIcon /></span>
+						<span>Als Passierschlag einsetzbar</span>
+					</li>
 				</ul>
 			</aside>
 			<aside class="calc-box">
