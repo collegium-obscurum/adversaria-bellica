@@ -696,6 +696,12 @@
 		inset: -1.5mm;
 	}
 
+	/* the corner button hangs above its block, so extending its hit area downwards would
+	   cover the block's own controls (the wounds reset button, once the values wrap) */
+	.card :global(.hide-toggle:not(:disabled))::after {
+		bottom: 0;
+	}
+
 	.card :global(.remove:disabled),
 	.card :global(.add:disabled) {
 		opacity: 0.35;
