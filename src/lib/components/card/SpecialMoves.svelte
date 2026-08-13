@@ -4,6 +4,7 @@
 	import { TRIGGER_LABELS } from '$lib/domain/wounds';
 	import { prefs } from '$lib/state/preferences.svelte';
 	import ColorPicker from './ColorPicker.svelte';
+	import EyeOffIcon from './EyeOffIcon.svelte';
 
 	let { card = $bindable(), editable = false }: { card: MonsterCard; editable?: boolean } =
 		$props();
@@ -83,7 +84,7 @@
 			aria-label="Spezialmanöver ausblenden"
 			onclick={() => {
 				card.specialMoves.hidden = true;
-			}}>✕</button
+			}}><EyeOffIcon /></button
 		>
 		<!-- own grid so only the rows size the columns, not the heading or the add buttons -->
 		<div class="rows">

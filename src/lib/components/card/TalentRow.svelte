@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { clampQs, clampTalentValue, TALENT_LABELS } from '$lib/domain/talentCalc';
 	import type { MonsterCard, TalentKey } from '$lib/domain/types';
+	import EyeOffIcon from './EyeOffIcon.svelte';
 
 	let { card = $bindable(), editable = false }: { card: MonsterCard; editable?: boolean } =
 		$props();
@@ -41,7 +42,7 @@
 				aria-label="Talente ausblenden"
 				onclick={() => {
 					card.talents.hidden = true;
-				}}>✕</button
+				}}><EyeOffIcon /></button
 			>
 		{/if}
 		{#each TALENT_ROWS as row (row[0])}
@@ -87,6 +88,7 @@
 
 <style>
 	.talents {
+		--block-border: 0.3mm;
 		position: relative;
 		display: flex;
 		flex-direction: column;

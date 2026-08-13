@@ -7,6 +7,7 @@
 	import ActionTable from './ActionTable.svelte';
 	import CardHeader from './CardHeader.svelte';
 	import ColorPicker from './ColorPicker.svelte';
+	import EyeOffIcon from './EyeOffIcon.svelte';
 	import SpecialMoves from './SpecialMoves.svelte';
 	import StatBadges from './StatBadges.svelte';
 	import TalentRow from './TalentRow.svelte';
@@ -83,12 +84,12 @@
 				<ColorPicker bind:color={card.banner.color} />
 				<button
 					type="button"
-					class="remove"
+					class="remove hide-toggle banner-hide"
 					onclick={() => {
 						card.banner.hidden = true;
 					}}
 					title="Banner ausblenden (Text bleibt erhalten)"
-					aria-label="Banner entfernen">✕</button
+					aria-label="Banner entfernen"><EyeOffIcon /></button
 				>
 			{:else}
 				<span class="banner-label">{card.banner.value}</span>
@@ -143,7 +144,7 @@
 								card.flavorText.hidden = true;
 							}}
 							title="Flavourtext ausblenden (Text bleibt erhalten)"
-							aria-label="Flavourtext entfernen">✕</button
+							aria-label="Flavourtext entfernen"><EyeOffIcon /></button
 						>
 					</div>
 				{/if}
@@ -195,7 +196,7 @@
 						aria-label="Schmerzschwellen ausblenden"
 						onclick={() => {
 							card.wounds.hidden = true;
-						}}>✕</button
+						}}><EyeOffIcon /></button
 					>
 				</div>
 			{:else if !editable && !card.wounds.hidden && hasThresholds}
@@ -229,22 +230,20 @@
 				{:else}
 					<div class="notes-section">
 						<h3>Notizen</h3>
-						<div class="removable">
-							<textarea
-								class="notes-input"
-								bind:value={card.notes.value}
-								placeholder="Notizen (Immunitäten, Schwächen, Taktik)"
-								aria-label="Notizen"></textarea>
-							<button
-								type="button"
-								class="remove"
-								onclick={() => {
-									card.notes.hidden = true;
-								}}
-								title="Notizen ausblenden (Text bleibt erhalten)"
-								aria-label="Notizen entfernen">✕</button
-							>
-						</div>
+						<button
+							type="button"
+							class="remove hide-toggle"
+							onclick={() => {
+								card.notes.hidden = true;
+							}}
+							title="Notizen ausblenden (Text bleibt erhalten)"
+							aria-label="Notizen entfernen"><EyeOffIcon /></button
+						>
+						<textarea
+							class="notes-input"
+							bind:value={card.notes.value}
+							placeholder="Notizen (Immunitäten, Schwächen, Taktik)"
+							aria-label="Notizen"></textarea>
 					</div>
 				{/if}
 			{:else if !card.notes.hidden && card.notes.value.trim() !== ''}
@@ -345,6 +344,7 @@
 
 	/* full-bleed strip along the top edge, replacing the top brand mark */
 	.banner {
+		position: relative;
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -357,6 +357,20 @@
 		letter-spacing: 0.15em;
 		color: var(--line);
 		border-bottom: 0.4mm solid currentColor;
+	}
+
+	/* the strip centers its contents, so both controls are pinned instead: the color
+	   picker to --block-indent like the entry rows', the hide button to the body's
+	   right edge. The padding keeps the input clear of them; it is wider on the right
+	   because the button sits further in. The display variant has neither control, so
+	   print still centers on the card's midline. */
+	.card.editable .banner {
+		padding-inline: 13mm 22mm;
+	}
+
+	.card.editable .banner :global(.picker) {
+		position: absolute;
+		left: calc(5mm + var(--block-indent));
 	}
 
 	.card.ornate .banner {
@@ -468,6 +482,7 @@
 	}
 
 	.wounds {
+		--block-border: 0.3mm;
 		position: relative;
 		padding: 0.5em 0.667em;
 		border: 0.3mm solid var(--line);
@@ -487,6 +502,7 @@
 	}
 
 	.notes-section {
+		position: relative;
 		display: flex;
 		flex-direction: column;
 		gap: 0.333em;
@@ -621,16 +637,32 @@
 		padding: 0.2mm 1mm;
 	}
 
+	/* icon buttons carry no text, so the wide side padding would make them oblong */
+	.card :global(.remove:has(svg)) {
+		padding: 0.2mm;
+	}
+
 	/* zero specificity so buttons that position themselves (hide-toggle, add-banner) win */
 	.card :global(:where(.remove, .add)) {
 		position: relative;
 	}
 
-	/* block-level hide button, parked in the corner of the block it belongs to */
+	/* block-level hide button, parked in the corner of the block it belongs to, on the
+	   same line as the inline remove buttons. Absolute offsets resolve against the
+	   padding box, so a bordered block declares --block-border to cancel it out. */
 	.card :global(.hide-toggle) {
 		position: absolute;
 		top: -1mm;
-		right: -1mm;
+		right: calc(-1 * var(--block-border, 0mm));
+	}
+
+	/* the banner strip centers its contents, so the button needs its own anchor or it
+	   drifts with the banner text. The terms are the strip's full-bleed padding, the
+	   badge column with its borders and the column gap, which together land the button
+	   on the body's right edge with the rest; top: auto centers it in the strip */
+	.card :global(.banner-hide) {
+		top: auto;
+		right: calc(5mm + 10mm + 0.8mm + 2mm);
 	}
 
 	/* invisible hit-area extension to roughly 24px; visual size must stay WYSIWYG */
