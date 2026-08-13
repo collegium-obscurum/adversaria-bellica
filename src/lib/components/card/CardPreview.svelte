@@ -229,6 +229,8 @@
 		--line: #1a1a1a;
 		--accent: #1a1a1a;
 		--muted: #444;
+		/* add buttons inside a section line up with the action rows' color picker */
+		--block-indent: 3.5mm;
 		position: relative;
 		width: 105mm;
 		height: 148mm;

@@ -188,6 +188,10 @@
 		text-align: left;
 	}
 
+	.actions .add {
+		margin-left: var(--block-indent);
+	}
+
 	.note {
 		margin: 0;
 		font-size: 0.824em;

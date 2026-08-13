@@ -228,6 +228,6 @@
 		display: flex;
 		flex-wrap: wrap;
 		gap: 1mm;
-		padding-left: 4mm;
+		padding-left: var(--block-indent);
 	}
 </style>
