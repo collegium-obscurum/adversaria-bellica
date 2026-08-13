@@ -155,8 +155,9 @@ test('legacy card shape is migrated on load', async ({ page }) => {
 	await expect(actionNames.nth(0)).toHaveValue('Hieb');
 	await expect(actionNames.nth(1)).toHaveValue('Biss');
 	await expect(page.getByLabel('Bereichsanfang').nth(0)).toHaveValue('11');
-	// 25 LeP: the 50% wound trigger fires at 13 damage
-	await expect(page.getByLabel('Effekt für ab 13 Schaden')).toHaveValue('Wütend');
+	await expect(page.getByLabel('Effekt für ab Schmerz 2')).toHaveValue('Wütend');
+	// 25 LeP: the second pain step sits at 13 cumulative damage
+	await expect(page.getByLabel('Schmerz 2', { exact: true })).toHaveValue('13');
 });
 
 test('invalid import file shows an error and changes nothing', async ({ page }) => {

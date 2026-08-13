@@ -69,7 +69,7 @@
 		for (const badge of STAT_BADGES) {
 			const stat = card.stats[badge.key];
 			if (stat.hidden) continue;
-			const value = stat.value === null ? '' : String(stat.value).trim();
+			const value = stat.value.trim();
 			if (value === '') continue;
 			stats.push({ abbr: badge.abbr, label: badge.label, value });
 		}

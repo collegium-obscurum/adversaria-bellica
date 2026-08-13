@@ -1,6 +1,7 @@
 import type { FitResult } from './cardFit';
 import type { EntryColor } from './entryColor';
 import type { TextStatKey } from './statBadges';
+import type { WoundThresholds } from './wounds';
 
 export interface TalentValue {
 	value: number;
@@ -72,8 +73,8 @@ export interface TextStat {
 }
 
 export type CardStats = {
-	/** value null = no HP; hides pain thresholds and wound triggers */
-	lifePoints: { value: number | null; hidden: boolean };
+	/** free text: a plain number auto-fills the pain thresholds, anything else leaves them alone */
+	lifePoints: TextStat;
 } & Record<TextStatKey, TextStat>;
 
 export interface MonsterCard {
@@ -89,8 +90,8 @@ export interface MonsterCard {
 	attributes: Record<AttributeKey, number | null>;
 	talents: { hidden: boolean; entries: Record<TalentKey, TalentEntry> };
 	actions: ActionEntry[];
-	/** the pain threshold row has no data of its own, only visibility */
-	wounds: { hidden: boolean };
+	/** manual = the user edited a threshold, so HP no longer overwrites them */
+	wounds: { hidden: boolean; manual: boolean } & WoundThresholds;
 	specialMoves: { hidden: boolean; rows: MoveRow[] };
 	/** print fit measured on last save; display recomputes live, the library badge reads this */
 	fit: FitResult;
@@ -106,7 +107,7 @@ export function createEmptyCard(): MonsterCard {
 		notes: { value: '', hidden: true },
 		image: null,
 		stats: {
-			lifePoints: { value: 20, hidden: false },
+			lifePoints: { value: '20', hidden: false },
 			armor: { value: '0', hidden: false },
 			initiative: { value: '10', hidden: false },
 			speed: { value: '8', hidden: false },
@@ -149,7 +150,7 @@ export function createEmptyCard(): MonsterCard {
 				color: null
 			}
 		],
-		wounds: { hidden: true },
+		wounds: { hidden: true, manual: false, hp75: '5', hp50: '10', hp25: '15', death: '20' },
 		specialMoves: {
 			hidden: true,
 			rows: WOUND_TRIGGERS.map((trigger) => ({

@@ -15,6 +15,7 @@ import { clampQs, clampTalentValue, derivedTalent } from './talentCalc';
 import { parseEntryColor } from './entryColor';
 import { FIT_FLOOR, type FitResult } from './cardFit';
 import { STAT_BADGES, type StatKey, type TextStatKey } from './statBadges';
+import { WOUND_LEVELS, woundThresholds, type WoundThresholds } from './wounds';
 
 interface LegacyActionEntry {
 	from: number;
@@ -203,9 +204,11 @@ const TEXT_STAT_KEYS = [
 	'actionCount'
 ] as const;
 
-function legacyLifePoints(value: unknown): number | null {
+/** HP is free text now; legacy cards stored a number, and anything under 1 meant "no HP". */
+function migrateLifePoints(value: unknown): string {
+	if (typeof value === 'string') return value;
 	const lifePoints = Number(value);
-	return Number.isFinite(lifePoints) && lifePoints >= 1 ? lifePoints : null;
+	return Number.isFinite(lifePoints) && lifePoints >= 1 ? String(lifePoints) : '';
 }
 
 /**
@@ -219,7 +222,7 @@ export function migrateStats(raw: Record<string, unknown>): CardStats {
 		const lifePoints = isRecord(source.lifePoints) ? source.lifePoints : {};
 		const stats = {
 			lifePoints: {
-				value: legacyLifePoints(lifePoints.value),
+				value: migrateLifePoints(lifePoints.value),
 				hidden: lifePoints.hidden === true
 			}
 		} as CardStats;
@@ -238,7 +241,10 @@ export function migrateStats(raw: Record<string, unknown>): CardStats {
 	}
 	const hidden = legacyHiddenStats(raw, values);
 	const stats = {
-		lifePoints: { value: legacyLifePoints(raw.lifePoints), hidden: hidden.includes('lifePoints') }
+		lifePoints: {
+			value: migrateLifePoints(raw.lifePoints),
+			hidden: hidden.includes('lifePoints')
+		}
 	} as CardStats;
 	for (const key of TEXT_STAT_KEYS) {
 		stats[key] = { value: values[key], hidden: hidden.includes(key) };
@@ -282,6 +288,25 @@ function migrateBanner(raw: unknown, legacyColor: unknown): Banner {
 	return { value, color: parseEntryColor(legacyColor), hidden: value.trim() === '' };
 }
 
+/**
+ * The thresholds used to be derived from HP on every render. Cards without stored ones get
+ * them backfilled so they print what they always printed; legacy cards showed the row
+ * whenever they had HP.
+ */
+export function migrateWounds(raw: unknown, lifePoints: string): MonsterCard['wounds'] {
+	const source = isRecord(raw) ? raw : {};
+	const auto = woundThresholds(lifePoints);
+	const thresholds = {} as WoundThresholds;
+	for (const level of WOUND_LEVELS) {
+		thresholds[level] = typeof source[level] === 'string' ? source[level] : (auto?.[level] ?? '');
+	}
+	return {
+		hidden: isRecord(raw) ? raw.hidden === true : lifePoints.trim() === '',
+		manual: source.manual === true,
+		...thresholds
+	};
+}
+
 /** Cards saved before fit tracking count as fitting until their next save re-measures them. */
 export function migrateFit(raw: unknown): FitResult {
 	if (!isRecord(raw)) {
@@ -311,10 +336,7 @@ export function migrateCard(raw: Record<string, unknown>): MonsterCard {
 		attributes,
 		talents: migrateTalents(raw.talents, attributes, raw.talentsHidden === true),
 		actions: migrateActions(Array.isArray(raw.actions) ? raw.actions : []),
-		// legacy cards printed the pain row whenever they had HP
-		wounds: {
-			hidden: isRecord(raw.wounds) ? raw.wounds.hidden === true : stats.lifePoints.value === null
-		},
+		wounds: migrateWounds(raw.wounds, stats.lifePoints.value),
 		specialMoves: migrateSpecialMoves(raw.specialMoves, raw.customMoves),
 		fit: migrateFit(raw.fit)
 	};

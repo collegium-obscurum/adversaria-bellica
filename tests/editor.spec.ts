@@ -25,7 +25,7 @@ test('a new card can be created and shows up in the library', async ({ page }) =
 	const cards = await storedCards(page);
 	expect(cards).toHaveLength(1);
 	expect(cards[0].name).toBe('Grimwolf');
-	expect(cards[0].stats.lifePoints.value).toBe(30);
+	expect(cards[0].stats.lifePoints.value).toBe('30');
 });
 
 test('an existing card can be edited', async ({ page }) => {
@@ -308,21 +308,43 @@ test('hidden stat badge is excluded from tile and persisted', async ({ page }) =
 	expect((await storedCards(page))[0].stats.initiative.hidden).toBe(true);
 });
 
-test('life points drive the wound threshold row and normalize on blur', async ({ page }) => {
+test('life points fill the wound thresholds, text HP keeps the last ones', async ({ page }) => {
 	await page.goto('/editor');
 	const card = page.locator('.card.editable');
 	await page.getByRole('button', { name: '+ Schmerzschwellen' }).click();
-	// default 20 LeP: thresholds 5 / 10 / 15, death at 20
-	await expect(card).toContainText('Schmerz bei Schaden:');
-	await expect(card).toContainText('5 / 10 / 15');
+	const thresholds = ['Schmerz 1', 'Schmerz 2', 'Schmerz 3', 'Tod'].map((label) =>
+		card.getByLabel(label, { exact: true })
+	);
+	async function expectThresholds(expected: string[]) {
+		for (const [index, value] of expected.entries()) {
+			await expect(thresholds[index]).toHaveValue(value);
+		}
+	}
+
+	// default 20 LeP
+	await expectThresholds(['5', '10', '15', '20']);
 
 	const lifePoints = card.getByLabel('Lebenspunkte', { exact: true });
-	await lifePoints.fill('0');
-	await lifePoints.blur();
-	await expect(lifePoints).toHaveValue('');
-	await expect(card).not.toContainText('Schmerz bei Schaden:');
-	// no HP means nothing to show, so the block cannot be added back either
-	await expect(page.getByRole('button', { name: '+ Schmerzschwellen' })).toHaveCount(0);
+	await lifePoints.fill('40');
+	await expectThresholds(['10', '20', '30', '40']);
+
+	// HP that is not a number leaves the thresholds standing
+	await lifePoints.fill('2W6+4');
+	await expectThresholds(['10', '20', '30', '40']);
+
+	// a manual edit pins all four, even after HP becomes a number again
+	await thresholds[1].fill('halbe LeP');
+	await lifePoints.fill('30');
+	await expectThresholds(['10', 'halbe LeP', '30', '40']);
+
+	await card.getByRole('button', { name: 'Schmerzschwellen zurücksetzen' }).click();
+	await expectThresholds(['8', '15', '23', '30']);
+
+	await nameInput(page).fill('Grimwolf');
+	await page.getByRole('button', { name: 'Speichern' }).click();
+	const cards = await storedCards(page);
+	expect(cards[0].stats.lifePoints.value).toBe('30');
+	expect(cards[0].wounds).toMatchObject({ manual: false, hp50: '15', death: '30' });
 });
 
 test('custom category can be entered', async ({ page }) => {

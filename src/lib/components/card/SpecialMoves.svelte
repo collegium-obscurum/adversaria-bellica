@@ -1,23 +1,21 @@
 <script lang="ts">
 	import { ENTRY_COLOR_LABELS } from '$lib/domain/entryColor';
 	import type { MonsterCard, MoveRow } from '$lib/domain/types';
-	import { triggerLabels } from '$lib/domain/wounds';
+	import { TRIGGER_LABELS } from '$lib/domain/wounds';
 	import { prefs } from '$lib/state/preferences.svelte';
 	import ColorPicker from './ColorPicker.svelte';
 
 	let { card = $bindable(), editable = false }: { card: MonsterCard; editable?: boolean } =
 		$props();
 
-	const labels = $derived(triggerLabels(card.stats.lifePoints.value));
-
 	function rowLabel(row: MoveRow): string {
-		return row.trigger === null ? row.label : labels[row.trigger];
+		return row.trigger === null ? row.label : TRIGGER_LABELS[row.trigger];
 	}
 
-	// without HP there are no wound thresholds; only Kampfbeginn remains meaningful
+	// the pain numbers live in the wound row; without it "ab Schmerz 2" refers to nothing
 	function available(row: MoveRow): boolean {
-		if (card.stats.lifePoints.value !== null) return true;
-		return row.trigger === null || row.trigger === 'combatStart';
+		if (!card.wounds.hidden) return true;
+		return row.trigger === null || row.trigger === 'combatStart' || row.trigger === 'death';
 	}
 
 	// the index travels with the row: the arrows reorder inside the full list

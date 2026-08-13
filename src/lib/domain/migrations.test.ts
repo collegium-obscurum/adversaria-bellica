@@ -4,7 +4,8 @@ import {
 	migrateCard,
 	migrateFit,
 	migrateSpecialMoves,
-	migrateStats
+	migrateStats,
+	migrateWounds
 } from './migrations';
 import type { ActionEntry, MonsterCard, WoundTrigger } from './types';
 
@@ -187,14 +188,16 @@ describe('migrateStats', () => {
 		expect(stats.armor.value).toBe('');
 	});
 
-	it('turns invalid or sub-1 lifePoints into null (no HP)', () => {
-		for (const bad of [0, -5, undefined, null, 'abc']) {
-			expect(migrateStats({ lifePoints: bad }).lifePoints.value).toBeNull();
+	it('turns invalid or sub-1 numeric lifePoints into no HP', () => {
+		for (const bad of [0, -5, undefined, null]) {
+			expect(migrateStats({ lifePoints: bad }).lifePoints.value).toBe('');
 		}
 	});
 
-	it('keeps valid lifePoints and coerces numeric strings', () => {
-		expect(migrateStats({ lifePoints: '25' }).lifePoints.value).toBe(25);
+	it('keeps lifePoints as text', () => {
+		expect(migrateStats({ lifePoints: 25 }).lifePoints.value).toBe('25');
+		expect(migrateStats({ lifePoints: '25' }).lifePoints.value).toBe('25');
+		expect(migrateStats({ lifePoints: '2W6+4' }).lifePoints.value).toBe('2W6+4');
 	});
 
 	it('derives visibility from empty text stats on cards without hiddenStats', () => {
@@ -231,7 +234,7 @@ describe('migrateStats', () => {
 				speed: { value: '', hidden: false }
 			}
 		});
-		expect(stats.lifePoints).toEqual({ value: 24, hidden: true });
+		expect(stats.lifePoints).toEqual({ value: '24', hidden: true });
 		expect(stats.armor).toEqual({ value: '3', hidden: false });
 		// an empty but shown stat stays shown; visibility is explicit now
 		expect(stats.speed).toEqual({ value: '', hidden: false });
@@ -269,6 +272,45 @@ describe('migrateFit', () => {
 		expect(migrateFit({ scale: 3, fits: true }).scale).toBe(1);
 		expect(migrateFit({ scale: 0.1, fits: true }).scale).toBe(0.7);
 		expect(migrateFit({ scale: 'abc', fits: true }).scale).toBe(1);
+	});
+});
+
+describe('migrateWounds', () => {
+	it('backfills the thresholds a card used to derive from its HP', () => {
+		expect(migrateWounds({ hidden: false }, '40')).toEqual({
+			hidden: false,
+			manual: false,
+			hp75: '10',
+			hp50: '20',
+			hp25: '30',
+			death: '40'
+		});
+	});
+
+	it('keeps stored thresholds and the manual flag', () => {
+		const wounds = migrateWounds(
+			{ hidden: false, manual: true, hp75: 'leicht', hp50: '', hp25: '9', death: 'Tod bei 0' },
+			'40'
+		);
+		expect(wounds).toEqual({
+			hidden: false,
+			manual: true,
+			hp75: 'leicht',
+			hp50: '',
+			hp25: '9',
+			death: 'Tod bei 0'
+		});
+	});
+
+	it('leaves the thresholds empty when HP is not a number', () => {
+		expect(migrateWounds(undefined, '2W6+4')).toEqual({
+			hidden: false,
+			manual: false,
+			hp75: '',
+			hp50: '',
+			hp25: '',
+			death: ''
+		});
 	});
 });
 
@@ -409,7 +451,7 @@ describe('migrateCard', () => {
 			hidden: true
 		});
 		expect(card.specialMoves.rows).toHaveLength(5);
-		expect(card.stats.lifePoints.value).toBeNull();
+		expect(card.stats.lifePoints.value).toBe('');
 		expect(card.stats.armor.value).toBe('');
 		expect(card.fit).toEqual({ scale: 1, fits: true, imageHidden: false });
 	});

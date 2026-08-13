@@ -3,7 +3,7 @@
 	import { STAT_BADGES } from '$lib/domain/statBadges';
 	import { computeCardFit, type FitResult } from '$lib/domain/cardFit';
 	import type { MonsterCard } from '$lib/domain/types';
-	import { woundThresholds } from '$lib/domain/wounds';
+	import { syncWounds, WOUND_LEVELS, woundThresholds } from '$lib/domain/wounds';
 	import ActionTable from './ActionTable.svelte';
 	import CardHeader from './CardHeader.svelte';
 	import ColorPicker from './ColorPicker.svelte';
@@ -25,8 +25,13 @@
 		onFit?: (fit: FitResult) => void;
 	} = $props();
 
-	const lifePoints = $derived(card.stats.lifePoints.value);
-	const thresholds = $derived(lifePoints === null ? null : woundThresholds(lifePoints));
+	const PAIN_LEVELS = ['hp75', 'hp50', 'hp25'] as const;
+
+	// the reset only makes sense while HP could refill the thresholds
+	const canResetWounds = $derived(
+		card.wounds.manual && woundThresholds(card.stats.lifePoints.value) !== null
+	);
+	const hasThresholds = $derived(WOUND_LEVELS.some((level) => card.wounds[level].trim() !== ''));
 	const ornate = $derived(prefs.cardStyle === 'ornate');
 	// the banner strip replaces the top brand mark and top corner ornaments
 	const hasBanner = $derived(!card.banner.hidden && (editable || card.banner.value.trim() !== ''));
@@ -148,25 +153,59 @@
 
 			<ActionTable bind:card {editable} />
 
-			{#if thresholds && !card.wounds.hidden}
+			{#if editable && !card.wounds.hidden}
 				<div class="wounds">
 					<b>Schmerz bei Schaden:</b>
-					{thresholds.hp75} / {thresholds.hp50} / {thresholds.hp25}
+					{#each PAIN_LEVELS as level, index (level)}
+						{#if index > 0}/{/if}
+						<input
+							class="wound-value"
+							aria-label="Schmerz {index + 1}"
+							bind:value={card.wounds[level]}
+							oninput={() => {
+								card.wounds.manual = true;
+							}}
+						/>
+					{/each}
 					· <b>Tod:</b>
-					{thresholds.death}
-					{#if editable}
+					<input
+						class="wound-value"
+						aria-label="Tod"
+						bind:value={card.wounds.death}
+						oninput={() => {
+							card.wounds.manual = true;
+						}}
+					/>
+					{#if canResetWounds}
 						<button
 							type="button"
-							class="remove hide-toggle"
-							title="Schmerzschwellen ausblenden"
-							aria-label="Schmerzschwellen ausblenden"
+							class="remove"
+							title="Schmerzschwellen wieder aus den LeP berechnen"
+							aria-label="Schmerzschwellen zurücksetzen"
 							onclick={() => {
-								card.wounds.hidden = true;
-							}}>✕</button
+								card.wounds.manual = false;
+								syncWounds(card);
+							}}>↺</button
 						>
 					{/if}
+					<button
+						type="button"
+						class="remove hide-toggle"
+						title="Schmerzschwellen ausblenden"
+						aria-label="Schmerzschwellen ausblenden"
+						onclick={() => {
+							card.wounds.hidden = true;
+						}}>✕</button
+					>
 				</div>
-			{:else if thresholds && editable}
+			{:else if !editable && !card.wounds.hidden && hasThresholds}
+				<div class="wounds">
+					<b>Schmerz bei Schaden:</b>
+					{card.wounds.hp75} / {card.wounds.hp50} / {card.wounds.hp25}
+					· <b>Tod:</b>
+					{card.wounds.death}
+				</div>
+			{:else if editable}
 				<button
 					type="button"
 					class="add"
@@ -438,6 +477,13 @@
 	.card.ornate .wounds {
 		background: rgb(255 250 232 / 55%);
 		border-color: var(--color-gold-soft);
+	}
+
+	/* no width: the field sizes to its text, so the row stays one line for plain numbers */
+	.wounds .wound-value {
+		field-sizing: content;
+		min-width: 3mm;
+		text-align: center;
 	}
 
 	.notes-section {

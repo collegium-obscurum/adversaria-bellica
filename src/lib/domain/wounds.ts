@@ -1,32 +1,35 @@
-import type { WoundTrigger } from './types';
+import type { MonsterCard, WoundTrigger } from './types';
 
-/** Cumulative damage at which each wound threshold triggers. */
-export interface WoundThresholds {
-	hp75: number;
-	hp50: number;
-	hp25: number;
-	death: number;
-}
+export const WOUND_LEVELS = ['hp75', 'hp50', 'hp25', 'death'] as const;
+export type WoundLevel = (typeof WOUND_LEVELS)[number];
 
-export function woundThresholds(maxHp: number): WoundThresholds {
-	// the editor's number input is transiently null while the user retypes the value
-	if (!Number.isFinite(maxHp) || maxHp < 1) maxHp = 1;
+/** Cumulative damage at which each wound threshold triggers; free text, HP may not be a number. */
+export type WoundThresholds = Record<WoundLevel, string>;
+
+/** Thresholds for a plain numeric HP value, or null when HP is anything else. */
+export function woundThresholds(lifePoints: string): WoundThresholds | null {
+	const maxHp = Number(lifePoints);
+	if (lifePoints.trim() === '' || !Number.isFinite(maxHp) || maxHp < 1) return null;
 	return {
-		hp75: Math.ceil(maxHp * 0.25),
-		hp50: Math.ceil(maxHp * 0.5),
-		hp25: Math.ceil(maxHp * 0.75),
-		death: maxHp
+		hp75: String(Math.ceil(maxHp * 0.25)),
+		hp50: String(Math.ceil(maxHp * 0.5)),
+		hp25: String(Math.ceil(maxHp * 0.75)),
+		death: String(maxHp)
 	};
 }
 
-/** Slot labels for the special-move triggers; HP slots show cumulative damage. */
-export function triggerLabels(maxHp: number | null): Record<WoundTrigger, string> {
-	const thresholds = woundThresholds(maxHp ?? 1);
-	return {
-		combatStart: 'Kampfbeginn',
-		hp75: `ab ${thresholds.hp75} Schaden`,
-		hp50: `ab ${thresholds.hp50} Schaden`,
-		hp25: `ab ${thresholds.hp25} Schaden`,
-		death: 'Tod'
-	};
+/** Refill the thresholds from HP; manually edited ones and unparsable HP keep what is stored. */
+export function syncWounds(card: MonsterCard) {
+	if (card.wounds.manual) return;
+	const thresholds = woundThresholds(card.stats.lifePoints.value);
+	if (thresholds) Object.assign(card.wounds, thresholds);
 }
+
+/** Slot labels for the special-move triggers; the pain row carries the numbers. */
+export const TRIGGER_LABELS: Record<WoundTrigger, string> = {
+	combatStart: 'Kampfbeginn',
+	hp75: 'ab Schmerz 1',
+	hp50: 'ab Schmerz 2',
+	hp25: 'ab Schmerz 3',
+	death: 'Tod'
+};

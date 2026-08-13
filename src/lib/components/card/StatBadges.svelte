@@ -4,6 +4,7 @@
 	import BadgeFace from './BadgeFace.svelte';
 	import { prefs } from '$lib/state/preferences.svelte';
 	import type { MonsterCard } from '$lib/domain/types';
+	import { syncWounds } from '$lib/domain/wounds';
 
 	let { card = $bindable(), editable = false }: { card: MonsterCard; editable?: boolean } =
 		$props();
@@ -19,13 +20,6 @@
 		if (length <= 2) return '9pt';
 		if (length <= 4) return '7pt';
 		return '5.5pt';
-	}
-
-	function normalizeLifePoints() {
-		const lifePoints = card.stats.lifePoints.value;
-		if (lifePoints !== null && (!Number.isFinite(lifePoints) || lifePoints < 1)) {
-			card.stats.lifePoints.value = null;
-		}
 	}
 
 	function isHidden(key: StatKey): boolean {
@@ -64,17 +58,20 @@
 						toggleHidden('lifePoints');
 					}}><BadgeFace badge={lifePointsBadge} cutColor={iconCutColor} /></button
 				>
+				<!-- explicit handler, not bind: the thresholds must be refilled after the new HP lands -->
 				<input
-					type="number"
-					min="1"
+					type="text"
 					aria-label={lifePointsBadge.label}
-					bind:value={card.stats.lifePoints.value}
-					onblur={normalizeLifePoints}
-					style:font-size={valueFontSize(card.stats.lifePoints.value ?? '')}
+					value={card.stats.lifePoints.value}
+					oninput={(event) => {
+						card.stats.lifePoints.value = event.currentTarget.value;
+						syncWounds(card);
+					}}
+					style:font-size={valueFontSize(card.stats.lifePoints.value)}
 				/>
 			{:else}
 				<BadgeFace badge={lifePointsBadge} cutColor={iconCutColor} />
-				<span class="badge-value" style:font-size={valueFontSize(card.stats.lifePoints.value ?? '')}
+				<span class="badge-value" style:font-size={valueFontSize(card.stats.lifePoints.value)}
 					>{card.stats.lifePoints.value}</span
 				>
 			{/if}
