@@ -84,8 +84,14 @@ describe('migrateSpecialMoves', () => {
 		expect(migrated.triggers.death.hidden).toBe(true);
 	});
 
-	it('hides the whole section on legacy cards', () => {
-		expect(migrateSpecialMoves({ combatStart: 'Brüllt.' }, undefined).hidden).toBe(true);
+	it('shows the section when a legacy card had anything in it', () => {
+		expect(migrateSpecialMoves({ combatStart: 'Brüllt.' }, undefined).hidden).toBe(false);
+		expect(migrateSpecialMoves({}, [{ trigger: 'Feuer', name: 'Panik' }]).hidden).toBe(false);
+	});
+
+	it('hides the section when a legacy card had nothing in it', () => {
+		expect(migrateSpecialMoves({ combatStart: '', hp50: '  ' }, []).hidden).toBe(true);
+		expect(migrateSpecialMoves(undefined, undefined).hidden).toBe(true);
 	});
 
 	it('keeps stored visibility of an already migrated section', () => {
@@ -221,20 +227,36 @@ describe('migrateFit', () => {
 });
 
 describe('migrateCard block visibility', () => {
-	it('hides the optional blocks on legacy cards but keeps their values', () => {
+	it('keeps blocks a legacy card had content in', () => {
 		const card = migrateCard({
 			id: 'a',
 			name: 'Wolf',
+			lifePoints: 24,
 			notes: 'Immun gegen Feuer.',
 			talents: { body: { value: 8, maxQs: 3 } },
 			specialMoves: { combatStart: 'Brüllt.' }
 		});
-		expect(card.notes).toEqual({ value: 'Immun gegen Feuer.', hidden: true });
-		expect(card.talents.hidden).toBe(true);
+		expect(card.notes).toEqual({ value: 'Immun gegen Feuer.', hidden: false });
+		expect(card.talents.hidden).toBe(false);
 		expect(card.talents.entries.body.value).toBe(8);
-		expect(card.specialMoves.hidden).toBe(true);
+		expect(card.specialMoves.hidden).toBe(false);
 		expect(card.specialMoves.triggers.combatStart.effect).toBe('Brüllt.');
+		// the pain row printed on every legacy card that had HP
+		expect(card.wounds.hidden).toBe(false);
+	});
+
+	it('hides the blocks a legacy card had nothing in', () => {
+		const card = migrateCard({ id: 'a', name: 'Wolf', notes: '   ', lifePoints: 0 });
+		expect(card.notes.hidden).toBe(true);
+		expect(card.talents.hidden).toBe(true);
+		expect(card.specialMoves.hidden).toBe(true);
 		expect(card.wounds.hidden).toBe(true);
+	});
+
+	it('respects a legacy talentsHidden flag even with talent values', () => {
+		const raw = { id: 'a', talents: { body: { value: 8, maxQs: 3 } } };
+		expect(migrateCard({ ...raw, talentsHidden: true }).talents.hidden).toBe(true);
+		expect(migrateCard(raw).talents.hidden).toBe(false);
 	});
 
 	it('shows legacy banner and flavour text that had content', () => {

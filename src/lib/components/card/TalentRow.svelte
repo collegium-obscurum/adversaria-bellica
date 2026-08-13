@@ -25,7 +25,7 @@
 	{#if editable}
 		<button
 			type="button"
-			class="add"
+			class="add talents-add"
 			onclick={() => {
 				card.talents.hidden = false;
 			}}>+ Talente</button

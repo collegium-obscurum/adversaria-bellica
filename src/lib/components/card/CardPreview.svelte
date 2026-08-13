@@ -400,6 +400,11 @@
 		min-height: 0;
 	}
 
+	/* the talent box is pinned to the card bottom; its add button follows the body instead */
+	.card.editable:has(:global(.talents-add)) .columns {
+		flex: 0 1 auto;
+	}
+
 	.card:not(.editable) .body {
 		overflow: hidden;
 	}

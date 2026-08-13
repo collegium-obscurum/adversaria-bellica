@@ -78,8 +78,8 @@ function moveFields(value: unknown): {
 
 /**
  * Special moves gained a wrapper with its own visibility plus per-trigger `hidden`.
- * Legacy cards showed a trigger exactly when it had content, and the section itself
- * starts hidden like every other optional block.
+ * Legacy cards showed a trigger exactly when it had content; the section comes back
+ * visible when anything was in it, so nothing a card used to print goes missing.
  */
 export function migrateSpecialMoves(
 	raw: unknown,
@@ -96,11 +96,9 @@ export function migrateSpecialMoves(
 			: move.name.trim() === '' && move.effect.trim() === '';
 		triggers[trigger] = { ...move, hidden };
 	}
-	return {
-		hidden: wrapper ? wrapper.hidden === true : true,
-		triggers,
-		custom: migrateCustomMoves(wrapper ? wrapper.custom : legacyCustom)
-	};
+	const custom = migrateCustomMoves(wrapper ? wrapper.custom : legacyCustom);
+	const empty = WOUND_TRIGGERS.every((trigger) => triggers[trigger].hidden) && custom.length === 0;
+	return { hidden: wrapper ? wrapper.hidden === true : empty, triggers, custom };
 }
 
 export function migrateCustomMoves(raw: unknown): CustomMove[] {
@@ -124,7 +122,8 @@ function numberOrNull(value: unknown): number | null {
  */
 export function migrateTalents(
 	raw: unknown,
-	attributes: Record<AttributeKey, number | null>
+	attributes: Record<AttributeKey, number | null>,
+	legacyHidden = false
 ): MonsterCard['talents'] {
 	const wrapper = isRecord(raw) && 'entries' in raw ? raw : null;
 	const source = wrapper ? wrapper.entries : raw;
@@ -148,7 +147,9 @@ export function migrateTalents(
 			};
 		}
 	}
-	return { hidden: wrapper ? wrapper.hidden === true : true, entries };
+	// a legacy card printed its talents unless flagged; a card without any talent data has nothing to show
+	const hidden = wrapper ? wrapper.hidden === true : legacyHidden || !isRecord(source);
+	return { hidden, entries };
 }
 
 export function migrateAttributes(raw: unknown): Record<AttributeKey, number | null> {
@@ -266,22 +267,23 @@ export function migrateFit(raw: unknown): FitResult {
 /** Bring a card parsed from storage or import JSON up to the current schema; every field gets a sane default. */
 export function migrateCard(raw: Record<string, unknown>): MonsterCard {
 	const attributes = migrateAttributes(raw.attributes);
+	const stats = migrateStats(raw);
 	return {
 		id: typeof raw.id === 'string' ? raw.id : crypto.randomUUID(),
 		name: textOrEmpty(raw.name),
 		category: textOrEmpty(raw.category),
 		banner: migrateBanner(raw.banner, raw.bannerColor),
 		flavorText: migrateTextBlock(raw.flavorText),
-		// legacy notes always printed when filled; the block is opt-in now, values stay
-		notes: isRecord(raw.notes)
-			? migrateTextBlock(raw.notes)
-			: { value: textOrEmpty(raw.notes), hidden: true },
+		notes: migrateTextBlock(raw.notes),
 		image: typeof raw.image === 'string' ? raw.image : null,
-		stats: migrateStats(raw),
+		stats,
 		attributes,
-		talents: migrateTalents(raw.talents, attributes),
+		talents: migrateTalents(raw.talents, attributes, raw.talentsHidden === true),
 		actions: migrateActions(Array.isArray(raw.actions) ? raw.actions : []),
-		wounds: { hidden: isRecord(raw.wounds) ? raw.wounds.hidden === true : true },
+		// legacy cards printed the pain row whenever they had HP
+		wounds: {
+			hidden: isRecord(raw.wounds) ? raw.wounds.hidden === true : stats.lifePoints.value === null
+		},
 		specialMoves: migrateSpecialMoves(raw.specialMoves, raw.customMoves),
 		fit: migrateFit(raw.fit)
 	};

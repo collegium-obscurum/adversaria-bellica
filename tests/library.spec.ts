@@ -155,8 +155,6 @@ test('legacy card shape is migrated on load', async ({ page }) => {
 	await expect(actionNames.nth(0)).toHaveValue('Hieb');
 	await expect(actionNames.nth(1)).toHaveValue('Biss');
 	await expect(page.getByLabel('Bereichsanfang').nth(0)).toHaveValue('11');
-	// the block is opt-in now, but the migrated move is still in there
-	await page.getByRole('button', { name: '+ Spezialmanöver' }).click();
 	// 25 LeP: the 50% wound trigger fires at 13 damage
 	await expect(page.getByLabel('Effekt für ab 13 Schaden')).toHaveValue('Wütend');
 });
