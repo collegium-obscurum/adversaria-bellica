@@ -231,9 +231,6 @@
 		--muted: #444;
 		/* add buttons inside a section line up with the entry rows' color picker */
 		--block-indent: 3.5mm;
-		/* movers, color, trigger/range, name, effect, remove: shared by both entry tables.
-		   25mm holds the longest wound trigger label ("ab 100 Schaden =") on one line */
-		--entry-grid: auto auto 25mm 22mm 1fr auto;
 		position: relative;
 		width: 105mm;
 		height: 148mm;

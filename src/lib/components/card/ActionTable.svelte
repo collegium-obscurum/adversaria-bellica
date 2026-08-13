@@ -150,10 +150,11 @@
 		gap: 0.333em;
 	}
 
-	/* same tracks as the special moves table so both read as one kind of table */
+	/* movers, color, range, name, effect, remove; widths follow this table's own content.
+	   The special moves table repeats the outer three tracks, so those stay in line. */
 	.actions.editor {
 		display: grid;
-		grid-template-columns: var(--entry-grid);
+		grid-template-columns: auto auto auto auto 1fr auto;
 		gap: 0.333em 1mm;
 	}
 

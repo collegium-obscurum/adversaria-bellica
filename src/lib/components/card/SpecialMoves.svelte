@@ -191,11 +191,12 @@
 		gap: 0.333em;
 	}
 
-	/* same tracks as the action table so both read as one kind of table */
+	/* movers, color, trigger, name, effect, remove; widths follow this table's own content.
+	   The action table repeats the outer three tracks, so those stay in line. */
 	.special-moves.editor {
 		position: relative;
 		display: grid;
-		grid-template-columns: var(--entry-grid);
+		grid-template-columns: auto auto auto auto 1fr auto;
 		gap: 0.333em 1mm;
 	}
 
@@ -212,7 +213,7 @@
 
 	/* .card.editable prefix outranks CardPreview's generic textarea width: 100% */
 	:global(.card.editable) .trigger-input {
-		width: 100%;
+		width: 20mm;
 		font-weight: bold;
 	}
 
