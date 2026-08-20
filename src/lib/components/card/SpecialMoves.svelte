@@ -198,10 +198,11 @@
 	}
 
 	/* movers, color, trigger, name, effect, remove; widths follow this table's own content.
-	   The action table repeats the outer three tracks, so those stay in line. */
+	   Trigger, name and effect are all free text, so all three shrink together instead of
+	   letting a long trigger squeeze the other two down to their min-width. */
 	.rows {
 		display: grid;
-		grid-template-columns: max-content max-content max-content auto auto max-content;
+		grid-template-columns: max-content max-content auto auto auto max-content;
 		align-items: center;
 		gap: 0.333em 1mm;
 	}
@@ -212,9 +213,11 @@
 		display: contents;
 	}
 
-	/* .card.editable prefix outranks CardPreview's generic textarea width: 100% */
+	/* .card.editable prefix outranks CardPreview's generic textarea width: 100%,
+	   so field-sizing sizes the trigger to its text instead of wrapping at a fixed width */
 	:global(.card.editable) .trigger-input {
-		width: 20mm;
+		width: auto;
+		min-width: 12mm;
 		font-weight: bold;
 	}
 
