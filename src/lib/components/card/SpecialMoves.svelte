@@ -197,27 +197,28 @@
 		position: relative;
 	}
 
-	/* movers, color, trigger, name, effect, remove; widths follow this table's own content.
-	   Trigger, name and effect are all free text, so all three shrink together instead of
-	   letting a long trigger squeeze the other two down to their min-width. */
+	/* movers, color, trigger, name, effect, remove; same shape as the action table.
+	   Trigger and name still size to their text, but capped, and the effect takes what is
+	   left over: an unbounded content-sized track blows the row past the card edge. */
 	.rows {
 		display: grid;
-		grid-template-columns: max-content max-content auto auto auto max-content;
+		grid-template-columns:
+			max-content max-content fit-content(20mm) fit-content(24mm) minmax(0, 1fr)
+			max-content;
 		align-items: center;
 		gap: 0.333em 1mm;
 	}
 
-	/* the cells are the grid items, so the name and effect columns can size to their text;
-	   the .card prefix outranks CardPreview's generic .entry-row flex row */
+	/* subgrid, not display: contents: each row stays one box, so a row that renders a
+	   different number of cells can't shift every following row into the wrong column */
 	:global(.card.editable) .rows > .entry-row {
-		display: contents;
+		display: grid;
+		grid-template-columns: subgrid;
+		grid-column: 1 / -1;
+		align-items: center;
 	}
 
-	/* .card.editable prefix outranks CardPreview's generic textarea width: 100%,
-	   so field-sizing sizes the trigger to its text instead of wrapping at a fixed width */
 	:global(.card.editable) .trigger-input {
-		width: auto;
-		min-width: 12mm;
 		font-weight: bold;
 	}
 

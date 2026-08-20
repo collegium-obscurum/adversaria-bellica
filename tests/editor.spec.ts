@@ -153,6 +153,61 @@ test('action rows can be removed but not the last one', async ({ page }) => {
 	await expect(page.getByRole('button', { name: 'Aktion entfernen: Hieb' })).toBeDisabled();
 });
 
+test('entry rows keep their columns and stay inside the card while editing', async ({ page }) => {
+	await seedCards(page, [
+		{
+			id: 'z1',
+			name: 'Zombie',
+			actions: [
+				{ span: 5, name: 'Infizierter Biss', effect: '2W6+4 TP' },
+				{ span: 5, name: 'Fehlschlag', effect: 'Der Angriff geht daneben.' },
+				{
+					span: 10,
+					name: 'Flucht',
+					effect: 'Erstes Mal: sucht einen Fluchtweg. Zweites Mal: entkommt.'
+				}
+			]
+		}
+	]);
+	await page.goto('/editor?id=z1');
+
+	await page.getByRole('button', { name: '+ Spezialmanöver' }).click();
+	await page.getByRole('button', { name: '+ Eigener Auslöser' }).click();
+	await page.getByLabel('Auslöser').fill('Schaden Verursacht');
+	await page.getByLabel('Name', { exact: true }).fill('Krankheitsübertrager');
+
+	const box = async (locator: import('@playwright/test').Locator) => {
+		const rect = await locator.boundingBox();
+		expect(rect).not.toBeNull();
+		return rect ?? { x: 0, y: 0, width: 0, height: 0 };
+	};
+	const sameColumn = async (locator: import('@playwright/test').Locator) => {
+		const cells = await locator.all();
+		expect(cells.length).toBeGreaterThan(1);
+		const lefts = [];
+		for (const cell of cells) {
+			lefts.push(Math.round((await box(cell)).x));
+		}
+		expect(Math.max(...lefts) - Math.min(...lefts)).toBeLessThanOrEqual(1);
+	};
+
+	const cardBox = await box(page.locator('.card.editable'));
+	const staysInsideCard = async () => {
+		for (const cell of await page.locator('.card.editable .entry-row > *').all()) {
+			const rect = await box(cell);
+			expect(rect.x + rect.width).toBeLessThanOrEqual(cardBox.x + cardBox.width + 1);
+		}
+	};
+
+	await sameColumn(page.getByLabel('Name der Aktion'));
+	await staysInsideCard();
+
+	// field-sizing grows the focused field; the columns must not shift with it
+	await page.getByLabel('Effekt der Aktion').last().click();
+	await sameColumn(page.getByLabel('Name der Aktion'));
+	await staysInsideCard();
+});
+
 test('wound trigger special move can be added, hidden, and saved', async ({ page }) => {
 	await page.goto('/editor');
 	await page.getByRole('button', { name: '+ Spezialmanöver' }).click();

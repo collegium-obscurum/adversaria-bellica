@@ -178,18 +178,25 @@
 		gap: 0.333em;
 	}
 
-	/* movers, color, sword, range, name, effect, remove; widths follow this table's own content */
+	/* movers, color, sword, range, name, effect, remove.
+	   The name still sizes to its text, but capped, and the effect takes what is left over:
+	   an unbounded content-sized track blows the row past the card edge on long entries. */
 	.rows.editor {
 		display: grid;
-		grid-template-columns: max-content max-content max-content max-content auto auto max-content;
+		grid-template-columns:
+			max-content max-content max-content max-content fit-content(30mm) minmax(0, 1fr)
+			max-content;
 		align-items: center;
 		gap: 0.333em 1mm;
 	}
 
-	/* the cells are the grid items, so the name and effect columns can size to their text;
-	   the .card prefix outranks CardPreview's generic .entry-row flex row */
+	/* subgrid, not display: contents: each row stays one box, so a row that renders a
+	   different number of cells can't shift every following row into the wrong column */
 	:global(.card.editable) .rows.editor > .entry-row {
-		display: contents;
+		display: grid;
+		grid-template-columns: subgrid;
+		grid-column: 1 / -1;
+		align-items: center;
 	}
 
 	.range .bound {
