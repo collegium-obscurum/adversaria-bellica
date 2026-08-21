@@ -1,0 +1,187 @@
+[
+	{
+		"id": "faa4266d-b0cf-4b4c-a2b6-ebd421936dce",
+		"name": "Verfluchte Ruine",
+		"category": "",
+		"banner": {
+			"value": "Umgebung",
+			"color": "green",
+			"hidden": false
+		},
+		"flavorText": {
+			"value": "",
+			"hidden": true
+		},
+		"notes": {
+			"value": "",
+			"hidden": true
+		},
+		"image": null,
+		"stats": {
+			"lifePoints": {
+				"value": "20",
+				"hidden": true
+			},
+			"armor": {
+				"value": "0",
+				"hidden": true
+			},
+			"initiative": {
+				"value": "10",
+				"hidden": true
+			},
+			"speed": {
+				"value": "8",
+				"hidden": true
+			},
+			"defense": {
+				"value": "6",
+				"hidden": true
+			},
+			"soulPower": {
+				"value": "0",
+				"hidden": true
+			},
+			"toughness": {
+				"value": "0",
+				"hidden": true
+			},
+			"sizeCategory": {
+				"value": "",
+				"hidden": true
+			},
+			"actionCount": {
+				"value": "1",
+				"hidden": false
+			}
+		},
+		"attributes": {
+			"courage": null,
+			"sagacity": null,
+			"intuition": null,
+			"charisma": null,
+			"dexterity": null,
+			"agility": null,
+			"constitution": null,
+			"strength": null
+		},
+		"talents": {
+			"hidden": true,
+			"entries": {
+				"body": {
+					"fw": null,
+					"value": 1,
+					"maxQs": 1
+				},
+				"social": {
+					"fw": null,
+					"value": 1,
+					"maxQs": 1
+				},
+				"nature": {
+					"fw": null,
+					"value": 1,
+					"maxQs": 1
+				},
+				"knowledge": {
+					"fw": null,
+					"value": 1,
+					"maxQs": 1
+				},
+				"craft": {
+					"fw": null,
+					"value": 1,
+					"maxQs": 1
+				}
+			}
+		},
+		"actions": [
+			{
+				"span": 2,
+				"name": "Grabruf Zombie",
+				"effect": "Ein Zombie bricht aus einem nahen Grab.",
+				"color": null,
+				"opportunityAttack": false
+			},
+			{
+				"span": 1,
+				"name": "Grabruf Skelett Schwertkämpfer",
+				"effect": "Ein Skelett Schwertkämpfer bricht aus einem nahen Grab.",
+				"color": null,
+				"opportunityAttack": false
+			},
+			{
+				"span": 1,
+				"name": "Grabruf Skelett Schütze",
+				"effect": "Ein Skelett Schütze bricht aus einem nahen Grab.",
+				"color": null,
+				"opportunityAttack": false
+			},
+			{
+				"span": 4,
+				"name": "Totenstille",
+				"effect": "Alle Geräusche verschwinden für einen Moment.",
+				"color": null,
+				"opportunityAttack": false
+			}
+		],
+		"wounds": {
+			"hidden": true,
+			"manual": false,
+			"hp75": "5",
+			"hp50": "10",
+			"hp25": "15",
+			"death": "20"
+		},
+		"specialMoves": {
+			"hidden": true,
+			"rows": [
+				{
+					"trigger": "combatStart",
+					"label": "",
+					"name": "",
+					"effect": "",
+					"color": null,
+					"hidden": true
+				},
+				{
+					"trigger": "hp75",
+					"label": "",
+					"name": "",
+					"effect": "",
+					"color": null,
+					"hidden": true
+				},
+				{
+					"trigger": "hp50",
+					"label": "",
+					"name": "",
+					"effect": "",
+					"color": null,
+					"hidden": true
+				},
+				{
+					"trigger": "hp25",
+					"label": "",
+					"name": "",
+					"effect": "",
+					"color": null,
+					"hidden": true
+				},
+				{
+					"trigger": "death",
+					"label": "",
+					"name": "",
+					"effect": "",
+					"color": null,
+					"hidden": true
+				}
+			]
+		},
+		"fit": {
+			"scale": 1,
+			"fits": true,
+			"imageHidden": false
+		}
+	}
+]

@@ -1,0 +1,211 @@
+[
+	{
+		"id": "c505c742-bf64-4a25-812f-1259c0e99caf",
+		"name": "Skelett Schwertkämpfer",
+		"category": "Untoter",
+		"banner": {
+			"value": "",
+			"color": null,
+			"hidden": true
+		},
+		"flavorText": {
+			"value": "Die alten Knochen rieben aufeinander, ein trockenes Knacken, dann stand das weiße Skelett im Mondlicht.",
+			"hidden": false
+		},
+		"notes": {
+			"value": "Können nicht klettern oder schwimmen. Greifen den lautesten Gegner an.",
+			"hidden": false
+		},
+		"image": null,
+		"stats": {
+			"lifePoints": {
+				"value": "18",
+				"hidden": false
+			},
+			"armor": {
+				"value": "0",
+				"hidden": false
+			},
+			"initiative": {
+				"value": "8",
+				"hidden": false
+			},
+			"speed": {
+				"value": "8",
+				"hidden": false
+			},
+			"defense": {
+				"value": "7",
+				"hidden": false
+			},
+			"soulPower": {
+				"value": "-1",
+				"hidden": false
+			},
+			"toughness": {
+				"value": "-1",
+				"hidden": false
+			},
+			"sizeCategory": {
+				"value": "",
+				"hidden": true
+			},
+			"actionCount": {
+				"value": "1",
+				"hidden": false
+			}
+		},
+		"attributes": {
+			"courage": 20,
+			"sagacity": 10,
+			"intuition": 10,
+			"charisma": 11,
+			"dexterity": 8,
+			"agility": 11,
+			"constitution": 11,
+			"strength": 13
+		},
+		"talents": {
+			"hidden": false,
+			"entries": {
+				"body": {
+					"fw": 4,
+					"value": 14,
+					"maxQs": 2
+				},
+				"social": {
+					"fw": 6,
+					"value": 14,
+					"maxQs": 2
+				},
+				"nature": {
+					"fw": null,
+					"value": 4,
+					"maxQs": 1
+				},
+				"knowledge": {
+					"fw": null,
+					"value": 2,
+					"maxQs": 1
+				},
+				"craft": {
+					"fw": null,
+					"value": 4,
+					"maxQs": 1
+				}
+			}
+		},
+		"actions": [
+			{
+				"span": 1,
+				"name": "Durchbohrer",
+				"effect": "2W6+8 TP",
+				"color": null,
+				"opportunityAttack": true
+			},
+			{
+				"span": 10,
+				"name": "Schwertschlag",
+				"effect": "1W6+4 TP",
+				"color": null,
+				"opportunityAttack": true
+			},
+			{
+				"span": 2,
+				"name": "Meutenruf",
+				"effect": "(1/Runde) Alle anderen Skelette dürfen sich bewegen.",
+				"color": null,
+				"opportunityAttack": false
+			},
+			{
+				"span": 4,
+				"name": "Unheimliches Klappern",
+				"effect": "Das Skelett klappert mit dem Kieferknochen.",
+				"color": null,
+				"opportunityAttack": false
+			}
+		],
+		"wounds": {
+			"hidden": true,
+			"manual": false,
+			"hp75": "5",
+			"hp50": "9",
+			"hp25": "14",
+			"death": "18"
+		},
+		"specialMoves": {
+			"hidden": false,
+			"rows": [
+				{
+					"trigger": "combatStart",
+					"label": "",
+					"name": "",
+					"effect": "",
+					"color": null,
+					"hidden": true
+				},
+				{
+					"trigger": "hp75",
+					"label": "",
+					"name": "",
+					"effect": "",
+					"color": null,
+					"hidden": true
+				},
+				{
+					"trigger": "hp50",
+					"label": "",
+					"name": "",
+					"effect": "",
+					"color": null,
+					"hidden": true
+				},
+				{
+					"trigger": "hp25",
+					"label": "",
+					"name": "",
+					"effect": "",
+					"color": null,
+					"hidden": true
+				},
+				{
+					"trigger": "death",
+					"label": "",
+					"name": "",
+					"effect": "",
+					"color": null,
+					"hidden": true
+				},
+				{
+					"trigger": null,
+					"label": "In Sonnenlicht",
+					"name": "Brennend",
+					"effect": "1 SP pro KR. Aktionswurf um 1 erschwert.",
+					"color": null,
+					"hidden": false
+				},
+				{
+					"trigger": null,
+					"label": "Angriff durch Stichwaffe",
+					"name": "Halber Schaden",
+					"effect": "TP/2",
+					"color": null,
+					"hidden": false
+				},
+				{
+					"trigger": null,
+					"label": "Angriff durch geweihte Waffe",
+					"name": "Doppelter Schaden",
+					"effect": "TPx2",
+					"color": null,
+					"hidden": false
+				}
+			]
+		},
+		"fit": {
+			"scale": 1,
+			"fits": true,
+			"imageHidden": false
+		}
+	}
+]

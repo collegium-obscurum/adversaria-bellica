@@ -1,0 +1,210 @@
+[
+	{
+		"id": "26f44c67-4314-4187-bbf0-b0c3e51372ac",
+		"name": "Nekromant",
+		"category": "Kulturschaffender",
+		"banner": {
+			"value": "Anführer",
+			"color": "red",
+			"hidden": false
+		},
+		"flavorText": {
+			"value": "",
+			"hidden": true
+		},
+		"notes": {
+			"value": "",
+			"hidden": true
+		},
+		"image": null,
+		"stats": {
+			"lifePoints": {
+				"value": "40",
+				"hidden": false
+			},
+			"armor": {
+				"value": "0",
+				"hidden": false
+			},
+			"initiative": {
+				"value": "12",
+				"hidden": false
+			},
+			"speed": {
+				"value": "8",
+				"hidden": false
+			},
+			"defense": {
+				"value": "8",
+				"hidden": false
+			},
+			"soulPower": {
+				"value": "2",
+				"hidden": false
+			},
+			"toughness": {
+				"value": "0",
+				"hidden": false
+			},
+			"sizeCategory": {
+				"value": "",
+				"hidden": true
+			},
+			"actionCount": {
+				"value": "1",
+				"hidden": false
+			}
+		},
+		"attributes": {
+			"courage": 15,
+			"sagacity": 15,
+			"intuition": 14,
+			"charisma": 13,
+			"dexterity": 13,
+			"agility": 10,
+			"constitution": 12,
+			"strength": 10
+		},
+		"talents": {
+			"hidden": false,
+			"entries": {
+				"body": {
+					"fw": 5,
+					"value": 10,
+					"maxQs": 2
+				},
+				"social": {
+					"fw": 3,
+					"value": 12,
+					"maxQs": 1
+				},
+				"nature": {
+					"fw": 7,
+					"value": 13,
+					"maxQs": 3
+				},
+				"knowledge": {
+					"fw": 10,
+					"value": 19,
+					"maxQs": 4
+				},
+				"craft": {
+					"fw": 10,
+					"value": 15,
+					"maxQs": 4
+				}
+			}
+		},
+		"actions": [
+			{
+				"span": 1,
+				"name": "Druckwelle",
+				"effect": "Alle Gegner in 4 Schritt Nähe: Körperbeherrschung-3 sonst 8 Schritt Knockback.",
+				"color": null,
+				"opportunityAttack": true
+			},
+			{
+				"span": 6,
+				"name": "Horriphobus",
+				"effect": "Gegner mit niedrigster Seelenkraft: +1 Stufe Furcht.",
+				"color": null,
+				"opportunityAttack": false
+			},
+			{
+				"span": 7,
+				"name": "Untotenattacke",
+				"effect": "Der nächste Untote agiert (Aktionswurf)",
+				"color": null,
+				"opportunityAttack": false
+			},
+			{
+				"span": 5,
+				"name": "Umpositionieren",
+				"effect": "Bewegt sich zum nächsten Untoten.",
+				"color": null,
+				"opportunityAttack": false
+			},
+			{
+				"span": 1,
+				"name": "Flucht",
+				"effect": "Erstes Mal: sucht einen Fluchtweg. Zweites Mal: entkommt.",
+				"color": null,
+				"opportunityAttack": false
+			}
+		],
+		"wounds": {
+			"hidden": false,
+			"manual": false,
+			"hp75": "10",
+			"hp50": "20",
+			"hp25": "30",
+			"death": "40"
+		},
+		"specialMoves": {
+			"hidden": false,
+			"rows": [
+				{
+					"trigger": "combatStart",
+					"label": "",
+					"name": "Totenruf",
+					"effect": "Beschwört für jeden Spieler einen Zombie.",
+					"color": null,
+					"hidden": false
+				},
+				{
+					"trigger": "hp75",
+					"label": "",
+					"name": "Skelette",
+					"effect": "Beschwört halb so viele Skelett Schwertkämpfer wie es Spieler gibt.",
+					"color": null,
+					"hidden": true
+				},
+				{
+					"trigger": "hp50",
+					"label": "",
+					"name": "Skelette 2",
+					"effect": "Beschwört halb so viele Skelett Schützen wie es Spieler gibt.",
+					"color": null,
+					"hidden": true
+				},
+				{
+					"trigger": "hp25",
+					"label": "",
+					"name": "Flucht",
+					"effect": "",
+					"color": null,
+					"hidden": false
+				},
+				{
+					"trigger": "death",
+					"label": "",
+					"name": "Erlösung",
+					"effect": "Alle Untoten zerfallen zu Staub.",
+					"color": null,
+					"hidden": false
+				},
+				{
+					"trigger": null,
+					"label": "Wenn Angegriffen",
+					"name": "Beschützer",
+					"effect": "Ein naher (max 2 Schritt) Zombie oder Skelett wirft sich vor den Angriff.",
+					"color": null,
+					"hidden": false
+				},
+				{
+					"trigger": null,
+					"label": "Tod eines Untoten",
+					"name": "Neubeschwörung",
+					"effect": "Gefallene Untote werden ersetzt: Zombie -> Skelett Schwertkämpfer -> Skelett Schütze -> Zombie",
+					"color": null,
+					"hidden": false
+				}
+			]
+		},
+		"fit": {
+			"scale": 0.9,
+			"fits": true,
+			"imageHidden": false
+		}
+	}
+]

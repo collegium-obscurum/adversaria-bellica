@@ -1,0 +1,211 @@
+[
+	{
+		"id": "ca772aba-0d8a-4e3a-a49a-1138a476e7d3",
+		"name": "Zombie",
+		"category": "Untoter",
+		"banner": {
+			"value": "",
+			"color": null,
+			"hidden": true
+		},
+		"flavorText": {
+			"value": "„Urrrr... hhhhnnn... arghhh...“",
+			"hidden": false
+		},
+		"notes": {
+			"value": "Können nicht klettern oder schwimmen. Greifen den lautesten Gegner an.",
+			"hidden": false
+		},
+		"image": null,
+		"stats": {
+			"lifePoints": {
+				"value": "16",
+				"hidden": false
+			},
+			"armor": {
+				"value": "0",
+				"hidden": false
+			},
+			"initiative": {
+				"value": "7",
+				"hidden": false
+			},
+			"speed": {
+				"value": "4",
+				"hidden": false
+			},
+			"defense": {
+				"value": "1",
+				"hidden": false
+			},
+			"soulPower": {
+				"value": "0",
+				"hidden": false
+			},
+			"toughness": {
+				"value": "0",
+				"hidden": false
+			},
+			"sizeCategory": {
+				"value": "",
+				"hidden": true
+			},
+			"actionCount": {
+				"value": "1",
+				"hidden": false
+			}
+		},
+		"attributes": {
+			"courage": 20,
+			"sagacity": 6,
+			"intuition": 10,
+			"charisma": 10,
+			"dexterity": 6,
+			"agility": 8,
+			"constitution": 13,
+			"strength": 13
+		},
+		"talents": {
+			"hidden": false,
+			"entries": {
+				"body": {
+					"fw": 4,
+					"value": 12,
+					"maxQs": 2
+				},
+				"social": {
+					"fw": 6,
+					"value": 14,
+					"maxQs": 2
+				},
+				"nature": {
+					"fw": null,
+					"value": 1,
+					"maxQs": 1
+				},
+				"knowledge": {
+					"fw": null,
+					"value": 1,
+					"maxQs": 1
+				},
+				"craft": {
+					"fw": null,
+					"value": 4,
+					"maxQs": 1
+				}
+			}
+		},
+		"actions": [
+			{
+				"span": 2,
+				"name": "Infizierender Biss",
+				"effect": "2W6+4 TP + Wundfieber",
+				"color": null,
+				"opportunityAttack": true
+			},
+			{
+				"span": 6,
+				"name": "Krallenangriff",
+				"effect": "1W6 TP",
+				"color": null,
+				"opportunityAttack": true
+			},
+			{
+				"span": 4,
+				"name": "Meutenruf",
+				"effect": "(1/Runde) Alle anderen Zombies dürfen sich bewegen.",
+				"color": null,
+				"opportunityAttack": false
+			},
+			{
+				"span": 4,
+				"name": "Gegner Spüren",
+				"effect": "Der Zombie wittert seine Gegner.",
+				"color": null,
+				"opportunityAttack": false
+			}
+		],
+		"wounds": {
+			"hidden": true,
+			"manual": false,
+			"hp75": "4",
+			"hp50": "8",
+			"hp25": "12",
+			"death": "16"
+		},
+		"specialMoves": {
+			"hidden": false,
+			"rows": [
+				{
+					"trigger": "combatStart",
+					"label": "",
+					"name": "",
+					"effect": "",
+					"color": null,
+					"hidden": true
+				},
+				{
+					"trigger": "hp75",
+					"label": "",
+					"name": "",
+					"effect": "",
+					"color": null,
+					"hidden": true
+				},
+				{
+					"trigger": "hp50",
+					"label": "",
+					"name": "",
+					"effect": "",
+					"color": null,
+					"hidden": true
+				},
+				{
+					"trigger": "hp25",
+					"label": "",
+					"name": "",
+					"effect": "",
+					"color": null,
+					"hidden": true
+				},
+				{
+					"trigger": "death",
+					"label": "",
+					"name": "",
+					"effect": "",
+					"color": null,
+					"hidden": true
+				},
+				{
+					"trigger": null,
+					"label": "In Sonnenlicht",
+					"name": "Brennend",
+					"effect": "2 SP pro KR. Seine Angriffe verursachen +2 TP. Aktionswurf um 1 erschwert.",
+					"color": null,
+					"hidden": false
+				},
+				{
+					"trigger": null,
+					"label": "Infizierender Biss",
+					"name": "Wundfieber",
+					"effect": "Krankheitsprobe (Zähigkeit) gegen Stufe 5 Wundfieber.",
+					"color": null,
+					"hidden": false
+				},
+				{
+					"trigger": null,
+					"label": "Angriff durch geweihte Waffe",
+					"name": "Doppelter Schaden",
+					"effect": "TPx2",
+					"color": null,
+					"hidden": false
+				}
+			]
+		},
+		"fit": {
+			"scale": 1,
+			"fits": true,
+			"imageHidden": false
+		}
+	}
+]
