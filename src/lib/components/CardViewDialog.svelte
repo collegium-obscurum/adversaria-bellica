@@ -15,7 +15,8 @@
 	// Reserve room for dialog padding, toolbar row, and backdrop margin.
 	const zoom = $derived(cardFitZoom(viewportWidth - 120, viewportHeight - 160));
 
-	$effect(() => {
+	// pre: a closed dialog is display:none, so the card must not measure its fit before this
+	$effect.pre(() => {
 		if (card) dialog.showModal();
 	});
 </script>

@@ -53,6 +53,41 @@ test('view dialog shows the card', async ({ page }) => {
 	await expect(dialog).toBeHidden();
 });
 
+test('view dialog shrinks the text of an overlong card instead of clipping it', async ({
+	page
+}) => {
+	const effect =
+		'Der Nekromant ruft so viele Skelette wie es Spieler gibt und sie greifen sofort an. '.repeat(
+			6
+		);
+	await seedCards(page, [
+		{
+			id: 'g1',
+			name: 'Nekromant',
+			actions: [
+				{ span: 5, name: 'Knochenhand', effect },
+				{ span: 5, name: 'Todesblick', effect },
+				{ span: 5, name: 'Zombie rufen', effect },
+				{ span: 5, name: 'Fluch', effect }
+			]
+		}
+	]);
+	await page.getByRole('button', { name: 'Nekromant ansehen' }).click();
+	const card = page.locator('dialog.view-dialog article.card');
+	await expect(card).toBeVisible();
+
+	const measured = await card.evaluate((element) => {
+		const body = element.querySelector('.body');
+		if (!body) throw new Error('card has no body');
+		return {
+			scale: Number(getComputedStyle(element).getPropertyValue('--fit-scale')),
+			overflow: body.scrollHeight - body.clientHeight
+		};
+	});
+	expect(measured.scale).toBeLessThan(1);
+	expect(measured.overflow).toBeLessThanOrEqual(1);
+});
+
 test('sample card can be copied into the library', async ({ page }) => {
 	await page.goto('/');
 	await page.getByRole('button', { name: 'Vorlagen ansehen' }).click();
