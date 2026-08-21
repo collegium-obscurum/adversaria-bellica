@@ -151,6 +151,25 @@ test('wrapped action text keeps the entry indent', async ({ page }) => {
 	expect(Math.abs(geometry.wrappedLeft - geometry.labelLeft)).toBeLessThan(1);
 });
 
+test('the Passierschlag icon stays inside its marker', async ({ page }) => {
+	await seedCards(page, [
+		{
+			id: 'g1',
+			name: 'Goblin',
+			actions: [{ span: 20, name: 'Krallenangriff', effect: '1W6 TP', opportunityAttack: true }]
+		}
+	]);
+	await page.getByRole('button', { name: 'Goblin ansehen' }).click();
+	const offset = await page
+		.locator('dialog.view-dialog .actions .entry .sword')
+		.first()
+		.evaluate((marker) => {
+			const icon = marker.querySelector('svg')?.getBoundingClientRect();
+			return (icon?.left ?? 0) - marker.getBoundingClientRect().left;
+		});
+	expect(Math.abs(offset)).toBeLessThan(1);
+});
+
 test('view dialog offers single-card PNG and JSON downloads', async ({ page }) => {
 	await seedCards(page, [{ id: 'g1', name: 'Goblin' }]);
 	await page.getByRole('button', { name: 'Goblin ansehen' }).click();

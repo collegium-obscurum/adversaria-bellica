@@ -267,6 +267,9 @@
 		height: 0.8em;
 		vertical-align: -0.06em;
 		line-height: 0;
+		/* inline-block, so it would inherit the entry's negative hanging indent and
+		   pull the icon out of its own box */
+		text-indent: 0;
 	}
 
 	/* the wrapper sizes the icon, like the stat badges do: html-to-image keeps the
