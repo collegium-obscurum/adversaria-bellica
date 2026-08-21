@@ -297,6 +297,20 @@ test('talent values clamp and talents can be hidden', async ({ page }) => {
 	expect(cards[0].talents.entries.body).toEqual(expect.objectContaining({ value: 99, maxQs: 6 }));
 });
 
+test('talent note renders on a single line', async ({ page }) => {
+	await page.goto('/editor');
+	await page.getByRole('button', { name: '+ Talente' }).click();
+	await expect(page.locator('.card.editable .talents .note')).toBeVisible();
+
+	// the offscreen copy is display mode at full card width, so it has the print geometry
+	const printNote = page.locator('.fit-measure .talents .note');
+	const { height, lineHeight } = await printNote.evaluate((element) => ({
+		height: element.getBoundingClientRect().height,
+		lineHeight: parseFloat(getComputedStyle(element).lineHeight)
+	}));
+	expect(height).toBeLessThan(lineHeight * 1.6);
+});
+
 test('talent calculator applies derived values to the card', async ({ page }) => {
 	await page.goto('/editor');
 	const attributeInputs = page.locator('.talent-calc .attributes input');

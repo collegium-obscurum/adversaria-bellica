@@ -83,6 +83,7 @@
 				{/each}
 			</div>
 		{/each}
+		<p class="note">1w20 &le; Wert = Erfolg · je 3 darunter +1 QS (max. in Klammern)</p>
 	</div>
 {/if}
 
@@ -127,5 +128,13 @@
 
 	.talent input.qs {
 		width: 3mm;
+	}
+
+	.note {
+		margin: 0;
+		text-align: center;
+		font-size: 0.824em;
+		font-style: italic;
+		color: var(--color-muted);
 	}
 </style>
