@@ -560,8 +560,12 @@
 		border-bottom: 0.3mm solid var(--line);
 	}
 
+	/* hanging indent: wrapped lines line up with the entry text instead of falling
+	   back under the leading markers. Sections set --entry-hang to their marker width. */
 	.card :global(.entry) {
 		margin: 0;
+		padding-left: var(--entry-hang, 0);
+		text-indent: calc(-1 * var(--entry-hang, 0));
 	}
 
 	/* entry colors: tint sets color, the dot paints itself via currentColor */

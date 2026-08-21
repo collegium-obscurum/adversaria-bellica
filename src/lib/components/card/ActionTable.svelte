@@ -31,7 +31,12 @@
 		Aktion nicht möglich, gilt die nächste darunter.
 	</p>
 	<!-- own grid so only the rows size the columns, not the heading or the note -->
-	<div class="rows" class:editor={editable}>
+	<!-- marker widths below, so the hanging indent matches what the row actually renders -->
+	<div
+		class="rows"
+		class:editor={editable}
+		style:--entry-hang={prefs.colorMode === 'dot' ? '1.85em' : '1.05em'}
+	>
 		{#each card.actions as action, index (action)}
 			{#if editable}
 				<div class="entry-row">
@@ -128,12 +133,12 @@
 								aria-label={ENTRY_COLOR_LABELS[action.color]}
 								title={ENTRY_COLOR_LABELS[action.color]}
 							></span>{:else}<span class="color-dot blank"
-							></span>{/if}&nbsp;{/if}{#if action.opportunityAttack}<span
+							></span>{/if}{/if}{#if action.opportunityAttack}<span
 							class="sword {action.color ? `tint-${action.color}` : ''}"
 							role="img"
 							aria-label="Passierschlag"
 							title="Passierschlag"><SwordIcon /></span
-						>{:else}<span class="sword"></span>{/if}&nbsp;<b
+						>{:else}<span class="sword"></span>{/if}<b
 						class={action.color && prefs.colorMode === 'text' ? `tint-${action.color}` : ''}
 						title={action.color && prefs.colorMode === 'text'
 							? ENTRY_COLOR_LABELS[action.color]
@@ -246,6 +251,12 @@
 	/* colorless rows keep the dot's space so the ranges line up under each other */
 	.entry .color-dot.blank {
 		background: none;
+	}
+
+	/* fixed gap instead of a space: --entry-hang above has to know the marker width */
+	.entry .color-dot,
+	.entry .sword {
+		margin-right: 0.25em;
 	}
 
 	/* print marker; sized off the text so it rides the line like the color dot.

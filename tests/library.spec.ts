@@ -113,6 +113,44 @@ test('dismissed delete confirmation keeps the card', async ({ page }) => {
 	expect(await storedCards(page)).toHaveLength(1);
 });
 
+test('wrapped action text keeps the entry indent', async ({ page }) => {
+	await seedCards(page, [
+		{
+			id: 'g1',
+			name: 'Goblin',
+			actions: [
+				{
+					span: 20,
+					name: 'Meutenruf',
+					effect:
+						'Alle anderen Goblins in Sichtweite dürfen sich sofort bewegen und danach angreifen.'
+				}
+			]
+		}
+	]);
+	await page.getByRole('button', { name: 'Goblin ansehen' }).click();
+	const geometry = await page
+		.locator('dialog.view-dialog .actions .entry')
+		.first()
+		.evaluate((entry) => {
+			const label = entry.querySelector('b')?.getBoundingClientRect();
+			const range = document.createRange();
+			range.selectNodeContents(entry);
+			const rects = [...range.getClientRects()];
+			const lastLineTop = Math.max(...rects.map((rect) => rect.top));
+			const lastLine = rects.filter((rect) => rect.top === lastLineTop);
+			return {
+				labelLeft: label?.left ?? 0,
+				labelTop: label?.top ?? 0,
+				wrappedLeft: Math.min(...lastLine.map((rect) => rect.left)),
+				wrappedTop: lastLineTop
+			};
+		});
+	// the effect has to actually wrap, otherwise the alignment check proves nothing
+	expect(geometry.wrappedTop).toBeGreaterThan(geometry.labelTop);
+	expect(Math.abs(geometry.wrappedLeft - geometry.labelLeft)).toBeLessThan(1);
+});
+
 test('view dialog offers single-card PNG and JSON downloads', async ({ page }) => {
 	await seedCards(page, [{ id: 'g1', name: 'Goblin' }]);
 	await page.getByRole('button', { name: 'Goblin ansehen' }).click();

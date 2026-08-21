@@ -168,13 +168,16 @@
 		{#each printedRows as entry (entry.row)}
 			{@const move = entry.row}
 			{@const label = rowLabel(move)}
-			<p class="entry">
+			<p
+				class="entry"
+				style:--entry-hang={move.color && prefs.colorMode === 'dot' ? '0.8em' : null}
+			>
 				{#if move.color && prefs.colorMode === 'dot'}<span
 						class="color-dot tint-{move.color}"
 						role="img"
 						aria-label={ENTRY_COLOR_LABELS[move.color]}
 						title={ENTRY_COLOR_LABELS[move.color]}
-					></span>&nbsp;{/if}<b
+					></span>{/if}<b
 					class={move.color && prefs.colorMode === 'text' ? `tint-${move.color}` : ''}
 					title={move.color && prefs.colorMode === 'text'
 						? ENTRY_COLOR_LABELS[move.color]
@@ -220,6 +223,11 @@
 
 	:global(.card.editable) .trigger-input {
 		font-weight: bold;
+	}
+
+	/* fixed gap instead of a space: --entry-hang above has to know the marker width */
+	.entry .color-dot {
+		margin-right: 0.25em;
 	}
 
 	/* indented so these read as part of the section, not as the next block's add button */
